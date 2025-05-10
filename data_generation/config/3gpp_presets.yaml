@@ -1,0 +1,332 @@
+# 3GPP TR 38.901 Channel Model Presets
+# These presets define standardized parameters for different wireless environments
+# Reference: 3GPP TR 38.901 V18.0.0 (2024-03)
+
+UMa:  # Urban Macrocell
+  description: "Dense urban areas with BS height (25m) above surrounding buildings"
+  # Antenna parameters
+  antenna_distance: 500           # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 12                     # TX antenna gain (dBi)
+  rx_gain: 10                     # RX antenna gain (dBi)
+  tx_height: 25.0                 # Transmitter height (m)
+  rx_height: 1.5                  # Receiver height (m)
+  
+  # Cluster and scatterer parameters
+  num_clusters: [16, 20]          # Number of scattering clusters
+  speed: [0, 30]                  # Scatterer speed (m/s)
+  cluster_density: 0.8            # Density of scatterers in clusters
+  cluster_radius: 25              # Horizontal radius of clusters (m)
+  cluster_height_range: 15        # Vertical range of clusters (m)
+  reflection_amplitude: [0.6, 0.9] # Reflection coefficient range
+
+  # Propagation parameters
+  snr: [10, 25]                   # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss:
+    low_loss_probability: 0.5     # Probability of low-loss building material
+    low_loss: 20
+    high_loss: 40
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 363        # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 4.0       # LOS shadow fading (6.0 for NLOS)
+  r_tau: 2.5                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/UMa_3d_dataset"  # Output directory
+
+UMi:  # Urban Microcell
+  description: "Urban street canyons with BS height (10m) below surrounding buildings"
+  # Antenna parameters
+  antenna_distance: 200           # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 10                     # TX antenna gain (dBi)
+  rx_gain: 10                     # RX antenna gain (dBi)
+  tx_height: 10.0                 # Transmitter height (m)
+  rx_height: 1.5                  # Receiver height (m)
+  
+  # Cluster and scatterer parameters
+  num_clusters: [12, 19]          # Number of scattering clusters
+  speed: [0, 30]                  # Scatterer speed (m/s)
+  cluster_density: 0.6            # Density of scatterers in clusters
+  cluster_radius: 20              # Horizontal radius of clusters (m)
+  cluster_height_range: 12        # Vertical range of clusters (m)
+  reflection_amplitude: [0.5, 0.85] # Reflection coefficient range
+
+  # Propagation parameters
+  snr: [5, 20]                    # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "3gpp"          # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss:
+    low_loss_probability: 0.5     # Probability of low-loss building material
+    low_loss: 20
+    high_loss: 40
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 342        # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 4.0       # LOS shadow fading (7.8 for NLOS)
+  r_tau: 2.3                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/UMi_3d_dataset"  # Output directory
+
+RMa:  # Rural Macrocell
+  description: "Rural areas with sparse buildings and large continuous coverage"
+  # Antenna parameters
+  antenna_distance: 1732          # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 14                     # TX antenna gain (dBi)
+  rx_gain: 10                     # RX antenna gain (dBi)
+  tx_height: 35.0                 # Transmitter height (m) - typically higher in rural
+  rx_height: 1.5                  # Receiver height (m)
+  
+  # Cluster and scatterer parameters
+  num_clusters: [8, 11]           # Number of scattering clusters
+  speed: [0, 120]                 # Scatterer speed (m/s) - higher for vehicles
+  cluster_density: 0.4            # Density of scatterers in clusters
+  cluster_radius: 35              # Horizontal radius of clusters (m)
+  cluster_height_range: 10        # Vertical range of clusters (m)
+  reflection_amplitude: [0.3, 0.7] # Reflection coefficient range - lower in rural areas
+
+  # Propagation parameters
+  snr: [15, 30]                   # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: false # Use H_{ij} term for diffuse scattering
+  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss:
+    low_loss_probability: 1.0     # Probability of low-loss building material
+    low_loss: 20
+    high_loss: 40
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 129        # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 4.0       # LOS shadow fading (8.0 for NLOS)
+  r_tau: 3.0                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/RMa_3d_dataset"  # Output directory
+
+InH:  # Indoor Hotspot
+  description: "Office environments and shopping malls with dense user distribution"
+  # Antenna parameters
+  antenna_distance: 20            # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 5                      # TX antenna gain (dBi)
+  rx_gain: 5                      # RX antenna gain (dBi)
+  tx_height: 3.0                  # Transmitter height (m) - ceiling mounted
+  rx_height: 1.0                  # Receiver height (m) - user device
+  
+  # Cluster and scatterer parameters
+  num_clusters: [15, 19]          # Number of scattering clusters
+  speed: [0, 3]                   # Scatterer speed (m/s) - slow pedestrians indoors
+  cluster_density: 0.7            # Density of scatterers in clusters
+  cluster_radius: 10              # Horizontal radius of clusters (m)
+  cluster_height_range: 3         # Vertical range of clusters (m) - ceiling height
+  reflection_amplitude: [0.5, 0.8] # Reflection coefficient range
+
+  # Propagation parameters
+  snr: [15, 25]                   # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "3gpp"          # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss: 10        # Simplified indoor loss value (walls, doors)
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 37         # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 3.0       # LOS shadow fading (8.0 for NLOS)
+  r_tau: 2.2                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/InH_3d_dataset"  # Output directory
+
+InF-SL:  # Indoor Factory - Sparse clutter, Low BS
+  description: "Factory hall with sparse machinery, BS below clutter height"
+  # Antenna parameters
+  antenna_distance: 50            # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 5                      # TX antenna gain (dBi)
+  rx_gain: 5                      # RX antenna gain (dBi)
+  tx_height: 3.0                  # Transmitter height (m)
+  rx_height: 1.5                  # Receiver height (m)
+  
+  # Cluster and scatterer parameters
+  num_clusters: [20, 25]          # Number of scattering clusters
+  speed: [0, 5]                   # Scatterer speed (m/s)
+  cluster_density: 0.4            # Density of scatterers in clusters
+  cluster_radius: 15              # Horizontal radius of clusters (m)
+  cluster_height_range: 5         # Vertical range of clusters (m)
+  reflection_amplitude: [0.7, 0.95] # Reflection coefficient range
+
+  # Propagation parameters
+  snr: [15, 20]                   # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss: 15        # Factory walls are typically more substantial
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 220        # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 4.0       # LOS shadow fading (6.0 for NLOS)
+  r_tau: 2.1                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/InF_SL_3d_dataset"  # Output directory
+
+InF-DL:  # Indoor Factory - Dense clutter, Low BS
+  description: "Factory with dense machinery/assembly lines, BS below clutter height"
+  # Antenna parameters
+  antenna_distance: 30            # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 5                      # TX antenna gain (dBi)
+  rx_gain: 5                      # RX antenna gain (dBi)
+  tx_height: 3.0                  # Transmitter height (m)
+  rx_height: 1.5                  # Receiver height (m)
+  
+  # Cluster and scatterer parameters
+  num_clusters: [20, 25]          # Number of scattering clusters
+  speed: [0, 5]                   # Scatterer speed (m/s)
+  cluster_density: 0.7            # Density of scatterers in clusters
+  cluster_radius: 12              # Horizontal radius of clusters (m)
+  cluster_height_range: 5         # Vertical range of clusters (m)
+  reflection_amplitude: [0.7, 0.95] # Reflection coefficient range
+
+  # Propagation parameters
+  snr: [10, 18]                   # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss: 15
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 180        # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 4.0       # LOS shadow fading (6.0 for NLOS)
+  r_tau: 2.1                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/InF_DL_3d_dataset"  # Output directory
+
+InF-SH:  # Indoor Factory - Sparse clutter, High BS
+  description: "Factory hall with sparse machinery, BS above clutter height"
+  # Antenna parameters
+  antenna_distance: 50            # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 8                      # TX antenna gain (dBi)
+  rx_gain: 5                      # RX antenna gain (dBi)
+  tx_height: 6.0                  # Transmitter height (m) - higher placement
+  rx_height: 1.5                  # Receiver height (m)
+  
+  # Cluster and scatterer parameters
+  num_clusters: [15, 20]          # Number of scattering clusters
+  speed: [0, 5]                   # Scatterer speed (m/s)
+  cluster_density: 0.4            # Density of scatterers in clusters
+  cluster_radius: 15              # Horizontal radius of clusters (m)
+  cluster_height_range: 6         # Vertical range of clusters (m)
+  reflection_amplitude: [0.7, 0.95] # Reflection coefficient range
+
+  # Propagation parameters
+  snr: [18, 25]                   # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss: 15
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 160        # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 4.0       # LOS shadow fading (6.0 for NLOS)
+  r_tau: 2.1                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/InF_SH_3d_dataset"  # Output directory
+
+InF-DH:  # Indoor Factory - Dense clutter, High BS
+  description: "Factory with dense machinery, BS above clutter height"
+  # Antenna parameters
+  antenna_distance: 30            # Horizontal distance between TX and RX antennas (m)
+  tx_gain: 8                      # TX antenna gain (dBi)
+  rx_gain: 5                      # RX antenna gain (dBi)
+  tx_height: 6.0                  # Transmitter height (m) - higher placement
+  rx_height: 1.5                  # Receiver height (m)
+  
+  # Cluster and scatterer parameters
+  num_clusters: [15, 20]          # Number of scattering clusters
+  speed: [0, 5]                   # Scatterer speed (m/s)
+  cluster_density: 0.7            # Density of scatterers in clusters
+  cluster_radius: 12              # Horizontal radius of clusters (m)
+  cluster_height_range: 6         # Vertical range of clusters (m)
+  reflection_amplitude: [0.7, 0.95] # Reflection coefficient range
+
+  # Propagation parameters
+  snr: [12, 20]                   # Signal-to-noise ratio (dB)
+  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  o2i_penetration_loss: 15
+  los_probability_indoor: 0.7     # Probability of LOS in indoor
+  
+  # 3GPP TR 38.901 specific parameters
+  rms_delay_spread_ns: 150        # RMS delay spread in nanoseconds (Table 7.5-6)
+  shadow_fading_std_db: 4.0       # LOS shadow fading (6.0 for NLOS)
+  r_tau: 2.1                      # Delay scaling factor
+  
+  # System parameters
+  blocks: 4                       # Number of OFDM blocks per sample
+  carrier_frequency: 2490         # Carrier frequency (MHz)
+  subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+  
+  # 3D model settings
+  enable_3d_model: true           # Enable full 3D modeling
+  
+  # Output settings
+  output_dir: "./data/raw/ray_tracing/InF_DH_3d_dataset"  # Output directory
