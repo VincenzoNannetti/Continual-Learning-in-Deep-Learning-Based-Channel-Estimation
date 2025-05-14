@@ -800,7 +800,7 @@ In the case of LOS condition, additional scaling of delays is required to compen
 	,	(7.5-3)
 where K [dB] is the Ricean K-factor as generated in Step 4. The scaled delays
 	,	(7.5-4)
-are not to be used in cluster power generation.
+are not to be used in cluster power generation.[VN1]
 
 Step 6: Generate cluster powers .
 Cluster powers are calculated assuming a single slope exponential power delay profile. Power assignment depends on the delay distribution defined in Table 7.5-6. With exponential delay distribution the cluster powers are determined by
@@ -813,7 +813,7 @@ and the cluster powers are not normalized as in equation (7.5-6) , but:
 		(7.5-8)
 where ?(.) is Dirac's delta function and KR is the Ricean K-factor as generated in Step 4 converted to linear scale. These power values are used only in equations (7.5-9) and (7.5-14), but not in equation (7.5-22).
 Assign the power of each ray within a cluster as Pn / M, where M is the number of rays per cluster.
-Remove clusters with less than -25 dB power compared to the maximum cluster power. The scaling factors need not be changed after cluster elimination.
+Remove clusters with less than -25 dB power compared to the maximum cluster power. The scaling factors need not be changed after cluster elimination.[VN2]
 
 Step 7: Generate arrival angles and departure angles for both azimuth and elevation.
 The composite PAS in azimuth of all clusters is modelled as wrapped Gaussian. The AOAs are determined by applying the inverse Gaussian function (7.5-9) with input parameters Pn and RMS angle spread ASA 
@@ -888,7 +888,7 @@ where n denotes a cluster and m denotes a ray within cluster n.  is the spherica
 	,	(7.5-24)
 where n denotes a cluster and m denotes a ray within cluster n. Also, is the location vector of receive antenna element u and is the location vector of transmit antenna element s, ?n,m is the cross polarisation power ratio in linear scale, and ?0 is the wavelength of the carrier frequency. If polarisation is not considered, the 2x2 polarisation matrix can be replaced by the scalar  and only vertically polarised field patterns are applied.
 The Doppler frequency component depends on the arrival angles (AOA, ZOA), and the UT velocity vector with speed v, travel azimuth angle ?v, elevation angle ?v and is given by 
-		(7.5-25)
+	[VN3]	(7.5-25)
 For the two strongest clusters, say n = 1 and 2, rays are spread in delay to three sub-clusters (per cluster), with fixed delay offset. The delays of the sub-clusters are
 		(7.5-26)
 where  is cluster delay spread specified in Table 7.5-6. When intra-cluster delay spread is unspecified (i.e., N/A) the value 3.91 ns is used; it is noted that this value results in the legacy behaviour with 5 and 10 ns sub-cluster delays.
@@ -1304,7 +1304,7 @@ Note: The resulting delay and angular spreads of channels generated with this al
 The Doppler shift generally depends on the time evolution of the channel as it is defined as the derivative of the channels phase over time. It can be the result from Tx, Rx, or scatterer movement. The more general form of the exponential Doppler term as used in Equation (7.5-22) is given by
 	.	(7.6-31)
 Here,  is the normalized vector that points into the direction of the incoming wave as seen from the Rx at time .  denotes the velocity vector of the Rx at time , while  denotes a reference point in time that defines the initial phase, e.g. . 
-Note that Equation (7.5-22) only holds for time-invariant Doppler shift, i.e. .
+Note that Equation (7.5-22) only holds for time-invariant Doppler shift, i.e. .[VN4]
 7.6.7	UT rotation
 UT rotation modelling is an add-on feature. When modelled, Step 1 in Clause 7.5 shall consider UT rotational motion. 
 Step 1:
@@ -1774,6 +1774,10 @@ where  is the power for the mth subpath of the nth path and  is the subpaths ang
 Annex B: Change history
 
 Change historyDateMeetingTDocCRRevCatSubject/CommentNew version2017-02RAN1#88R1-1703641Skeleton TR based on TR 38.900 v14.2.0, adding new changes (from R1-1701231, R1-1701406, R1-1701410, R1-1701411, R1-1701412, R1-1701413, R1-1701414, R1-1701416, R1-1701417 and R1-1701425) to have a TR applicable for the frequency range 0.5 to 100 GHz0.0.12017-02RAN1#88R1-1704145Adding new agreements (from R1-1702701, R1-1703635, R1-1703873, R1-1703358, R1-1702703, R1-1703637, R1-1703354, R1-1703458, R1-1703647, R1-1701936) and reflecting comments from RAN1 e-mail discussions [88-17].0.1.02017-02RAN#75RP-170394Submitted to RAN for information1.0.02017-03RAN#75RP-170737Add TR number further to the approval of revised SID in RP-170379. Submitted to RAN for one step approval1.0.12017-03RAN#75MCC clean-up – Further to RAN#75 decision, TR goes under change control as Rel-14 14.0.02017-06RAN#76RP-1712080001-FCorrection on site specific effective height for TR38.90114.1.02017-06RAN#76RP-1712080003-FCorrection for LOS probability14.1.02017-06RAN#76RP-1712080004-FCorrection for scaling factor for ZOD generation14.1.02017-06RAN#76RP-1712080005-FCorrection for modelling of intra-cluster angular and delay spreads14.1.02017-06RAN#76RP-1712080007-FTR38.901_CR_LCS_Radiation_Field_Notation14.1.02017-06RAN#76RP-1712080008-FTR38.901_CR_Mean_angle_definition14.1.02017-06RAN#76RP-1712080009-FTR38.901_CR_O2I_penetration_loss14.1.02017-06RAN#76RP-17120800101FTR38.901_CR_Correction_on_Rural_LSP14.1.02017-06RAN#76RP-17120800111FClarification for spatial consistency procedure14.1.02017-06RAN#76RP-1712080013-FTR38.901_CR_Scenarios_in_Simulation_Assumptions14.1.02017-06RAN#76RP-1712080014-FTR38.901_CR_TDL_Spatial_Filter14.1.02017-06RAN#76RP-1712080015-FCorrection of spatial-consistency UE mobility modelling Procedure A14.1.02017-07MCC: UMa LOS probability in Table 7.4-2 is made fully visible14.1.12017-09RAN#77RP-1716480016-FCorrection on the formula of Annex A14.2.02017-09RAN#77RP-17164800182FCorrection on cross polarization power ratios in TR 38.90114.2.02017-09RAN#77RP-17164800191FTR38.901_CR_Spatially-consistent_UT_modelling14.2.02017-09RAN#77RP-17164800201FTR38.901_CR_Calibraiton_Results14.2.02017-12RAN#78RP-1726870022-FCorrection on 3D-InH channel model in TR 38.90114.3.02018-06SA#80----Update to Rel-15 version (MCC)15.0.02019-09RAN#85RP-1919440023-BAddition of indoor industrial channel model – version created in error – withdrawn15.1.02019-10RAN#85RP-1919440023-BAddition of indoor industrial channel model – creation of rel-16 report16.0.02019-12RAN#86RP-1926290024-FCR to TR 38.901 for remaining open issues in IIOT channel modelling16.1.02022-03SA#95-eUpdate to Rel-17 version (MCC)17.0.02023-12RAN#102RP-2337270025-FCR correcting scaling of angles for CDL model and a figure reference17.1.02024-03SA#103----Update to Rel-18 version (MCC)18.0.0
+[VN1]Intra Cluster Excess Delay Offset
+[VN2]Cluster Power
+[VN3]Doppler Freq Basic Equation
+[VN4]Time Varying Doppler which Is implemented in my code 
 3GPP TR 38.901 V18.0.0 (2024-03)
 14
 Release 18

@@ -7,30 +7,28 @@ Description: Helper functions for 3D vector operations in the ray tracing model.
 
 import numpy as np
 from typing import Union, Tuple, Optional
+from numba import njit
 
 Vector = np.ndarray
 
 def ensure_vector3d(v: Union[list, tuple, np.ndarray]) -> Vector:
     if not isinstance(v, np.ndarray):
         v = np.array(v, dtype=float)
-    if len(v) == 2:
-        return np.array([v[0], 0.0, v[1]], dtype=float)
-    elif len(v) == 3:
-        return v
-    else:
-        raise ValueError(f"Expected 2 or 3 values, got {len(v)}")
+    if len(v) != 3:
+        raise ValueError(f"Expected 3 values (3D vector), got {len(v)}")
+    return v
 
 def distance3d(p: Vector, q: Vector) -> float:
     p = ensure_vector3d(p)
     q = ensure_vector3d(q)
     return np.linalg.norm(p - q)
 
-def horizontal_distance(p: Vector, q: Vector) -> float:
-    p = ensure_vector3d(p)
-    q = ensure_vector3d(q)
+@njit(cache=True, fastmath=True)
+def horizontal_distance(p, q) -> float:
     return np.linalg.norm(p[:2] - q[:2])
 
-def unit_vector3d(p: Vector, q: Vector) -> Vector:
+@njit(cache=True, fastmath=True)
+def unit_vector3d(p, q) -> Vector:
     """
     Calculate the unit vector pointing from p to q.
     
@@ -44,14 +42,12 @@ def unit_vector3d(p: Vector, q: Vector) -> Vector:
     Raises:
         ValueError: If p and q are too close (distance < 1e-9)
     """
-    p = ensure_vector3d(p)
-    q = ensure_vector3d(q)
-    
     direction = q - p
     distance = np.linalg.norm(direction)
     
     if distance < 1e-9:
-        raise ValueError("Points are too close to define a direction")
+        # For Numba compatibility, handle error case differently
+        return np.array([0.0, 0.0, 0.0])
         
     return direction / distance
 
@@ -91,7 +87,7 @@ def zenith_azimuth(p: Vector, q: Vector) -> Tuple[float, float]:
         
     return zenith, azimuth
 
-def generate_random_3d_direction(rng: Optional[np.random.RandomState] = None) -> Vector:
+def generate_random_3d_direction(rng: Optional[Union[np.random.RandomState, np.random.Generator]] = None) -> Vector:
     """
     Generate a random 3D unit vector with uniform distribution.
     
@@ -104,8 +100,9 @@ def generate_random_3d_direction(rng: Optional[np.random.RandomState] = None) ->
     if rng is None:
         # Use numpy's random directly for non-reproducibility
         # Generate random azimuth (0 to 2π) and zenith (0 to π)
-        azimuth = np.random.uniform(0, 2 * np.pi)
-        zenith = np.arccos(2 * np.random.random() - 1)  # Uniform on a sphere
+        rng_local = np.random.default_rng()
+        azimuth = rng_local.uniform(0, 2 * np.pi)
+        zenith = np.arccos(2 * rng_local.random() - 1)  # Uniform on a sphere
     else:
         # Use provided random number generator for reproducibility
         azimuth = rng.uniform(0, 2 * np.pi)

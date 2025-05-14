@@ -35,9 +35,7 @@ Desktop.ini
 # Data files
 data/
 data/raw/
-data/processed/
-data/simulations/
-data/models/
+data/preprocessed/
 
 # Log files
 *.log

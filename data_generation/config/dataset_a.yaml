@@ -1,35 +1,31 @@
 # Dataset A - Low multipath, good SNR environment
-# Resembles a rural or suburban setting with mostly clear line-of-sight
-
-# ---- Antenna Parameters ----
-antenna_distance: 50               # Meters - Horizontal distance between TX and RX antennas 
-tx_gain: 15                        # dBi - Transmitter antenna gain
-rx_gain: 15                        # dBi - Receiver antenna gain
-tx_height: 25                      # Meters - Height of transmitter antenna (typical for RMa environment)
-rx_height: 1.5                     # Meters - Height of receiver antenna (typical user equipment height)
-
-# ---- Channel Parameters ----
-snr: 15                            # dB - Signal-to-Noise Ratio
-num_clusters: [1, 3]               # Integer number of scattering cluster locations (reduced for simpler channel)
-speed: [0.5, 2]                    # m/s - Movement speed of scatterers (slower for higher temporal correlation)
-use_aggregate_scattering: false    # Whether to use H_{ij} term for diffuse scattering
-pathloss_model: "friis"            # Pathloss model: "friis" (original) or "3gpp" (TR 38.901)
-environment_type: "RMa"            # Environment type: "UMi" (Urban MicroCell) has lower pathloss than RMa/UMa
-reflection_amplitude: [0.6, 0.9]   # Range of reflection coefficients (increased for better visibility)
-cluster_density: 0.2               # Density of scatterers in clusters (reduced for fewer paths)
-cluster_radius: 15                 # Horizontal radius where scatterers are placed around cluster center
-cluster_height_range: 7.5          # Vertical range of scatterers (default is half of cluster_radius if not specified)
-rms_delay_spread_ns: 250           # RMS delay spread in nanoseconds (increased for more frequency selectivity)
-shadow_fading_std_db: 2.0          # Shadow fading standard deviation in dB (reduced for less variability)
-
-# ---- 3D Environment Settings ----
-los_probability_indoor: 0.7        # Probability of LOS in indoor environments
-enable_3d_model: true              # Whether to use the 3D channel model (if false, falls back to 2D)
 
 # ---- System Parameters ----
-subcarrier_spacing: 60000          # Hz - Spacing between OFDM subcarriers (60 kHz)
-blocks: 4                          # Number of 14-symbol blocks to generate per sample
-carrier_frequency: 2490            # MHz - Center frequency for the channel (default 2.49 GHz)
+blocks: 4                       # Number of OFDM blocks per sample
+carrier_frequency: 2490         # Carrier frequency (MHz)
+subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+
+# ---- Environment Type and Dimensions ----
+environment_type: "RMa"                 # Which 3GPP preset to use as base (RMa = Rural Macrocell)
+environment_dimensions: [1000, 1000, 310]  # Dimensions of the environment (x, y, z) - not in presets
+
+# ---- Parameter Overrides ----
+# Override these specific parameters from the RMa preset
+num_clusters: [1, 5]               # Deliberately reduced from [8, 11] in RMa preset
+cluster_density: 1.0               # Increased from 0.4 in RMa preset
+cluster_radius: 6                  # Reduced from 35 in RMa preset
+# cluster_height_range: 1000        
+rms_delay_spread_ns: 250           # Modified from 129 in RMa preset
+use_aggregate_scattering: true     # Modified from false in RMa preset
+
+# ---- Custom Movement Parameters ----
+# These parameters are unique to this config and not in presets
+scatterer_movement_type: "linear"     # Movement model to use
+far_field_margin: 6e-2                  # Far field region of 6cm
+
+# ---- Flocking Movement Parameters ----
+cluster_movement_params:
+  flock_movement_direction: [1, 0, 0] # Direction vector [x, y, z]
 
 # ---- Output Settings ----
-output_dir: "./data/raw/ray_tracing/dataset_a_3d" # Output directory for this dataset
+output_dir: "./data/raw/ray_tracing/dataset_a" # Output directory for this dataset

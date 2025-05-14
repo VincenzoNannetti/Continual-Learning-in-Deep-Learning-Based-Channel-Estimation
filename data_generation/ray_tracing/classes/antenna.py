@@ -19,8 +19,6 @@ class Antenna:
                  x = East coordinate (m)
                  y = North coordinate (m)
                  z = Height above ground (m)
-                 Note: For backward compatibility, 2D positions [x, z] will be 
-                 converted to 3D as [x, 0, z]
         """
         self.name = name
         self.antenna_type = antenna_type
@@ -30,15 +28,11 @@ class Antenna:
         if not isinstance(pos, np.ndarray):
             pos = np.array(pos, dtype=float)
             
-        # Validate and convert position to 3D if needed
-        if len(pos) == 2:
-            # Backward compatibility: Assume [x, height] -> [x, 0, height]
-            self.pos = np.array([pos[0], 0.0, pos[1]], dtype=float)
-        elif len(pos) == 3:
-            # Already 3D [x, y, z]
-            self.pos = pos
-        else:
-            raise ValueError(f"Position must be 2D [x, height] or 3D [x, y, z], got {len(pos)} elements")
+        # Validate position is 3D
+        if len(pos) != 3:
+            raise ValueError(f"Position must be 3D [x, y, z], got {len(pos)} elements")
+        
+        self.pos = pos
 
     def get_name(self):
         return self.name
@@ -47,7 +41,7 @@ class Antenna:
         return self.gain
 
     def get_pos(self):
-        return self.pos
+        return self.pos.copy()
 
     def get_antenna_type(self):
         return self.antenna_type
