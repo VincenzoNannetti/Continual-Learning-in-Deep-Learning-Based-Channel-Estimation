@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+
+# Virtual Environments 
+.env
+.venv
+env/
+venv/
+
+# Build and distribution artifacts
+build/
+dist/
+*.egg-info/
+
+# Test and Coverage 
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Data files
+data/
+data/raw/
+data/processed/
+data/simulations/
+data/models/
+
+# Log files
+*.log
+
+# Temporary/backup files 
+*~
+*.swp
+*.bak
