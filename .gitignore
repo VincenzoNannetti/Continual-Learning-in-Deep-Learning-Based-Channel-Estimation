@@ -37,6 +37,13 @@ data/
 data/raw/
 data/preprocessed/
 
+standard_training/checkpoints/
+continual_learning/checkpoints/
+standard_training/checkpoints/autoencoder/
+standard_training/checkpoints/combined/
+standard_training/checkpoints/unet/
+standard_training/checkpoints/srcnn/
+
 # Log files
 *.log
 
