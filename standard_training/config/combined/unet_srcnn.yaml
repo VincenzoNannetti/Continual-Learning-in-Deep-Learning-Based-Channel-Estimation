@@ -13,8 +13,8 @@ model:
   strict_load: True # Using default from load_model
   
   # UNet specific parameters
-  pretrained_unet: null      # <--- Set path to trained UNet .pth if available
-  freeze_unet: False         # <--- Set True to freeze UNet weights
+  pretrained_unet: null        # <--- Set path to trained UNet .pth if available
+  freeze_unet: False           # <--- Set True to freeze UNet weights
 
   # SRCNN specific parameters
   pretrained_srcnn: null       # <--- Set path to trained SRCNN .pth if available
@@ -22,20 +22,19 @@ model:
 
 data:
   # --- Keep your data settings the same ---
-  dataset_type: channel
-  data_dir_self: ./Learning_Algorithms/data/raw/My Data/ # Ensure this key is correct
-  # data_dir_paper: ... # Add if needed
-  preprocessed_dir: ./Learning_Algorithms/data/preprocessed/
-  data_source: self 
-  snr: 0 
-  data_name: all_test_data_mixed_dataset_4blocks_dynamic_pilots
-  dataset_a_name: all_test_data_SNR20_no_agg_scatter_4blocks
-  dataset_b_name: all_test_data_SNR0_with_agg_scatter_4blocks_datasetB
-  num_pilots: 48
+  dataset_type: standard
+  data_dir: ./data/raw/original/ # Ensure this key is correct
+  preprocessed_dir: ./data/preprocessed/original/
+
+  data_name: original_datasetA
+  dataset_a_name: original_datasetA
+  dataset_b_name: original_datasetB
+ 
   interpolation: rbf 
   normalisation: zscore 
   normalise_before_interp: True 
   normalise_target: True   
+  
   num_workers: 0
   validation_split: 0.15
   test_split: 0.15
@@ -59,10 +58,10 @@ training:
 
 evaluation:
   metrics: [nmse, psnr, mse, ssim]
-  # save_results_dir: ./Learning_Algorithms/Catastrophic_Forgetting/results/unet_srcnn/finetuned_eval_a
+  save_results_dir: ./standard_training/checkpoints/unet/evaluations/
 
 logging:
-  checkpoint_dir: ./Learning_Algorithms/results/checkpoints/unet/
+  checkpoint_dir: ./standard_training/checkpoints/unet/
 
 hardware:
   device: auto

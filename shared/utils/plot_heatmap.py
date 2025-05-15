@@ -55,7 +55,7 @@ def plot_heatmap(
     split_interp=True  # New parameter to control split layout
 ):
     """
-    Plot heatmaps of complex matrices for channel estimation visualization using IEEE style.
+    Plot heatmaps of complex matrices for channel estimation visualisation using IEEE style.
     Creates two separate figures:
     1. First figure: Interpolation input and its error (side-by-side)
     2. Second figure: Combined/predicted output, perfect/ground truth, and error between them

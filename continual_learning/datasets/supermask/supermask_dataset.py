@@ -1,5 +1,5 @@
 """
-Filename: continual_learning/datasets/supermask_dataset.py
+Filename: ./Supermaks/dataset/dataloader.py
 Author: Vincenzo Nannetti
 Date: 14/03/2025
 Description: Supermask network dataloader

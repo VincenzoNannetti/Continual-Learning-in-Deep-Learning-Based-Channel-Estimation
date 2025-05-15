@@ -105,7 +105,7 @@ class Scatterer:
         self.time_elapsed_for_movement = 0.0
         params = movement_specific_params if movement_specific_params is not None else {}
 
-        # Initialize all potential movement attributes to defaults
+        # Initisalise all potential movement attributes to defaults
         self.oscillation_center = self.initial_pos.copy()
         self.oscillation_axis = np.array([1.,0.,0.])
         self.oscillation_amplitude = 0.0

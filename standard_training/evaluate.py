@@ -25,15 +25,8 @@ import matplotlib.pyplot as plt
 import wandb
 from shared.utils.metrics import get_metric_function
 from shared.utils.plot_heatmap import plot_heatmap
-
-
-def format_time(seconds):
-    """Format time in hours, minutes, seconds."""
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    seconds = int(seconds % 60)
-    return f"{hours}h {minutes}m {seconds}s"
-
+from shared.utils.format_time import format_time
+from shared.utils.get_device import get_device
 
 def get_criterion(config):
     """Get the loss function based on the config."""
@@ -587,20 +580,7 @@ def main(config_path, checkpoint_path=None, data_config=None):
     from standard_training.datasets.dataset_utils import load_data
     
     # Setup device
-    device_name = config.get('hardware', {}).get('device', 'auto').lower()
-    if device_name == 'auto':
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    elif device_name == 'cuda':
-        if not torch.cuda.is_available():
-            print("Warning: CUDA requested but not available. Using CPU.")
-            device = torch.device("cpu")
-        else:
-            device = torch.device("cuda")
-    elif device_name == 'cpu':
-        device = torch.device("cpu")
-    else:
-        print(f"Warning: Invalid device name '{device_name}'. Using auto-detection.")
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = get_device(config)
     print(f"Using device: {device}")
     
     print("\n" + "="*80)

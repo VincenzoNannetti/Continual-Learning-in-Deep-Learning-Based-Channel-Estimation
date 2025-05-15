@@ -362,10 +362,10 @@ class Channel:
                                 if len(self.cluster_powers) > cluster_id:
                                     # Scale by the cluster power weight (3GPP TR 38.901, Eq 7.5-5)
                                     cluster_power = self.cluster_powers[cluster_id]
-                                    # If the sum of contributions is non-zero, normalize by the number of 
+                                    # If the sum of contributions is non-zero, normalise by the number of 
                                     # scatterers in the cluster to maintain relative amplitude relationships
                                     if np.abs(sum_within_cluster) > 1e-10 and np.sum(mask) > 0:
-                                        # Normalize by scatterer count, then apply cluster power 
+                                        # normalise by scatterer count, then apply cluster power 
                                         cluster_sums[cluster_id] = sum_within_cluster * np.sqrt(cluster_power)
                                     else:
                                         cluster_sums[cluster_id] = 0.0
@@ -577,7 +577,7 @@ class Channel:
             # Create a mask for valid values to avoid invalid power computation
             valid_mask = d_2d > c_threshold_num
             
-            # Initialize C_val with zeros
+            # Initisalise C_val with zeros
             C_val = np.zeros_like(d_2d)
             
             # Only compute the power for valid elements (where d_2d > c_threshold_num)
@@ -592,7 +592,7 @@ class Channel:
             # Generate random samples with the same shape as _prob_h_E_is_1m_arr
             random_samples = self.rng.random(size=_prob_h_E_is_1m_arr.shape)
             
-            # Initialize h_E as an array with default value 1.0
+            # Initisalise h_E as an array with default value 1.0
             h_E = np.ones_like(_prob_h_E_is_1m_arr, dtype=float) 
             
             # Create a mask for elements where h_E should be chosen from the distribution

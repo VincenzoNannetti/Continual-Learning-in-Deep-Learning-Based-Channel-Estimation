@@ -152,7 +152,7 @@ def plot_pdp(perfect_matrices, save_path):
     # Plot in dB, add epsilon for log(0)
     pdp_db = 10 * np.log10(avg_pdp_causal + 1e-12) # Use smaller epsilon
 
-    # Limit y-axis range for better visualization, relative to the peak in the causal part
+    # Limit y-axis range for better visualisation, relative to the peak in the causal part
     # Avoid plotting extremely low noise floor values if they obscure the shape
     peak_db = np.max(pdp_db)
     floor_db = max(peak_db - 40, np.min(pdp_db)) # Show at least 40dB range or actual min
@@ -484,19 +484,19 @@ def calculate_kl_divergence(data_a, data_b, num_bins=100, epsilon=1e-10):
 
     bins = np.linspace(min_val, max_val, num_bins + 1)
 
-    # Create histograms and normalize to get probability distributions (PMFs)
+    # Create histograms and normalise to get probability distributions (PMFs)
     hist_a, _ = np.histogram(data_a, bins=bins, density=False)
     hist_b, _ = np.histogram(data_b, bins=bins, density=False)
 
-    # Normalize to sum to 1
+    # normalise to sum to 1
     pmf_a = hist_a / np.sum(hist_a) if np.sum(hist_a) > 0 else np.zeros_like(hist_a)
     pmf_b = hist_b / np.sum(hist_b) if np.sum(hist_b) > 0 else np.zeros_like(hist_b)
 
     # Add epsilon to avoid division by zero or log(0) in entropy calculation
     pmf_a_smooth = pmf_a + epsilon
     pmf_b_smooth = pmf_b + epsilon
-    pmf_a_smooth /= np.sum(pmf_a_smooth) # Re-normalize after adding epsilon
-    pmf_b_smooth /= np.sum(pmf_b_smooth) # Re-normalize after adding epsilon
+    pmf_a_smooth /= np.sum(pmf_a_smooth) # Re-normalise after adding epsilon
+    pmf_b_smooth /= np.sum(pmf_b_smooth) # Re-normalise after adding epsilon
 
 
     # Calculate KL divergence using scipy.stats.entropy
@@ -511,7 +511,7 @@ def calculate_kl_divergence(data_a, data_b, num_bins=100, epsilon=1e-10):
 
 if __name__ == "__main__":
     # --- Argument Parsing --- #
-    parser = argparse.ArgumentParser(description="Generate visualizations for channel data.")
+    parser = argparse.ArgumentParser(description="Generate visualisations for channel data.")
     parser.add_argument("--plot-a", action="store_true", help="Generate individual plots for Dataset A.")
     parser.add_argument("--plot-b", action="store_true", help="Generate individual plots for Dataset B.")
     parser.add_argument("--compare", action="store_true", help="Generate comparison plots for Dataset A vs B.")

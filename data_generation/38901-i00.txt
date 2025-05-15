@@ -1,14 +1,23 @@
-3GPP TR 38.901 V18.0.0 (2024-03)Technical Report
-3rd Generation Partnership Project;
+3GPP TR 38.901 V18.0.0 (2024-03)
+Technical Report
+
+3rd Generation Partnership Project;
 Technical Specification Group Radio Access Network;
 Study on channel model for frequencies from 0.5 to 100 GHz
-(Release 18)	The present document has been developed within the 3rd Generation Partnership Project (3GPP TM) and may be further elaborated for the purposes of 3GPP.
+(Release 18)
+	
+
+
+
+The present document has been developed within the 3rd Generation Partnership Project (3GPP TM) and may be further elaborated for the purposes of 3GPP.
 The present document has not been subject to any approval process by the 3GPP Organizational Partners and shall not be implemented.
 This Specification is provided for future development work within 3GPP only. The Organizational Partners accept no liability for any use of this Specification.
 Specifications and Reports for implementation of the 3GPP TM system should be obtained via the 3GPP Organizational Partners' Publications Offices.
 
-
-3GPP
+
+
+
+3GPP
 Postal address
 
 3GPP support office address
@@ -17,18 +26,20 @@ Valbonne - FRANCE
 Tel.: +33 4 92 94 42 00 Fax: +33 4 93 65 47 16
 Internet
 http://www.3gpp.org
-Copyright Notification
+
+Copyright Notification
 No part may be reproduced except as authorized by written permission.
 The copyright and the foregoing restriction extend to reproduction in all media.
 
-© 2024, 3GPP Organizational Partners (ARIB, ATIS, CCSA, ETSI, TSDSI, TTA, TTC).
+ï¿½ 2024, 3GPP Organizational Partners (ARIB, ATIS, CCSA, ETSI, TSDSI, TTA, TTC).
 All rights reserved.
 
-UMTS™ is a Trade Mark of ETSI registered for the benefit of its members
-3GPP™ is a Trade Mark of ETSI registered for the benefit of its Members and of the 3GPP Organizational Partners
-LTE™ is a Trade Mark of ETSI registered for the benefit of its Members and of the 3GPP Organizational Partners
-GSM® and the GSM logo are registered and owned by the GSM Association
-Contents
+UMTSï¿½ is a Trade Mark of ETSI registered for the benefit of its members
+3GPPï¿½ is a Trade Mark of ETSI registered for the benefit of its Members and of the 3GPP Organizational Partners
+LTEï¿½ is a Trade Mark of ETSI registered for the benefit of its Members and of the 3GPP Organizational Partners
+GSMï¿½ and the GSM logo are registered and owned by the GSM Association
+
+Contents
 1	Scope	7
 2	References	7
 3	Definitions, symbols and abbreviations	8
@@ -151,32 +162,32 @@ The following documents contain provisions which, through reference in this text
 -	References are either specific (identified by date of publication, edition number, version number, etc.) or nonspecific.
 -	For a specific reference, subsequent revisions do not apply.
 -	For a non-specific reference, the latest version applies. In the case of a reference to a 3GPP document (including a GSM document), a non-specific reference implicitly refers to the latest version of that document in the same Release as the present document.
-[1]	3GPP TR 21.905: "Vocabulary for 3GPP Specifications".
-[2]	3GPP TD RP-151606: "Study on channel model for frequency spectrum above 6 GHz".
-[3]	3GPP TR 36.873 (V12.2.0): "Study on 3D channel model for LTE".
-[4]	3GPP RP-151847: "Report of RAN email discussion about >6GHz channel modelling", Samsung.
+[1]	3GPPï¿½TRï¿½21.905: "Vocabulary for 3GPP Specifications".
+[2]	3GPPï¿½TD RP-151606: "Study on channel model for frequency spectrum above 6 GHz".
+[3]	3GPPï¿½TRï¿½36.873ï¿½(V12.2.0): "Study on 3D channel model for LTE".
+[4]	3GPPï¿½RP-151847: "Report of RAN email discussion about >6GHz channel modelling", Samsung.
 [5]	3GPP TD R1-163408: "Additional Considerations on Building Penetration Loss Modelling for 5G System Performance Evaluation", Straight Path Communications.
 [6]	ICT-317669-METIS/D1.4: "METIS channel model, METIS 2020, Feb, 2015".
 [7]	Glassner, A S: "An introduction to ray tracing. Elsevier, 1989".
 [8]	McKown, J. W., Hamilton, R. L.: "Ray tracing as a design tool for radio networks, Network, IEEE, 1991(6): 27-30".
-[9]	Kurner, T., Cichon, D. J., Wiesbeck, W.: "Concepts and results for 3D digital terrain-based wave propagation models: An overview", IEEE J.Select. Areas Commun., vol. 11, pp. 1002–1012, 1993.
+[9]	Kurner, T., Cichon, D. J., Wiesbeck, W.: "Concepts and results for 3D digital terrain-based wave propagation models: An overview", IEEE J.Select. Areas Commun., vol. 11, pp. 1002ï¿½1012, 1993.
 [10]	Born, M., Wolf, E.: "Principles of optics: electromagnetic theory of propagation, interference and diffraction of light", CUP Archive, 2000.
-[11]	Friis, H.: "A note on a simple transmission formula", proc. IRE, vol. 34, no. 5, pp. 254–256, 1946.
-[12]	Kouyoumjian, R.G., Pathak, P.H.: "A uniform geometrical theory of diffraction for an edge in a perfectly conducting surface" Proc. IEEE, vol. 62, pp. 1448–1461, Nov. 1974.
-[13]	Pathak, P.H., Burnside, W., Marhefka, R.: "A Uniform GTD Analysis of the Diffraction of Electromagnetic Waves by a Smooth Convex Surface", IEEE Transactions on Antennas and Propagation, vol. 28, no. 5, pp. 631–642, 1980.
+[11]	Friis, H.: "A note on a simple transmission formula", proc. IRE, vol. 34, no. 5, pp. 254ï¿½256, 1946.
+[12]	Kouyoumjian, R.G., Pathak, P.H.: "A uniform geometrical theory of diffraction for an edge in a perfectly conducting surface" Proc. IEEE, vol. 62, pp. 1448ï¿½1461, Nov. 1974.
+[13]	Pathak, P.H., Burnside, W., Marhefka, R.: "A Uniform GTD Analysis of the Diffraction of Electromagnetic Waves by a Smooth Convex Surface", IEEE Transactions on Antennas and Propagation, vol. 28, no. 5, pp. 631ï¿½642, 1980.
 [14]	IST-WINNER II Deliverable 1.1.2 v.1.2, "WINNER II Channel Models", IST-WINNER2, Tech. Rep., 2007 (http://www.ist-winner.org/deliverables.html).
 [15]	3GPP TR36.101: "User Equipment (UE) radio transmission and reception".
 [16]	3GPP TR36.104: "Base Station (BS) radio transmission and reception".
-[17]	Asplund, H., Medbo, J., Göransson, B., Karlsson, J., Sköld, J.: "A simplified approach to applying the 3GPP spatial channel model", in Proc. of PIMRC 2006.
+[17]	Asplund, H., Medbo, J., Gï¿½ransson, B., Karlsson, J., Skï¿½ld, J.: "A simplified approach to applying the 3GPP spatial channel model", in Proc. of PIMRC 2006.
 [18]	ITU-R Rec. P.1816: "The prediction of the time and the spatial profile for broadband land mobile services using UHF and SHF bands".
 [19]	ITU-R Rec. P.2040-1: "Effects of building materials and structures on radiowave propagation above about 100 MHz", International Telecommunication Union Radiocommunication Sector ITU-R, 07/2015.
 [20]	ITU-R Rec. P.527-3: "Electrical characteristics of the surface of the earth", International Telecommunication Union Radiocommunication Sector ITU-R, 03/1992.
 [21]	Jordan, E.C., Balmain, K.G.: "Electromagnetic Waves and Radiating Systems", Prentice-Hall Inc., 1968.
-[22]	3GPP TD RP-162469: "Study on New Radio (NR) Access Technology".
+[22]	3GPPï¿½TD RP-162469: "Study on New Radio (NR) Access Technology".
 [23]	3GPP TD RP-182138: "SID on Channel Modeling for Indoor Industrial Scenarios".
 3	Definitions, symbols and abbreviations
 3.1	Definitions
-For the purposes of the present document, the terms and definitions given in TR 21.905 [1] apply.
+For the purposes of the present document, the terms and definitions given in TRï¿½21.905ï¿½[1] apply.
 3.2	Symbols
 For the purposes of the present document, the following symbols apply:
 	antenna radiation power pattern 
@@ -225,7 +236,7 @@ hUT	antenna height for UT
 ?	Angular displacement between two pairs of unit vectors
 
 3.3	Abbreviations
-For the purposes of the present document, the abbreviations given in TR 21.905 [1] and the following apply. An abbreviation defined in the present document takes precedence over the definition of the same abbreviation, if any, in TR 21.905 [1].
+For the purposes of the present document, the abbreviations given in TRï¿½21.905ï¿½[1] and the following apply. An abbreviation defined in the present document takes precedence over the definition of the same abbreviation, if any, in TRï¿½21.905ï¿½[1].
 2D	two-dimensional
 3D	three-dimensional
 AOA	Azimuth angle Of Arrival
@@ -344,8 +355,8 @@ NYU WIRELESS Channel Models:
 -	Intra cluster parameters were proposed in terms of ray excess delay and ray power distribution
 -	Human blockage models were proposed in terms of blockage probability and blockage attenuation
 5G mmWave Channel Model Alliance:
--	Will provide a venue to promote fundamental research into measurement, analysis, identification of physical parameters, and statistical representations of mmWave propagation channels. 
--	Divided into six collaborative working groups that include a Steering Committee; Modelling Methodology Group; Measurement Methodology Group; and groups that focus on defining and parameterizing Indoor, Outdoor, and Emerging Usage Scenarios. 
+-	Will provide a venue to promote fundamental research into measurement, analysis, identification of physical parameters, and statistical representations of mmWave propagation channels.ï¿½
+-	Divided into six collaborative working groups that include a Steering Committee; Modelling Methodology Group; Measurement Methodology Group; and groups that focus on defining and parameterizing Indoor, Outdoor, and Emerging Usage Scenarios.ï¿½
 -	Sponsored by Communications Technology Research Laboratory within the NIST. 
 mmMAGIC: 
 -	Brings together major infrastructure vendors, major European operators, leading research institutes and universities, measurement equipment vendors and one SME. 
@@ -374,14 +385,26 @@ Note:	The scenarios of interest are based on the plenary email discussion and di
 6.3	Channel measurement capabilities
 The measurement capability as reported by each company is summarized in the following table. 
 Table 6.3-1: Channel measurement capabilities
-6 - 20 GHz20 - 30 GHz30 - 60 GHz>60 GHzUrban macroCMCC
-Nokia/AalborgNokia/AalborgNYU Urban microAalto University
+
+6 - 20 GHz
+20 - 30 GHz
+30 - 60 GHz
+>60 GHz
+Urban macro
+CMCC
+Nokia/Aalborg
+Nokia/Aalborg
+NYU
+ï¿½
+Urban micro
+Aalto University
 CMCC
 Ericsson
 Intel/Fraunhofer HHI
 Nokia/Aalborg
 NTT DOCOMO
-OrangeAT&T
+Orange
+AT&T
 Aalto University
 CMCC
 Huawei
@@ -395,7 +418,8 @@ CATT
 KT 
 ETRI
 ITRI/CCU
-ZTEAT&T
+ZTE
+AT&T
 Huawei
 Intel/Fraunhofer HHI
 NTT DOCOMO
@@ -403,18 +427,22 @@ Qualcomm
 CATT
 ETRI
 ITRI/CCU
-ZTEAT&T
+ZTE
+AT&T
 Aalto University
 Huawei
 Intel/Fraunhofer HHI
-NYUIndoorAalto University
+NYU
+Indoor
+Aalto University
 CMCC
 Ericsson
 Huawei
 Intel/Fraunhofer HHI
 Nokia/Aalborg
 NTT DOCOMO
-OrangeAT&T
+Orange
+AT&T
 Alcatel-Lucent
 Aalto University
 BUPT
@@ -430,7 +458,8 @@ CATT
 KT
 ETRI
 ITRI/CCU
-ZTEAT&T
+ZTE
+AT&T
 Ericsson
 Huawei
 Intel/Fraunhofer HHI
@@ -440,16 +469,20 @@ Qualcomm
 CATT
 ETRI
 ITRI/CCU
-ZTEAT&T
+ZTE
+AT&T
 Aalto University
 Huawei
 Intel/Fraunhofer HHI
-NYUO2IEricsson
+NYU
+O2I
+Ericsson
 Huawei
 Intel/Fraunhofer HHI
 Nokia/Aalborg
 NTT DOCOMO
-OrangeAT&T
+Orange
+AT&T
 Alcatel-Lucent
 Ericsson
 Huawei
@@ -457,19 +490,22 @@ Intel/Fraunhofer HHI
 NTT DOCOMO
 NYU
 Samsung
-KTAT&T
+KT
+AT&T
 Ericsson
 Huawei 
 Intel/Fraunhofer HHI
-NTT DOCOMOAT&T
+NTT DOCOMO
+AT&T
 Huawei 
-Intel/Fraunhofer HHI
+Intel/Fraunhofer HHI
+
 6.4	Modelling objectives
 The requirements for channel modelling are as follows.
 -	Channel model SI should take into account the outcome of RAN-level discussion in the '5G' requirement study item
 -	Complexity in terms of Description, Generating channel coefficients, development complexity and Simulation time should be considered. 
 -	Support frequency range up to 100 GHz. 
--	The critical path of the SI is 6 – 100 GHz
+-	The critical path of the SI is 6 ï¿½ 100 GHz
 -	Take care of mmW propagation aspects such as blocking and atmosphere attenuation.
 -	The model should be consistent in space, time and frequency
 -	Support large channel bandwidths (up to 10% of carrier frequency)
@@ -491,11 +527,15 @@ A Global Coordinate System (GCS) is defined for a system comprising multiple BSs
 A GCS with coordinates (x, y, z, , ) and unit vectors (, ) and an LCS with "primed" coordinates (x', y', z', , ) and "primed" unit vectors (, ) are defined with a common origins in Figures 7.1.3-1 and 7.1.3-2. Figure 7.1.3-1 illustrates the sequence of rotations that relate the GCS (gray) and the LCS (blue). Figure 7.1.3-2 shows the coordinate direction and unit vectors of the GCS (gray) and the LCS (blue). Note that the vector fields of the array antenna elements are defined in the LCS. In Figure 7.1.3-1 we consider an arbitrary 3D-rotation of the LCS with respect to the GCS given by the angles ?, ?, ?. The set of angles ?, ?, ? can also be termed as the orientation of the array antenna with respect to the GCS. 
 Note that the transformation from a LCS to a GCS depends only on the angles ?, ?, ?. The angle ? is called the bearing angle, ? is called the downtilt angle and ? is called the slant angle.
 
-Figure 7.1.3-1: Orienting the LCS (blue) with respect to the GCS (gray) by a sequence of 3 rotations: ?, ?, ?.Figure 7.1.3-2: Definition of spherical coordinates and unit vectors in both the GCS and LCS.Let denote an antenna element pattern in the LCS and denote the same antenna element pattern in the GCS. Then the two are related simply by 
+
+
+Figure 7.1.3-1: Orienting the LCS (blue) with respect to the GCS (gray) by a sequence of 3 rotations: ?, ?, ?.
+Figure 7.1.3-2: Definition of spherical coordinates and unit vectors in both the GCS and LCS.
+Let denote an antenna element pattern in the LCS and denote the same antenna element pattern in the GCS. Then the two are related simply by 
 		(7.1-1)
 with  and  given by (7.1-7) and (7.1-8).
 Let us denote the polarized field components in the LCS by , and in the GCS by , . Then they are related by equation (7.1-11). 
-Any arbitrary 3D rotation can be specified by at most 3 elemental rotations, and following the framework of Figure 7.1.3-1, a series of rotations about the z, and axes are assumed here, in that order. The dotted and double-dotted marks indicate that the rotations are intrinsic, which means that they are the result of one (?) or two (??) intermediate rotations. In other words, the  axis is the original y axis after the first rotation about z, and the  axis is the original x axis after the first rotation about z and the second rotation about. A first rotation of ? about z sets the antenna bearing angle (i.e. the sector pointing direction for a BS antenna element). The second rotation of ? about  sets the antenna downtilt angle. Finally, the third rotation of ? about  sets the antenna slant angle. The orientation of the x, y and z axes after all three rotations can be denoted as ,  and . These triple-dotted axes represents the final orientation of the LCS, and for notational purposes denoted as the x', y' and z' axes (local or "primed" coordinate system).
+Any arbitrary 3D rotation can be specified by at most 3 elemental rotations, and following the framework of Figureï¿½7.1.3-1, a series of rotations about the z, and axes are assumed here, in that order. The dotted and double-dotted marks indicate that the rotations are intrinsic, which means that they are the result of one (?) or two (??) intermediate rotations. In other words, the  axis is the original y axis after the first rotation about z, and the  axis is the original x axis after the first rotation about z and the second rotation about. A first rotation of ? about z sets the antenna bearing angle (i.e. the sector pointing direction for a BS antenna element). The second rotation of ? about  sets the antenna downtilt angle. Finally, the third rotation of ? about  sets the antenna slant angle. The orientation of the x, y and z axes after all three rotations can be denoted as ,  and . These triple-dotted axes represents the final orientation of the LCS, and for notational purposes denoted as the x', y' and z' axes (local or "primed" coordinate system).
 In order to establish the equations for transformation of the coordinate system and the polarized antenna field patterns between the GCS and the LCS, it is necessary to determine the composite rotation matrix that describes the transformation of point (x, y, z) in the GCS into point (x', y', z') in the LCS. This rotation matrix is computed as the product of three elemental rotation matrices. The matrix to describe rotations about the z,and  axes by the angles ?, ? and ? respectively and in that order is defined as
 		(7.1-2)
 The reverse transformation is given by the inverse of R, which is also equal to the transpose of R since it is orthogonal.
@@ -559,14 +599,70 @@ The detailed scenario description in this clause can be used for channel model c
 UMi-street canyon and UMa
 Details on UMi-street canyon and UMa scenarios are listed in Table 7.2-1. 
 Table 7.2-1: Evaluation parameters for UMi-street canyon and UMa scenarios
-ParametersUMi - street canyonUMaCell layoutHexagonal grid, 19 micro sites, 3 sectors per site (ISD = 200m)Hexagonal grid, 19 macro sites, 3 sectors per site (ISD = 500m)BS antenna height 10m25mUT locationOutdoor/indoorOutdoor and indoorOutdoor and indoorLOS/NLOSLOS and NLOSLOS and NLOSHeight Same as 3D-UMi in TR36.873Same as 3D-UMa in TR36.873Indoor UT ratio80%80%UT mobility (horizontal plane only)3km/h3km/hMin. BS - UT distance (2D)10m35mUT distribution (horizontal)UniformUniform
+Parameters
+UMi - street canyon
+UMa
+Cell layout
+Hexagonal grid, 19 micro sites, 3 sectors per site (ISD = 200m)
+Hexagonal grid, 19 macro sites, 3 sectors per site (ISD = 500m)
+BS antenna height 
+10m
+25m
+UT location
+Outdoor/indoor
+Outdoor and indoor
+Outdoor and indoor
+
+LOS/NLOS
+LOS and NLOS
+LOS and NLOS
+
+Height 
+Same as 3D-UMi in TR36.873
+Same as 3D-UMa in TR36.873
+Indoor UT ratio
+80%
+80%
+UT mobility (horizontal plane only)
+3km/h
+3km/h
+Min. BS - UT distance (2D)
+10m
+35m
+UT distribution (horizontal)
+Uniform
+Uniform
+
 Indoor-office
 Details on indoor-office scenarios are listed in Table 7.2-2 and presented in Figure 7.2-1. More details, if necessary, can be added to Figure 7.2-1. 
 Table 7.2-2: Evaluation parameters for indoor-office scenarios
-ParametersIndoor - office 
-open officeIndoor - office 
-mixed officeLayoutRoom size (WxLxH)120mx50mx3mISD20mBS antenna height 3 m (ceiling)UT locationLOS/NLOSLOS and NLOS
-Height 1 mUT mobility (horizontal plane only)3 km/hMin. BS - UT distance (2D)0UT distribution (horizontal)UniformNote:	The only difference between the open office and mixed office models in this TR is the line of sight probability.
+Parameters
+Indoor - office 
+open office
+Indoor - office 
+mixed office
+Layout
+Room size (WxLxH)
+120mx50mx3m
+
+ISD
+20m
+BS antenna height 
+3 m (ceiling)
+UT location
+LOS/NLOS
+LOS and NLOS
+
+
+Height 
+1 m
+UT mobility (horizontal plane only)
+3 km/h
+Min. BS - UT distance (2D)
+0
+UT distribution (horizontal)
+Uniform
+Note:	The only difference between the open office and mixed office models in this TR is the line of sight probability.
 
 
 Figure 7.2-1: Layout of indoor office scenarios.
@@ -574,25 +670,97 @@ Figure 7.2-1: Layout of indoor office scenarios.
 RMa
 The rural deployment scenario focuses on larger and continuous coverage. The key characteristics of this scenario are continuous wide area coverage supporting high speed vehicles. This scenario will be noise-limited and/or interference-limited, using macro TRPs. Details of RMa scenario is described in Table 7.2-3.
 Table 7.2-3: Evaluation parameters for RMa 
-ParametersRMaCarrier Frequency Up to 7GhzBS height 35mLayoutHexagonal grid, 19 Macro sites, 3sectors per site, ISD = 1732m or 5000mUT height 1.5mUT distributionUniformIndoor/Outdoor50% indoor and 50% in carLOS/NLOSLOS and NLOSMin BS - UT distance(2D)35m
+Parameters
+RMa
+Carrier Frequency 
+Up to 7Ghz
+BS height 
+35m
+Layout
+Hexagonal grid, 19 Macro sites, 3sectors per site, ISD = 1732m or 5000m
+UT height 
+1.5m
+UT distribution
+Uniform
+Indoor/Outdoor
+50% indoor and 50% in car
+LOS/NLOS
+LOS and NLOS
+Min BS - UT distance(2D)
+35m
+
 Indoor Factory (InF)
 The indoor factory (InF) scenario focuses on factory halls of varying sizes and with varying levels of density of "clutter", e.g. machinery, assembly lines, storage shelves, etc. Details of the InF scenario are listed in Table 7.2-4.
 Table 7.2-4: Evaluation parameters for InF
-InFParametersInF-SL 
-(sparse clutter, low BS)InF-DL
-(dense clutter, low BS)InF-SH
-(sparse clutter, high BS)InF-DH
-(dense clutter, high BS)InF-HH
-(high Tx, high Rx)LayoutRoom sizeRectangular: 20-160000 m2 
- Ceiling height5-25 m5-15 m5-25 m5-15 m5-25 mEffective clutter height h_c< Ceiling height, 0-10 mExternal wall and ceiling typeConcrete or metal walls and ceiling with metal-coated windowsClutter typeBig machineries composed of regular metallic surfaces. 
-For example: several mixed production areas with open spaces and storage/commissioning areasSmall to medium metallic machinery and objects with irregular structure. 
-For example: assembly and production lines surrounded by mixed small-sized machineries.Big machineries composed of regular metallic surfaces. 
-For example: several mixed production areas with open spaces and storage/commissioning areasSmall to medium metallic machinery and objects with irregular structure. 
-For example: assembly and production lines surrounded by mixed small-sized machineries.AnyTypical clutter size, d_clutter10 m2 m10 m2 mAnyClutter density r (percentage of surface area occupied by clutter)Low clutter density
-(<40%)High clutter density
-(?40%)Low clutter density
-(<40%)High clutter density
-(?40%)AnyBS antenna height Clutter-embedded, i.e. the BS antenna height is below the average clutter heightAbove clutterAbove clutterUT locationLOS/NLOSLOS and NLOS100% LOSHeight Clutter-embeddedAbove clutter
+
+InF
+Parameters
+InF-SL 
+(sparse clutter, low BS)
+InF-DL
+(dense clutter, low BS)
+InF-SH
+(sparse clutter, high BS)
+InF-DH
+(dense clutter, high BS)
+InF-HH
+(high Tx, high Rx)
+Layout
+Room sizenormalisnormalis
+Rectangular: 20-160000 m2 
+ 
+
+Ceiling height
+5-25 m
+5-15 m
+5-25 m
+5-15 m
+5-25 m
+
+Effective clutter height h_c
+< Ceiling height, 0-10 m
+
+External wall and ceiling type
+Concrete or metal walls and ceiling with metal-coated windows
+Clutter type
+Big machineries composed of regular metallic surfaces. 
+For example: several mixed production areas with open spaces and storage/commissioning areas
+Small to medium metallic machinery and objects with irregular structure. 
+For example: assembly and production lines surrounded by mixed small-sized machineries.
+Big machineries composed of regular metallic surfaces. 
+For example: several mixed production areas with open spaces and storage/commissioning areas
+Small to medium metallic machinery and objects with irregular structure. 
+For example: assembly and production lines surrounded by mixed small-sized machineries.
+Any
+Typical clutter size, d_clutter
+10 m
+2 m
+10 m
+2 m
+Any
+Clutter density r (percentage of surface area occupied by clutter)
+Low clutter density
+(<40%)
+High clutter density
+(?40%)
+Low clutter density
+(<40%)
+High clutter density
+(?40%)
+Any
+BS antenna height 
+Clutter-embedded, i.e. the BS antenna height is below the average clutter height
+Above clutter
+Above clutter
+UT location
+LOS/NLOSnormalis
+LOS and NLOS
+100% LOS
+
+Height 
+Clutter-embedded
+Above clutter
+
 7.3	Antenna modelling
 This clause captures the antenna array structures considered in this SI for calibration.
 The BS antenna is modelled by a uniform rectangular panel array, comprising MgNg panels, as illustrated in Figure 7.3-1 with Mg being the number of panels in a column and Ng being the number of panels in a row. Furthermore the following properties apply:
@@ -606,14 +774,24 @@ The rectangular panel array antenna can be described by the following tuple .
 Figure 7.3-1: Cross-polarized panel array antenna model
 The antenna radiation power pattern of each antenna element is generated according to Table 7.3-1.
 Table 7.3-1: Radiation power pattern of a single antenna element
-ParameterValuesVertical cut of the radiation power pattern (dB)
-Horizontal cut of the radiation power pattern (dB)
-3D radiation power pattern (dB)
-Maximum directional gain of an antenna element GE,max8 dBi
+Parameter
+Values
+Vertical cut of the radiation power pattern (dB)
+
+
+Horizontal cut of the radiation power pattern (dB)
+
+
+3D radiation power pattern (dB)
+
+
+Maximum directional gain of an antenna element GE,max
+8 dBi
+
 7.3.1	Antenna port mapping
 Legacy BS array antennas, i.e. uniform linear arrays with fix phase shifts between its M elements to obtain a beamtilt in vertical direction are modelled using complex weights
 		(7.3-1)
-where m=1, …, M,  is the electrical vertical steering angle defined between 0° and 180° (90° represents perpendicular to the array).  denotes the wavelength and  the vertical element spacing.
+where m=1, ï¿½, M,  is the electrical vertical steering angle defined between 0ï¿½ and 180ï¿½ (90ï¿½ represents perpendicular to the array).  denotes the wavelength and  the vertical element spacing.
 7.3.2	Polarized antenna modelling
 In general the relationship between radiation field and power pattern is given by:
 	.	(7.3-2)
@@ -627,34 +805,47 @@ Note that the zenith and the azimuth field components , ,  and  are defined in t
 
 Model-2:
 In case of polarized antennas, the polarization is modelled as angle-independent in both azimuth and elevation, in an LCS. For a linearly polarized antenna, the antenna element field pattern, in the vertical polarization and in the horizontal polarization, are given by
-		(7.3-4)
+		(7.3-4)normalis
 and
 	,	(7.3-5)
 respectively, where  is the polarization slant angle and is the 3D antenna element power pattern as a function of azimuth angle,  and elevation angle, in the LCS. Note that  degrees correspond to a purely vertically polarized antenna element. The vertical and horizontal field directions are defined in terms of the spherical basis vectors,  and  respectively in the LCS as defined in Clause 7.1.2. Also =, = and =  as defined in Table 7.1-1.
-7.4	Pathloss, LOS probability and penetration modelling
+7.4	Pathloss, LOS probability anormalisration modelling
 7.4.1	Pathloss
 The pathloss models are summarized in Table 7.4.1-1 and the distance definitions are indicated in Figure 7.4.1-1 and Figure 7.4.1-2. Note that the distribution of the shadow fading is log-normal, and its standard deviation for each scenario is given in Table 7.4.1-1.
 
-Figure7.4.1-1: Definition of d2D and d3D 
-for outdoor UTsFigure 7.4.1-2: Definition of d2D-out, d2D-in 
-and d3D-out, d3D-in for indoor UTs. Note that 
+
+
+Figure7.4.1-1: Definition of d2D and d3D 
+for outdoor UTs
+Figure 7.4.1-2: Definition of d2D-out, d2D-in 
+and d3D-out, d3D-in for indoor UTs. 
+Note that 
 		(7.4-1)
 
 Table 7.4.1-1: Pathloss models
-ScenarioLOS/NLOSPathloss [dB], fc is in GHz and d is in meters, see note 6Shadow 
+Scenario
+LOS/NLOS
+Pathloss [dB], fc is in GHz and d is in meters, see note 6
+Shadow 
 fading 
-std [dB]Applicability range, 
+std [dB]
+Applicability range, 
 antenna height 
-default values RMaLOS, see note 5
+default values 
+RMa
+LOSnormalis
+, see note 5
 
 
-
 
 
 
 
 
-
+
+
+
+
 
 
 
@@ -664,40 +855,116 @@ The applicability ranges:
 
 
 
-NLOS
-for 
-
-
-UMaLOS, see note 1
 
 
-
+NLOS
 
-
-
-
-NLOS
 for 
 
-
-
-
-
-Explanations: see note 3Optional UMi - Street CanyonLOS, see note 1
 
 
-
-NLOS
+
+
+UMa
+LOS
+, see note 1
+
+
+
+
+
+
+
+
+
+
+
+NLOS
+
 for 
 
-
 
-Explanations: see note 4Optional InH - OfficeLOSNLOS
-Optional InFLOS?PL?_LOS=31.84+21.50 log_10?(d_3D )+19.00 log_10?(f_c )?_SF=4.31?d_3D?600 mNLOSInF-SL: PL=33+25.5 log_10?(d_3D )+20 log_10?(f_c )
-?PL?_NLOS=max?(PL,?PL?_LOS)?_SF=5.7InF-DL: PL=18.6+35.7 log_10?(d_3D )+20 log_10?(f_c )
-?PL?_NLOS=max?(PL,?PL?_LOS,?PL?_(InF-SL))?_SF=7.2InF-SH: PL=32.4+23.0 log_10?(d_3D )+20 log_10?(f_c )
-?PL?_NLOS=max?(PL,?PL?_LOS)?_SF=5.9InF-DH: PL=33.63+21.9 log_10?(d_3D )+20 log_10?(f_c )
-?PL?_NLOS=max?(PL,?PL?_LOS)?_SF=4.0Note 1:	Breakpoint distance d'BP = 4 h'BS h'UT fc/c, where fc is the centre frequency in Hz, c = 3.0?108 m/s is the propagation velocity in free space, and h'BS and h'UT are the effective antenna heights at the BS and the UT, respectively. The effective antenna heights h'BS and h'UT are computed as follows: h'BS = hBS – hE, h'UT = hUT – hE, where hBS and hUT are the actual antenna heights, and hE is the effective environment height. For UMi hE = 1.0m. For UMa hE=1m with a probability equal to 1/(1+C(d2D, hUT)) and chosen from a discrete uniform distribution uniform(12,15,…,(hUT-1.5)) otherwise. With C(d2D, hUT) given by
+
+
+
+
+
+Explanations: see note 3
+
+
+Optional 
+
+
+UMi - Street Canyon
+LOS
+, see note 1
+
+
+
+
+
+
+
+NLOS
+
+for 
+
+
+
+
+
+Explanations: see note 4
+
+
+Optional 
+
+
+InH - Office
+LOS
+
+
+
+
+NLOS
+
+
+
+
+
+
+Optional 
+
+
+InF
+LOS
+?PL?_LOS=31.84+21.50 log_10?(d_3D )+19.00 log_10?(f_c )
+?_SF=4.3
+1?d_3D?600 m
+
+NLOS
+InF-SL: PL=33+25.5 log_10?(d_3D )+20 log_10?(f_c )
+?PL?_NLOS=max?(PL,?PL?_LOS)
+?_SF=5.7
+
+
+
+InF-DL: PL=18.6+35.7 log_10?(d_3D )+20 log_10?(f_c )
+?PL?_NLOS=max?(PL,?PL?_LOS,?PL?_(InF-SL))
+?_SF=7.2
+
+
+
+InF-SH: PL=32.4+23.0 log_10?(d_3D )+20 log_10?(f_c )
+?PL?_NLOS=max?(PL,?PL?_LOS)
+?_SF=5.9
+
+
+
+InF-DH: PL=33.63+21.9 log_10?(d_3D )+20 log_10?(f_c )
+?PL?_NLOS=max?(PL,?PL?_LOS)
+?_SF=4.0
+
+Note 1:	Breakpoint distance d'BP = 4 h'BS h'UT fc/c, where fc is the centre frequency in Hz, c = 3.0?108 m/s is the propagation velocity in free space, and h'BS and h'UT are the effective antenna heights at the BS and the UT, respectively. The effective antenna heights h'BS and h'UT are computed as follows: h'BS = hBS ï¿½ hE, h'UT = hUT ï¿½ hE, where hBS and hUT are the actual antenna heights, and hE is the effective environment height. For UMi hE = 1.0m. For UMa hE=1m with a probability equal to 1/(1+C(d2D, hUT)) and chosen from a discrete uniform distribution uniform(12,15,ï¿½,(hUT-1.5)) otherwise. With C(d2D, hUT) given by
 	,
 	where
 	. 
@@ -706,21 +973,39 @@ Note 2:	The applicable frequency range of the PL formula in this table is 0.5 < 
 Note 3:	UMa NLOS pathloss is from TR36.873 with simplified format and PLUMa-LOS = Pathloss of UMa LOS outdoor scenario.
 Note 4:	PLUMi-LOS = Pathloss of UMi-Street Canyon LOS outdoor scenario.
 Note 5:	Break point distance dBP = 2? hBS hUT fc/c, where fc is the centre frequency in Hz, c = 3.0 ? 108 m/s is the propagation velocity in free space, and hBS and hUT are the antenna heights at the BS and the UT, respectively.
-Note 6:	fc denotes the center frequency normalized by 1GHz, all distance related values are normalized by 1m, unless it is stated otherwise.
+Note 6:	fc denotes the center frequency normalized by 1GHz, all distance related values are normalized by 1m, unless it is stated otherwise.
+
 
 
 7.4.2	LOS probability
 The Line-Of-Sight (LOS) probabilities are given in Table 7.4.2-1.
 Table 7.4.2-1 LOS probability
-ScenarioLOS probability (distance is in meters)RMaUMi - Street canyonUMawhere
+Scenario
+LOS probability (distance is in meters)
+RMa
 
-Indoor - Mixed officeIndoor - Open officeInF-SL
+UMi - Street canyon
+
+UMa
+where
+
+
+Indoor - Mixed office
+
+Indoor - Open office
+
+InF-SL
 InF-SH
 InF-DL
-InF-DHPr_(LOS,subsce) (d_2D )=exp?(-d_2D/k_subsce )
+InF-DH
+Pr_(LOS,subsce) (d_2D )=exp?(-d_2D/k_subsce )
 where
 k_subsce={?(-d_clutter/ln?(1-r) &"for InF-SL and InF-DL" @-d_clutter/ln?(1-r) ?(h_BS-h_UT)/(h_c-h_UT )&"for InF-SH and InF-DH" )?
-The parameters d_clutter, r, and h_c are defined in Table 7.2-4InF-HHPr_LOS=1Note:	The LOS probability is derived with assuming antenna heights of 3m for indoor, 10m for UMi, and 25m for UMa
+The parameters d_clutter, r, and h_c are defined in Table 7.2-4
+InF-HH
+Pr_LOS=1
+Note:	The LOS probability is derived with assuming antenna heights of 3m for indoor, 10m for UMi, and 25m for UMa
+
 7.4.3	O2I penetration loss
 7.4.3.1	O2I building penetration loss
 The pathloss incorporating O2I building penetration loss is modelled as in the following:
@@ -730,13 +1015,36 @@ where  is the basic outdoor path loss given in Clause 7.4.1, where  is replaced 
 		(7.4-3)
  is an additional loss is added to the external wall loss to account for non-perpendicular incidence; , is the penetration loss of material i, example values of which can be found in Table 7.4.3-1;  is proportion of i-th materials, where ; and N is the number of materials.
 Table 7.4.3-1: Material penetration losses
-MaterialPenetration loss [dB]Standard multi-pane glassIRR glassConcreteWoodNote:	f is in GHz
+Material
+Penetration loss [dB]
+Standard multi-pane glass
+
+IRR glass
+
+Concrete
+
+Wood
+
+Note:	f is in GHz
+
 Table 7.4.3-2 gives ,  and ?P for two O2I penetration loss models. The O2I penetration is UT-specifically generated, and is added to the SF realization in the log domain.
 Table 7.4.3-2: O2I building penetration loss model
- Path loss through external wall:
- in [dB]Indoor loss:
- in [dB]Standard deviation:
-?P in [dB]Low-loss model0.5 4.4High-loss model0.5 6.5
+ï¿½
+Path loss through external wall:
+ in [dB]
+Indoor loss:
+ in [dB]
+Standard deviation:
+?P in [dB]
+Low-loss model
+
+0.5 
+4.4
+High-loss model
+
+0.5 
+6.5
+
  is minimum of two independently generated uniformly distributed variables between 0 and 25 m for UMa and UMi-Street Canyon, and between 0 and 10 m for RMa.  shall be UT-specifically generated.
 Both low-loss and high-loss models are applicable to UMa and UMi-Street Canyon. 
 Only the low-loss model is applicable to RMa. 
@@ -745,8 +1053,18 @@ The composition of low and high loss is a simulation parameter that should be de
 Note:	One example survey for the US market can be found in [5]. The survey does not necessarily be representative for all the scenarios. Other ratios outside of the survey should not be precluded.
 For backwards compatibility with TR 36.873 [3], the following building penetration model should be used for UMa and UMi single-frequency simulations at frequencies below 6 GHz. 
 Table 7.4.3-3. O2I building penetration loss model for single-frequency simulations <6 GHz
-ParameterValue20 dB0.5 
-with  being a single, link-specific, uniformly distributed variable between 0 and 25 m0 dB7 dB (note: replacing the respective value in Table 7.4.1-1)
+Parameter
+Value
+
+20 dB
+
+0.5 
+with  being a single, link-specific, uniformly distributed variable between 0 and 25 m
+
+0 dB
+
+7 dB (note: replacing the respective value in Table 7.4.1-1)
+
 7.4.3.2	O2I car penetration loss
 The pathloss incorporating O2I car penetration loss is modelled as in the following:
 		(7.4-4)
@@ -758,7 +1076,7 @@ The long-term (log-normal) fading in the logarithmic scale around the mean path 
 with the correlation length dcor being dependent on the environment, see the correlation parameters for shadowing and other large scale parameters in Table 7.5-6 (Channel model parameters). In a spatial consistency procedure in Clause 7.6.3, the cluster specific random variables are also correlated following the exponential function with respect to correlation distances in the two dimensional horizontal plane.
 7.5	Fast fading model
 The radio channel realizations are created using the parameters listed in Table 7.5-1. The channel realizations are obtained by a step-wise procedure illustrated in Figure 7.5-1 and described below. It has to be noted that the geometric description covers arrival angles from the last bounce scatterers and respectively departure angles to the first scatterers interacted from the transmitting side. The propagation between the first and the last interaction is not defined. Thus, this approach can model also multiple interactions with the scattering media. This indicates also that e.g., the delay of a multipath component cannot be determined by the geometry. In the following steps, downlink is assumed. For uplink, arrival and departure parameters have to be swapped. 
-Note: the channel generation in this clause is enough for at least the following cases.
+Note: the channel generation in this clause is enough for at least the following cases.normalis
 -	Case 1: For low complexity evaluations
 -	Case 2: To compare with earlier simulation results, 
 -	Case 3: When none of the additional modelling components are turned on. 
@@ -767,11 +1085,45 @@ For other advanced simulations, e.g., spatially consistency, large bandwidth and
 
 Figure 7.5-1 Channel coefficient generation procedure
 
-Figure 7.5-2: Definition of a global coordinate system showing the zenith angle ? and the azimuth angle ?. ?=0° points to zenith and ?=+90° points to the horizon. 
+Figure 7.5-2: Definition of a global coordinate system showing the zenith angle ? and the azimuth angle ?. ?=0ï¿½ points to zenith and ?=+90ï¿½ points to the horizon. 
 The spherical basis vectors  and  shown above are defined based on the direction of propagation.
 
 Table 7.5-1: Notations in the global coordinate system (GCS) 
-ParameterNotationLOS AOD?LOS,AODLOS AOA?LOS,AOALOS ZOD?LOS,ZODLOS ZOA?LOS,ZOAAOA for cluster n?n,AOAAOD for cluster n?n,AODAOA for ray m in cluster n?n,m,AOAAOD for ray m in cluster n?n,m,AODZOA for cluster n?n,ZOAZOD for cluster n?n,ZODZOA for ray m in cluster n?n,m,ZOAZOD for ray m in cluster n?n,m,ZODReceive antenna element u field pattern in the direction of the spherical basis vector Frx,u,?Receive antenna element u field pattern in the direction of the spherical basis vector Frx,u,?Transmit antenna element s field pattern in the direction of the spherical basis vector Ftx,s,?Transmit antenna element s field pattern in the direction of the spherical basis vector Frx,s,?
+Parameter
+Notation
+LOS AOD
+?LOS,AOD
+LOS AOA
+?LOS,AOA
+LOS ZOD
+?LOS,ZOD
+LOS ZOA
+?LOS,ZOA
+AOA for cluster n
+?n,AOA
+AOD for cluster n
+?n,AOD
+AOA for ray m in cluster n
+?n,m,AOA
+AOD for ray m in cluster n
+?n,m,AOD
+ZOA for cluster n
+?n,ZOA
+ZOD for cluster n
+?n,ZOD
+ZOA for ray m in cluster n
+?n,m,ZOA
+ZOD for ray m in cluster nnormalis
+?n,m,ZOD
+Receive antenna element u field pattern in the direction of the spherical basis vector 
+Frx,u,?
+Receive antenna element u fieldnormalis in the direction of the spherical basis vector 
+Frx,u,?
+Transmit antenna element s field pattern in the direction of the spherical basis vector 
+Ftx,s,?
+Transmit antenna element s field pattern in the direction of the spherical basis vector 
+Frx,s,?
+
 Step 1: Set environment, network layout, and antenna array parameters
 a)	Choose one of the scenarios (e.g. UMa, UMi-Street Canyon, RMa, InH-Office or InF). Choose a global coordinate system and define zenith angle ?, azimuth angle ?, and spherical basis vectors ,  as shown in Figure 7.5-2. Note: Scenario RMa is for up to 7GHz while others are for up to 100GHz
 b)	Give number of BS and UT
@@ -794,7 +1146,7 @@ Small scale parameters:
 Step 5: Generate cluster delays ?
 Delays are drawn randomly from the delay distribution defined in Table 7.5-6. With exponential delay distribution calculate
 	,	(7.5-1)
-Where r? is the delay distribution proportionality factor, Xn ~ uniform(0,1), and cluster index n = 1,…,N. With uniform delay distribution the delay values  are drawn from the corresponding range. Normalise the delays by subtracting the minimum delay and sort the normalised delays to ascending order:
+Where r? is the delay distribution proportionality factor, Xnï¿½~ï¿½uniform(0,1), and cluster index nï¿½=ï¿½1,ï¿½,N. With uniform delay distribution the delay values  are drawn from the corresponding range. Normalise the delays by subtracting the minimum delay and sort the normalised delays to ascending order:
 	.	(7.5-2)
 In the case of LOS condition, additional scaling of delays is required to compensate for the effect of LOS peak addition to the delay spread. The heuristically determined Ricean K-factor dependent scaling constant is
 	,	(7.5-3)
@@ -812,7 +1164,7 @@ In the case of LOS condition an additional specular component is added to the fi
 and the cluster powers are not normalized as in equation (7.5-6) , but:
 		(7.5-8)
 where ?(.) is Dirac's delta function and KR is the Ricean K-factor as generated in Step 4 converted to linear scale. These power values are used only in equations (7.5-9) and (7.5-14), but not in equation (7.5-22).
-Assign the power of each ray within a cluster as Pn / M, where M is the number of rays per cluster.
+Assign the power of each ray within a cluster as Pnï¿½/ï¿½M, where M is the number of rays per cluster.
 Remove clusters with less than -25 dB power compared to the maximum cluster power. The scaling factors need not be changed after cluster elimination.[VN2]
 
 Step 7: Generate arrival angles and departure angles for both azimuth and elevation.
@@ -822,10 +1174,36 @@ with  defined as
 	,	(7.5-10)
 where  is defined as a scaling factor related to the total number of clusters and is given in Table 7.5-2:
 Table 7.5-2: Scaling factors for AOA, AOD generation
-# clusters4581011121415161920250.7790.8601.0181.0901.1231.1461.1901.2111.2261.2731.2891.358
+# clusters
+4
+5
+8
+10
+11
+12
+14
+15
+16
+19
+20
+25
+
+0.779
+0.860
+1.018
+1.090
+1.123
+1.146
+1.190
+1.211
+1.226
+1.273
+1.289
+1.358
+
 In the LOS case, constant  also depends on the Ricean K-factor K in [dB], as generated in Step 4. Additional scaling of the angles is required to compensate for the effect of LOS peak addition to the angle spread.
 
-Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,–1}, and add component  to introduce random variation
+Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,ï¿½1}, and add component  to introduce random variation
 	,	(7.5-11)
 where ?LOS,AOA is the LOS direction defined in the network layout description, see Step1c.
 In the LOS case, substitute (7.5-11) by (7.5-12) to enforce the first cluster to the LOS direction ?LOS, AOA 
@@ -834,7 +1212,29 @@ Finally add offset angles ?m from Table 7.5-3 to the cluster angles
 	,	(7.5-13)
 where cASA is the cluster-wise rms azimuth spread of arrival angles (cluster ASA) in Table 7.5-6.
 Table 7.5-3: Ray offset angles within a cluster, given for rms angle spread normalized to 1
-Ray number mBasis vector of offset angles ?m1,2± 0.04473,4± 0.14135,6± 0.24927,8± 0.37159,10± 0.512911,12± 0.679713,14± 0.884415,16± 1.148117,18± 1.519519,20± 2.1551
+Ray number m
+Basis vector of offset angles ?m
+1,2
+ï¿½ 0.0447
+3,4
+ï¿½ 0.1413
+5,6
+ï¿½ 0.2492
+7,8
+ï¿½ 0.3715
+9,10
+ï¿½ 0.5129
+11,12
+ï¿½ 0.6797
+13,14
+ï¿½ 0.8844
+15,16
+ï¿½ 1.1481
+17,18
+ï¿½ 1.5195
+19,20
+ï¿½ 2.1551
+
 The generation of AOD () follows a procedure similar to AOA as described above.
 The generation of ZOA assumes that the composite PAS in the zenith dimension of all clusters is Laplacian (see Table 7.5-6). The ZOAs are determined by applying the inverse Laplacian function (7.5-14) with input parameters Pn and RMS angle spread ZSA
 	,	(7.5-14)
@@ -842,19 +1242,37 @@ The generation of ZOA assumes that the composite PAS in the zenith dimension of 
 	,	(7.5-15)
 Where  is a scaling factor related to the total number of clusters and is given in Table 7.5-4:
 Table 7.5-4: Scaling factors for ZOA, ZOD generation
-# clusters8101112151920250.8890.9571.0311.1041.10881.1841.1781.282
+# clusters
+8
+10
+11
+12
+15
+19
+20
+25
+
+0.889
+0.957
+1.031
+1.104
+1.1088
+1.184
+1.178
+1.282
+
 In the LOS case, constant  also depends on the Ricean K-factor K in [dB], as generated in Step 4. Additional scaling of the angles is required to compensate for the effect of LOS peak addition to the angle spread. 
-Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,–1}, and add component  to introduce random variation
+Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,ï¿½1}, and add component  to introduce random variation
 	,	(7.5-16)
 where  if the BS-UT link is O2I and otherwise. The LOS direction is defined in the network layout description, see Step1c.
 In the LOS case, substitute (7.5-16) by (7.5-17) to enforce the first cluster to the LOS direction ?LOS,ZOA 
 	.	(7.5-17)
 Finally add offset angles ?m from Table 7.5-3 to the cluster angles
 	,	(7.5-18)
-where cZSA is the cluster-wise rms spread of ZOA (cluster ZSA) in Table 7.5-6. Assuming that is wrapped within [0, 360°], if , thenis set to .
+where cZSA is the cluster-wise rms spread of ZOA (cluster ZSA) in Table 7.5-6. Assuming that is wrapped within [0, 360ï¿½], if , thenis set to .
 The generation of ZOD follows the same procedure as ZOA described above except equation (7.5-16) is replaced by 
 	,	(7.5-19)
-where variable Xn is with uniform distribution to the discrete set of {1,–1}, , is given in Tables 7.5-6/7/8 and equation (7.5-18) is replaced by 
+where variable Xn is with uniform distribution to the discrete set of {1,ï¿½1}, , is given in Tables 7.5-6/7/8 and equation (7.5-18) is replaced by 
 		(7.5-20)
 where is the mean of the ZSD log-normal distribution. 
 In the LOS case, the generation of ZOD follows the same procedure as ZOA described above using equation (7.5-17).
@@ -863,7 +1281,7 @@ Step 8: Coupling of rays within a cluster for both azimuth and elevation
 Couple randomly AOD angles ?n,m,AOD to AOA angles ?n,m,AOA within a cluster n, or within a sub-cluster in the case of two strongest clusters (see Step 11 and Table 7.5-3). Couple randomly ZOD angles  with ZOA angles using the same procedure. Couple randomly AOD angles ?n,m,AOD with ZOD angles within a cluster n or within a sub-cluster in the case of two strongest clusters.
 
 Step 9: Generate the cross polarization power ratios
-Generate the cross polarization power ratios (XPR) ??for each ray m of each cluster n. XPR is log-Normal distributed. Draw XPR values as
+normalis the cross polarization power ratios (XPR) ??for each ray m of each cluster n. XPR is log-Normal distributed. Draw XPR values as
 	,	(7.5-21)
 where  is Gaussian distributed with ?and  from Table 7.5-6. 
 Note:  is independently drawn for each ray and each cluster.
@@ -880,12 +1298,12 @@ The method described below is used at least for drop-based evaluations irrespect
 -	Case 3: When none of the additional modelling components are turned on.
 -	Case 4: When spatial consistency and/or blockage is modeled for MU-MIMO simulations
 -	Other cases are not precluded
-For the N – 2 weakest clusters, say n = 3, 4,…, N, the channel coefficients are given by:
+For the N ï¿½ 2 weakest clusters, say n = 3, 4,ï¿½, N, the channel coefficients are given by:
 		(7.5-22)
 where Frx,u,? and Frx,u,? are the field patterns of receive antenna element u according to (7.1-11) and in the direction of the spherical basis vectors,  and  respectively, Ftx,s,? and Ftx,s,? are the field patterns of transmit antenna element s in the direction of the spherical basis vectors,  and  respectively. Note that the patterns are given in the GCS and therefore include transformations with respect to antenna orientation as described in Clause 7.1.  is the spherical unit vector with azimuth arrival angle ?n,m,AOA and elevation arrival angle ?n,m,ZOA, given by 
 	,	(7.5-23)
 where n denotes a cluster and m denotes a ray within cluster n.  is the spherical unit vector with azimuth departure angle ?n,m,AOD and elevation departure angle ?n,m,ZOD, given by
-	,	(7.5-24)
+	,	(7.5-24)normalis
 where n denotes a cluster and m denotes a ray within cluster n. Also, is the location vector of receive antenna element u and is the location vector of transmit antenna element s, ?n,m is the cross polarisation power ratio in linear scale, and ?0 is the wavelength of the carrier frequency. If polarisation is not considered, the 2x2 polarisation matrix can be replaced by the scalar  and only vertically polarised field patterns are applied.
 The Doppler frequency component depends on the arrival angles (AOA, ZOA), and the UT velocity vector with speed v, travel azimuth angle ?v, elevation angle ?v and is given by 
 	[VN3]	(7.5-25)
@@ -895,10 +1313,26 @@ where  is cluster delay spread specified in Table 7.5-6. When intra-cluster dela
 Twenty rays of a cluster are mapped to sub-clusters as presented in Table 7.5-5 below. The corresponding offset angles are taken from Table 7.5-3 with mapping of Table 7.5-5.
 Table 7.5-5: Sub-cluster information for intra cluster delay spread clusters
 sub-cluster #
-mapping to rays
-Power
-delay offset
-10/2006/201.28 4/202.56 
+
+mapping to rays
+
+Power
+
+delay offnormalis
+
+
+
+10/20
+0
+
+
+6/20
+1.28 
+
+
+4/20
+2.56 
+
 Then, the channel impulse response is given by:
 		(7.5-27)
 where  is given in (7.5-22) and  defined as:
@@ -914,74 +1348,1085 @@ Step 12: Apply pathloss and shadowing for the channel coefficients.
 
 
 Table 7.5-6 Part-1: Channel model parameters for UMi-Street Canyon and UMa 
-ScenariosUMi - Street CanyonUMaLOSNLOSO2ILOSNLOSO2IDelay spread (DS)
-lgDS=log10(DS/1s)?lgDS-0.24 log10(1+ fc) - 7.14-0.24 log10(1+ fc) - 6.83-6.62-6.955 - 0.0963 log10(fc)-6.28 - 0.204 log10(fc)-6.62?lgDS0.380.16 log10(1+ fc) + 0.280.320.660.390.32AOD spread (ASD)
-lgASD=log10(ASD/1?)?lgASD-0.05 log10(1+ fc) + 1.21-0.23 log10(1+ fc) + 1.531.251.06 + 0.1114 log10(fc)1.5 - 0.1144 log10(fc)1.25?lgASD0.410.11 log10(1+ fc) + 0.330.420.280.280.42AOA spread (ASA)
-lgASA=log10(ASA/1?)?lgASA-0.08 log10(1+ fc) + 1.73-0.08 log10(1+ fc) + 1.811.761.812.08 - 0.27 log10(fc)1.76?lgASA0.014 log10(1+ fc) + 0.280.05 log10(1+ fc) + 0.30.160.200.110.16ZOA spread (ZSA)
-lgZSA=log10(ZSA/1?)?lgZSA-0.1 log10(1+ fc) + 0.73-0.04 log10(1+ fc) + 0.921.010.95-0.3236 log10(fc) + 1.5121.01?lgZSA-0.04 log10(1+ fc) + 0.34-0.07 log10(1+ fc) + 0.410.430.160.160.43Shadow fading (SF) [dB]?SFSee Table 7.4.1-1See Table 7.4.1-17See Table 7.4.1-1See Table 7.4.1-17K-factor (K) [dB]?K9N/AN/A9N/AN/A?K5N/AN/A3.5N/AN/ACross-Correlations ASD vs DS0.5 0 0.40.40.40.4ASA vs DS0.8 0.4 0.40.80.60.4ASA vs SF-0.4 -0.4 0-0.500ASD vs SF-0.5 0 0.2-0.5-0.60.2DS vs SF-0.4 -0.7 -0.5-0.4-0.4-0.5ASD vs ASA0.4 0 000.40ASD vs ?-0.2 N/AN/A0N/AN/AASA vs ?-0.3 N/AN/A-0.2N/AN/ADS vs ?-0.7 N/AN/A-0.4N/AN/ASF vs ?0.5 N/AN/A0N/AN/ACross-Correlations 1)ZSD vs SF0 0 0000ZSA vs SF0 0 0-0.8-0.40ZSD vs K0 N/AN/A0N/AN/AZSA vs K0 N/AN/A0N/AN/AZSD vs DS0 -0.5 -0.6-0.2-0.5-0.6ZSA vs DS0.2 0 -0.200-0.2ZSD vs ASD0.5 0.5 -0.20.50.5-0.2ZSA vs ASD0.3 0.5 00-0.10ZSD vs ASA0 0 0-0.300ZSA vs ASA0 0.2 0.50.400.5ZSD vs ZSA0 0 0.5000.5Delay scaling parameter r?32.12.22.52.32.2XPR [dB]?XPR98.09879?XPR335435Number of clusters 121912122012Number of rays per cluster 202020202020Cluster DS () in [ns]51111max(0.25, 6.5622
--3.4084 log10(fc))max(0.25, 6.5622
--3.4084 log10(fc))11Cluster ASD () in [deg]3105525Cluster ASA () in [deg]1722811158Cluster ZSA () in [deg]773773Per cluster shadowing std ? [dB]334334Correlation distance in the horizontal plane [m]DS71010304010ASD81011185011ASA8917155017SF1013737507?15N/AN/A12N/AN/AZSA121025155025ZSD121025155025fc is carrier frequency in GHz; d2D is BS-UT distance in km.
+Scenarios
+UMi - Street Canyon
+UMa
+
+LOS
+NLOS
+O2I
+LOS
+NLOS
+O2I
+Delay spread (DS)
+lgDS=log10(DS/1s)
+?lgDS
+-0.24 log10(1+ fc) - 7.14
+-0.24 log10(1+ fc) - 6.83
+-6.62
+-6.955 - 0.0963 log10(fc)
+-6.28 - 0.204 log10(fc)
+-6.62
+
+?lgDS
+0.38
+0.16 log10(1+ fc) + 0.28normalis
+0.32
+0.66
+0.39
+0.32
+AOD spread (ASD)
+lgASD=log10(ASD/1?)
+?lgASD
+-0.05 log10(1+ fc) + 1.21
+-0.23 log10(1+ fc) + 1.53
+1.25
+1.06 + 0.1114 log10(fc)
+1.5 - 0.1144 log10(fc)
+1.25
+
+?lgASD
+0.41
+0.11 log10(1+ fc) + 0.33
+0.42
+0.28
+0.28normalis
+0.42
+AOA spreadnormalis
+lgASA=log10(ASA/1?)
+?lgASAnormalis
+-0.08 log10(1+ fc) + 1.73
+-0.08 log10(1+ fc) + 1normalis
+1.76
+1.81normalis
+2.08 - 0.27 log10(fc)
+1.76
+
+?lgASA
+0.014 log10(1+ fc) + 0.28
+0.05 log10(1+ fc) + 0.3
+0.16
+0.20normalis
+0.11
+0.16normalis
+ZOA spread (ZSA)
+lgZSA=normalisA/1?)
+?lgZSA
+-0.1 lnormalisfc) + 0.73
+-0.04 log10(1+ fc) + 0.92
+1.01normalis
+0.95
+-0.3236 log10(fc) + 1.512normalis
+1.01
+
+?lgZSAnormalis
+-0.04 log10(1+ fc) + 0.34
+-0.07 log10(1+ fc) + 0.41
+0.43
+0.16
+0.16
+0.43
+Shadow fading (SF) [dB]
+?SF
+See Table 7.4.1-1
+See Table 7.4.1-1
+7
+See Table 7.4.1-1
+See Table 7.4.1-1
+7
+K-factor (K) [dB]
+?K
+9
+N/A
+N/A
+9
+N/A
+N/A
+
+?K
+5
+N/A
+N/A
+3.5
+N/A
+N/A
+Cross-Correlations 
+ASD vs DS
+0.5 
+0 
+0.4
+0.4
+0.4
+0.4
+
+ASA vs DS
+0.8 
+0.4 
+0.4
+0.8
+0.6
+0.4
+
+ASA vs SF
+-0.4 
+-0.4 
+0
+-0.5
+0
+0
+
+ASD vs SF
+-0.5 
+0 
+0.2
+-0.5
+-0.6
+0.2
+
+DS vs SF
+-0.4 
+-0.7 
+-0.5
+-0.4
+-0.4
+-0.5
+
+ASD vs ASAnormalis
+0.4 
+0 
+0
+0
+0.4
+0
+
+ASD vs ?
+-0.2 
+N/A
+N/A
+0
+N/A
+N/A
+
+ASA vs ?
+-0.3 
+N/A
+N/A
+-0.2
+N/A
+N/A
+
+DS vs ?
+-0.7 
+N/A
+N/A
+-0.4
+N/A
+N/A
+
+SF vs ?
+0.5 
+N/A
+N/A
+0
+N/A
+N/A
+Cross-Correlations 1)
+ZSD vs SF
+0 
+0 
+0
+0
+0
+0
+
+ZSA vs SF
+0 
+0 
+0
+-0.8
+-0.4
+0
+
+ZSD vs K
+0 
+N/A
+N/A
+0
+N/A
+N/A
+
+ZSA vs K
+0 
+N/A
+N/A
+0
+N/A
+N/A
+
+ZSD vs DS
+0 
+-0.5 
+-0.6
+-0.2
+-0.5
+-0.6
+
+ZSA vs DS
+0.2 
+0 
+-0.2
+0
+0
+-0.2
+
+ZSD vs ASD
+0.5 
+0.5 
+-0.2
+0.5
+0.5
+-0.2
+
+ZSA vs ASD
+0.3 
+0.5 
+0
+0
+-0.1
+0
+
+ZSD vs ASA
+0 
+0 
+0
+-0.3
+0
+0
+
+ZSA vs ASA
+0 
+0.2 
+0.5
+0.4
+0
+0.5
+
+ZSD vs ZSA
+0 
+0 
+0.5
+0
+0
+0.5
+Delay scaling parameter r?
+3
+2.1
+2.2
+2.5normalis
+2.3
+2.2
+XPR [dB]
+?XPR
+9normalis
+8.0
+9
+8
+7
+9
+
+?XPR
+3
+3
+5
+4
+3
+5
+Number of clusters 
+12
+19
+12
+12
+20
+12
+Number of rays per cluster 
+20
+20
+20
+20
+20
+20
+Cluster DS () in [ns]
+5
+11
+11
+max(0.25, 6.5622
+-3.4084 log10(fc))
+max(0.25, 6.5622
+-3.4084 log10(fc))
+11
+Cluster ASD () in [deg]
+3
+10
+5
+5
+2
+5
+Cluster ASA () in [deg]
+17
+22
+8
+11
+15
+8
+Cluster ZSA () in [deg]
+7
+7
+3
+7
+7
+3
+Per cluster shadowing std ? [dB]
+3
+3
+4
+3
+3
+4
+Correlation distance in the horizontal plane [m]
+DS
+7
+10
+10
+30
+40
+10
+
+ASD
+8
+10
+11
+18
+50
+11
+
+ASA
+8
+9
+17
+15
+50
+17
+
+SF
+10
+13
+7
+37
+50
+7
+
+?
+15
+N/A
+N/A
+12
+N/A
+N/A
+
+ZSA
+12
+10
+25
+15
+50
+25
+
+ZSD
+12
+10
+25
+15
+50
+25
+fc is carrier frequency in GHz; d2D is BS-UT distance in km.
 NOTE 1:	DS = rms delay spread, ASD = rms azimuth spread of departure angles, ASA = rms azimuth spread of arrival angles, ZSD = rms zenith spread of departure angles, ZSA = rms zenith spread of arrival angles, SF = shadow fading, and K = Ricean K-factor.
 NOTE 2:	The sign of the shadow fading is defined so that positive SF means more received power at UT than predicted by the path loss model.
 NOTE 3:	All large scale parameters are assumed to have no correlation between different floors.
 NOTE 4:	The following notation for mean (?lgX=mean{log10(X) }) and standard deviation (?lgX=std{log10(X) }) is used for logarithmized parameters X. 
 NOTE 5:	For all considered scenarios the AOD/AOA distributions are modelled by a wrapped Gaussian distribution, the ZOD/ZOA distributions are modelled by a Laplacian distribution and the delay distribution is modelled by an exponential distribution.
 NOTE 6:	For UMa and frequencies below 6 GHz, use fc = 6 when determining the values of the frequency-dependent LSP values 
-NOTE 7:	For UMi and frequencies below 2 GHz, use fc = 2 when determining the values of the frequency-dependent LSP values 
+NOTE 7:	For UMi and frequencies below 2 GHz, use fc = 2 when determining the values of the frequency-dependent LSP values 
+
 Table 7.5-6 Part-2: Channel model parameters for RMa (up to 7GHz) and Indoor-Office 
-ScenariosRMa Indoor-OfficeLOSNLOSO2ILOSNLOSDelay spread (DS)
-lgDS=log10(DS/1s)?lgDS-7.49-7.43-7.47-0.01 log10(1+fc) - 7.692-0.28 log10(1+fc) - 7.173?lgDS0.550.48 0.240.180.10 log10(1+fc) + 0.055AOD spread (ASD)
-lgASD=log10(ASD/1?)?lgASD0.900.950.671.601.62?lgASD0.380.450.180.180.25AOA spread (ASA)
-lgASA=log10(ASA/1?)?lgASA1.521.521.66-0.19 log10(1+fc) + 1.781-0.11 log10(1+fc) + 1.863?lgASA0.240.130.210.12 log10(1+fc) + 0.1190.12 log10(1+fc) + 0.059ZOA spread (ZSA)
-lgZSA=log10(ZSA/1?)?lgZSA0.470.580.93-0.26 log10(1+fc) + 1.44-0.15 log10(1+fc) + 1.387?lgZSA0.400.370.22-0.04 log10(1+fc) + 0.264-0.09 log10(1+fc) + 0.746Shadow fading (SF) [dB]?SFSee Table 7.4.1-18See Table 7.4.1-1K-factor (K) [dB]?K7N/AN/A7N/A?K4N/AN/A4N/ACross-Correlations ASD vs DS0-0.400.60.4ASA vs DS0000.80ASA vs SF000–0.5–0.4ASD vs SF00.60–0.40DS vs SF-0.5-0.50–0.8–0.5ASD vs ASA00-0.70.40ASD vs ?0N/AN/A0N/AASA vs ?0N/AN/A0N/ADS vs ?0N/AN/A-0.5N/ASF vs ?0N/AN/A0.5N/ACross-Correlations 1)ZSD vs SF0.01-0.0400.20ZSA vs SF-0.17-0.2500.30ZSD vs K0N/AN/A0N/AZSA vs K-0.02N/AN/A0.1N/AZSD vs DS-0.05-0.1000.1-0.27ZSA vs DS0.27-0.4000.2-0.06ZSD vs ASD0.730.420.660.50.35ZSA vs ASD-0.14-0.270.4700.23ZSD vs ASA-0.20-0.18-0.550-0.08ZSA vs ASA0.240.26-0.220.50.43ZSD vs ZSA-0.07-0.27000.42Delay scaling parameter r?3.81.71.73.63XPR [dB]?XPR12771110?XPR43344Number of clusters 1110101519Number of rays per cluster 2020202020Cluster DS () in [ns]N/AN/AN/AN/AN/ACluster ASD () in [deg]22255Cluster ASA () in [deg]333811Cluster ZSA () in [deg]33399Per cluster shadowing std ? [dB]33363Correlation distance in the horizontal plane [m]DS50363685ASD25303073ASA35404053SF37120120106?40N/AN/A4N/AZSA15505044ZSD15505044fc is carrier frequency in GHz; d2D is BS-UT distance in km.
+Scenarios
+RMa 
+Indoor-Office
+
+LOS
+NLOS
+O2I
+LOS
+NLOS
+Delay spread (DS)
+lgDS=log10(DS/1s)
+?lgDS
+-7.49
+-7.43
+-7.47
+-0.01 log10(1+fc) - 7.692
+-0.28 log10(1+fc) - 7.173
+
+?lgDS
+0.55
+0.48
+ 0.24
+0.18
+0.10 log10(1+fc) + 0.055
+AOD spread (ASD)
+lgASD=log10(ASD/1?)
+?lgASD
+0.90
+0.95
+0.67
+1.60
+1.62
+
+?lgASD
+0.38
+0.45
+0.18
+0.18
+0.25
+AOA spread (ASA)
+lgASA=log10(ASA/1?)
+?lgASA
+1.52
+1.52
+1.66
+-0.19 log10(1+fc) + 1.781
+-0.11 log10(1+fc) + 1.863
+
+?lgASA
+0.24
+0.13
+0.21
+0.12 log10(1+fc) + 0.119
+0.12 log10(1+fc) + 0.059
+ZOA spread (ZSA)
+lgZSA=log10(ZSA/1?)
+?lgZSA
+0.47
+0.58
+0.93
+-0.26 log10(1+fc) + 1.44
+-0.15 log10(1+fc) + 1.387
+
+?lgZSA
+0.40
+0.37
+0.22
+-0.04 log10(1+fc) + 0.264
+-0.09 log10(1+fc) + 0.746
+Shadow fading (SF) [dB]
+?SF
+See Table 7.4.1-1
+8
+See Table 7.4.1-1
+K-factor (K) [dB]
+?K
+7
+N/A
+N/A
+7
+N/A
+
+?K
+4
+N/A
+N/A
+4
+N/A
+Cross-Correlations 
+ASD vs DS
+0
+-0.4
+0
+0.6
+0.4
+
+ASA vs DS
+0
+0
+0
+0.8
+0
+
+ASA vs SF
+0
+0
+0
+ï¿½0.5
+ï¿½0.4
+
+ASD vs SF
+0
+0.6
+0
+ï¿½0.4
+0
+
+DS vs SF
+-0.5
+-0.5
+0
+ï¿½0.8
+ï¿½0.5
+
+ASD vs ASA
+0
+0
+-0.7
+0.4
+0
+
+ASD vs ?
+0
+N/A
+N/A
+0
+N/A
+
+ASA vs ?
+0
+N/A
+N/A
+0
+N/A
+
+DS vs ?
+0
+N/A
+N/A
+-0.5
+N/A
+
+SF vs ?
+0
+N/A
+N/A
+0.5
+N/A
+Cross-Correlations 1)
+ZSD vs SF
+0.01
+-0.04
+0
+0.2
+0
+
+ZSA vs SF
+-0.17
+-0.25
+0
+0.3
+0
+
+ZSD vs K
+0
+N/A
+N/A
+0
+N/A
+
+ZSA vs K
+-0.02
+N/A
+N/A
+0.1
+N/A
+
+ZSD vs DS
+-0.05
+-0.10
+0
+0.1
+-0.27
+
+ZSA vs DS
+0.27
+-0.40
+0
+0.2
+-0.06
+
+ZSD vs ASD
+0.73
+0.42
+0.66
+0.5
+0.35
+
+ZSA vs ASD
+-0.14
+-0.27
+0.47
+0
+0.23
+
+ZSD vs ASA
+-0.20
+-0.18
+-0.55
+0
+-0.08
+
+ZSA vs ASA
+0.24
+0.26
+-0.22
+0.5
+0.43
+
+ZSD vs ZSA
+-0.07
+-0.27
+0
+0
+0.42
+Delay scaling parameter r?
+3.8
+1.7
+1.7
+3.6
+3
+XPR [dB]
+?XPR
+12
+7
+7
+11
+10
+
+?XPR
+4
+3
+3
+4
+4
+Number of clusters 
+11
+10
+10
+15
+19
+Number of rays per cluster 
+20
+20
+20
+20
+20
+Cluster DS () in [ns]
+N/A
+N/A
+N/A
+N/A
+N/A
+Cluster ASD () in [deg]
+2
+2
+2
+5
+5
+Cluster ASA () in [deg]
+3
+3
+3
+8
+11
+Cluster ZSA () in [deg]
+3
+3
+3
+9
+9
+Per cluster shadowing std ? [dB]
+3
+3
+3
+6
+3
+Correlation distance in the horizontal plane [m]
+DS
+50
+36
+36
+8
+5
+
+ASD
+25
+30
+30
+7
+3
+
+ASA
+35
+40
+40
+5
+3
+
+SF
+37
+120
+120
+10
+6
+
+?
+40
+N/A
+N/A
+4
+N/A
+
+ZSA
+15
+50
+50
+4
+4
+
+ZSD
+15
+50
+50
+4
+4
+fc is carrier frequency in GHz; d2D is BS-UT distance in km.
 NOTE 1:	DS = rms delay spread, ASD = rms azimuth spread of departure angles, ASA = rms azimuth spread of arrival angles, ZSD = rms zenith spread of departure angles, ZSA = rms zenith spread of arrival angles, SF = shadow fading, and K = Ricean K-factor.
 NOTE 2:	The sign of the shadow fading is defined so that positive SF means more received power at UT than predicted by the path loss model.
 NOTE 3:	The following notation for mean (?lgX=mean{log10(X) }) and standard deviation (?lgX=std{log10(X) }) is used for logarithmized parameters X. 
 NOTE 4:	Void. 
 NOTE 5:	For all considered scenarios the AOD/AOA distributions are modelled by a wrapped Gaussian distribution, the ZOD/ZOA distributions are modelled by a Laplacian distribution and the delay distribution is modelled by an exponential distribution.
-NOTE 6:	For InH and frequencies below 6 GHz, use fc = 6 when determining the values of the frequency-dependent LSP values 
+NOTE 6:	For InH and frequencies below 6 GHz, use fc = 6 when determining the values of the frequency-dependent LSP values 
+
 
 Table 7.5-6 Part-3: Channel model parameters for InF
-ScenariosInFLOSNLOSDelay spread (DS)
-lgDS=log10(DS/1s) 4)?lgDSlog10(26(V/S)+14)-9.35log10(30(V/S)+32)-9.44
-?lgDS0.150.19AOD spread (ASD)
-lgASD=log10(ASD/1?)?lgASD1.561.57?lgASD0.250.2AOA spread (ASA)
-lgASA=log10(ASA/1?)?lgASA-0.18*log10(1+fc) + 1.781.72?lgASA0.12*log10(1+fc) + 0.20.3ZOA spread (ZSA)
-lgZSA=log10(ZSA/1?)?lgZSA-0.2*log10(1+fc) + 1.5-0.13*log10(1+fc) + 1.45?lgZSA0.350.45Shadow fading (SF) [dB]?SFSpecified as part of path loss modelsK-factor (K) [dB]?K7N/A?K8N/ACross-Correlations ASD vs DS00ASA vs DS00ASA vs SF00ASD vs SF00DS vs SF00ASD vs ASA00ASD vs ?-0.5N/AASA vs ?0N/ADS vs ?-0.7N/ASF vs ?0N/ACross-Correlations 1)ZSD vs SF00ZSA vs SF00ZSD vs K0N/AZSA vs K0N/AZSD vs DS00ZSA vs DS00ZSD vs ASD00ZSA vs ASD00ZSD vs ASA00ZSA vs ASA00ZSD vs ZSA00Delay scaling parameter r?2.73XPR [dB]?XPR1211?XPR66Number of clusters 2525Number of rays per cluster 2020Cluster DS () in [ns]N/AN/ACluster ASD () in [deg]55Cluster ASA () in [deg]88Cluster ZSA () in [deg]99Per cluster shadowing std ? [dB]43Correlation distance in the horizontal plane [m] 5)DS1010ASD1010ASA1010SF1010?10N/AZSA1010ZSD1010fc is carrier frequency in GHz; d2D is BS-UT distance in km.
+Scenarios
+InF
+
+LOS
+NLOS
+Delay spread (DS)
+lgDS=log10(DS/1s) 4)
+?lgDS
+log10(26(V/S)+14)-9.35
+log10(30(V/S)+32)-9.44
+
+
+?lgDS
+0.15
+0.19
+AOD spread (ASD)
+lgASD=log10(ASD/1?)
+?lgASD
+1.56
+1.57
+
+?lgASD
+0.25
+0.2
+AOA spread (ASA)
+lgASA=log10(ASA/1?)
+?lgASA
+-0.18*log10(1+fc) + 1.78
+1.72
+
+?lgASA
+0.12*log10(1+fc) + 0.2
+0.3
+ZOA spread (ZSA)
+lgZSA=log10(ZSA/1?)
+?lgZSA
+-0.2*log10(1+fc) + 1.5
+-0.13*log10(1+fc) + 1.45
+
+?lgZSA
+0.35
+0.45
+Shadow fading (SF) [dB]
+?SF
+Specified as part of path loss models
+K-factor (K) [dB]
+?K
+7
+N/A
+
+?K
+8
+N/A
+Cross-Correlations 
+ASD vs DS
+0
+0
+
+ASA vs DS
+0
+0
+
+ASA vs SF
+0
+0
+
+ASD vs SF
+0
+0
+
+DS vs SF
+0
+0
+
+ASD vs ASA
+0
+0
+
+ASD vs ?
+-0.5
+N/A
+
+ASA vs ?
+0
+N/A
+
+DS vs ?
+-0.7
+N/A
+
+SF vs ?
+0
+N/A
+Cross-Correlations 1)
+ZSD vs SF
+0
+0
+
+ZSA vs SF
+0
+0
+
+ZSD vs K
+0
+N/A
+
+ZSA vs K
+0
+N/A
+
+ZSD vs DS
+0
+0
+
+ZSA vs DS
+0
+0
+
+ZSD vs ASD
+0
+0
+
+ZSA vs ASD
+0
+0
+
+ZSD vs ASA
+0
+0
+
+ZSA vs ASA
+0
+0
+
+ZSD vs ZSA
+0
+0
+Delay scaling parameter r?
+2.7
+3
+XPR [dB]
+?XPR
+12
+11
+
+?XPR
+6
+6
+Number of clusters 
+25
+25
+Number of rays per cluster 
+20
+20
+Cluster DS () in [ns]
+N/A
+N/A
+Cluster ASD () in [deg]
+5
+5
+Cluster ASA () in [deg]
+8
+8
+Cluster ZSA () in [deg]
+9
+9
+Per cluster shadowing std ? [dB]
+4
+3
+Correlation distance in the horizontal plane [m] 5)
+DS
+10
+10
+
+ASD
+10
+10
+
+ASA
+10
+10
+
+SF
+10
+10
+
+?
+10
+N/A
+
+ZSA
+10
+10
+
+ZSD
+10
+10
+fc is carrier frequency in GHz; d2D is BS-UT distance in km.
 NOTE 1:	DS = rms delay spread, ASD = rms azimuth spread of departure angles, ASA = rms azimuth spread of arrival angles, ZSD = rms zenith spread of departure angles, ZSA = rms zenith spread of arrival angles, SF = shadow fading, and K = Ricean K-factor.
 NOTE 2:	The sign of the shadow fading is defined so that positive SF means more received power at UT than predicted by the path loss model.
 NOTE 3:	The following notation for mean (?lgX=mean{log10(X) }) and standard deviation (?lgX=std{log10(X) }) is used for logarithmized parameters X. 
 NOTE 4:	V = hall volume in m3, S = total surface area of hall in m2 (walls+floor+ceiling)
-NOTE 5:	When the simulation scenario is small it is recommended to consider methods to improve the statistical confidence, such as using multiple random seeds in simulations. 
+NOTE 5:	When the simulation scenario is small it is recommended to consider methods to improve the statistical confidence, such as using multiple random seeds in simulations. 
+
 Table 7.5-7: ZSD and ZOD offset parameters for UMa
-ScenariosLOSNLOSZOD spread (ZSD)
-lgZSD=log10(ZSD/1?)?lgZSDmax[-0.5, -2.1(d2D/1000)
--0.01 (hUT - 1.5)+0.75]max[-0.5, -2.1(d2D/1000)
--0.01(hUT - 1.5)+0.9]?lgZSD0.400.49ZOD offsetµoffset,ZOD0e(fc)-10^{a(fc) log10(max(b(fc), d2D))
-+c(fc) -0.07(hUT-1.5)}Note:	For NLOS ZOD offset: 
+Scenarios
+LOS
+NLOS
+ZOD spread (ZSD)
+lgZSD=log10(ZSD/1?)
+?lgZSD
+max[-0.5, -2.1(d2D/1000)
+-0.01 (hUT - 1.5)+0.75]
+max[-0.5, -2.1(d2D/1000)
+-0.01(hUT - 1.5)+0.9]
+
+?lgZSD
+0.40
+0.49
+ZOD offset
+ï¿½offset,ZOD
+0
+e(fc)-10^{a(fc) log10(max(b(fc), d2D))
++c(fc) -0.07(hUT-1.5)}
+Note:	For NLOS ZOD offset: 
 a(fc) = 0.208log10(fc)- 0.782; 
 b(fc) = 25; 
 c(fc) = -0.13log10(fc)+2.03; 
-e(fc) = 7.66log10(fc)-5.96.
-Table 7.5-8: ZSD and ZOD offset parameters for UMi – Street Canyon
-ScenariosLOSNLOSZOD spread (ZSD)
-lgZSD=log10(ZSD/1?)?lgZSDmax[-0.21, -14.8(d2D/1000)
-+ 0.01|hUT-hBS| + 0.83]max[-0.5, -3.1(d2D/1000)
-+ 0.01 max(hUT-hBS,0) +0.2]?lgZSD0.350.35ZOD offsetµoffset,ZOD0-10^{-1.5log10(max(10, d2D))+3.3}
+e(fc) = 7.66log10(fc)-5.96.
+
+Table 7.5-8: ZSD and ZOD offset parameters for UMi ï¿½ Street Canyon
+Scenarios
+LOS
+NLOS
+ZOD spread (ZSD)
+lgZSD=log10(ZSD/1?)
+?lgZSD
+max[-0.21, -14.8(d2D/1000)
++ 0.01|hUT-hBS| + 0.83]
+max[-0.5, -3.1(d2D/1000)
++ 0.01ï¿½max(hUT-hBS,0) +0.2]
+
+?lgZSD
+0.35
+0.35
+ZOD offset
+ï¿½offset,ZOD
+0
+-10^{-1.5log10(max(10, d2D))+3.3}
+
 Table 7.5-9: ZSD and ZOD offset parameters for RMa 
-ScenariosLOSNLOSO2IZOD spread (ZSD)
-lgZSD=log10(ZSD/1?)?lgZSDmax[-1, -0.17(d2D/1000)
--0.01(hUT - 1.5) + 0.22]max[-1, -0.19(d2D/1000)
--0.01(hUT - 1.5) + 0.28]max[-1, -0.19(d2D/1000)
--0.01(hUT - 1.5) + 0.28]?lgZSD0.340.300.30ZOD offsetµoffset,ZOD0arctan((35 - 3.5)/d2D)
--arctan((35 - 1.5)/d2D)arctan((35 - 3.5)/d2D)
--arctan((35 - 1.5)/d2D)
+Scenarios
+LOS
+NLOS
+O2I
+ZOD spread (ZSD)
+lgZSD=log10(ZSD/1?)
+?lgZSD
+max[-1, -0.17(d2D/1000)
+-0.01(hUT - 1.5) + 0.22]
+max[-1, -0.19(d2D/1000)
+-0.01(hUT - 1.5) + 0.28]
+max[-1, -0.19(d2D/1000)
+-0.01(hUT - 1.5) + 0.28]
+
+?lgZSD
+0.34
+0.30
+0.30
+ZOD offset
+ï¿½offset,ZOD
+0
+arctan((35 - 3.5)/d2D)
+-arctan((35 - 1.5)/d2D)
+arctan((35 - 3.5)/d2D)
+-arctan((35 - 1.5)/d2D)
+
 Table 7.5-10: ZSD and ZOD offset parameters for Indoor-Office
-ScenariosLOSNLOSZOD spread (ZSD)
-lgZSD=log10(ZSD/1?)?lgZSD-1.43 log10(1+ fc)+2.2281.08?lgZSD0.13 log10(1+fc)+0.300.36ZOD offsetµoffset,ZOD00
+Scenarios
+LOS
+NLOS
+ZOD spread (ZSD)
+lgZSD=log10(ZSD/1?)
+?lgZSD
+-1.43 log10(1+ fc)+2.228
+1.08
+
+?lgZSD
+0.13 log10(1+fc)+0.30
+0.36
+ZOD offset
+ï¿½offset,ZOD
+0
+0
+
 Table 7.5-11: ZSD and ZOD offset parameters for InF
-ScenariosLOSNLOSZOD spread (ZSD)
-lgZSD=log10(ZSD/1?)?lgZSD1.351.2?lgZSD0.350.55ZOD offsetµoffset,ZOD00
+Scenarios
+LOS
+NLOS
+ZOD spread (ZSD)
+lgZSD=log10(ZSD/1?)
+?lgZSD
+1.35
+1.2
+
+?lgZSD
+0.35
+0.55
+ZOD offset
+ï¿½offset,ZOD
+0
+0
+
 Notes for Tables 7.5-7, 7.5-8, 7.5-9, 7.5-10, 7.5-11:
 NOTE 1:	fc is center frequency in GHz; d2D is BS-UT distance in m.
 NOTE 2:	hBS and hUT are antenna heights in m for BS and UT respectively.
@@ -1001,7 +2446,43 @@ where:
 -	?? is 0 in the LOS case and min() otherwise, where min() is the minimum delay in Step 5.
 For centre frequencies not specified in this table, the frequency dependent oxygen loss ?(fc) is obtained from a linear interpolation between two loss values corresponding to the two adjacent centre frequencies of the centre frequency fc.
 Table 7.6.1-1 Frequency dependent oxygen loss ?(f) [dB/km]
-f in [GHz]0-5253545556575859606162636465666768-100?(f) in [dB/km]012.246.69.712.614.61514.614.310.56.83.91.910
+f in [GHz]
+0-52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68-100
+?(f) in [dB/km]
+0
+1
+2.2
+4
+6.6
+9.7
+12.6
+14.6
+15
+14.6
+14.3
+10.5
+6.8
+3.9
+1.9
+1
+0
+
 For large channel bandwidth, first transform the time-domain channel response of each cluster (all rays within one cluster share common oxygen absorption loss for simplicity) into frequency-domain channel response, and apply the oxygen absorption loss to the cluster's frequency-domain channel response for frequency fc + ?f within the considered bandwidth. The oxygen loss, OLn(fc+ ?f) for cluster n at frequency fc+ ?f is modelled as:
 	 [dB]	(7.6-2)
 where:
@@ -1025,7 +2506,7 @@ With large antenna arrays or large bandwidths, the angle and/or delay resolution
 where  denotes the continuous uniform distribution in the interval . These random variables may further be modelled as spatially consistent with correlation distance equal to the cluster-specific random variable correlation distance of Table 7.6.3.1-2.
 2.	The relative delay of m-th ray is given by , where n is the cluster index, , the cluster DS  is given in Table 7.5-6. These random variables may further be modelled as spatially consistent with correlation distance equal to the cluster-specific random variable correlation distance of Table 7.6.3.1-2. In this case, the sub-cluster mapping according to (7.5-26) and Table 7.5-5 shall not be applied. The delays to be used in Equation (7.6-3) are given by .
 3.	Ray powers are determined unequally by the following process:
-The power of m-th ray in n-th cluster is given by  for m = 1,…,M, where 
+The power of m-th ray in n-th cluster is given by  for mï¿½=ï¿½1,ï¿½,M, where 
 		(7.6-6)
 and , , , and  are respectively the intra-cluster delay spread and the corresponding intra-cluster angular spread that are given in Table 7.5-6. The cluster zenith spread of departure is given by
 	,	(7.6-7)
@@ -1055,18 +2536,60 @@ The procedure shall apply to each cluster before sorting the delay. Cluster spec
 -	Random phase in Step 10. 
 The random coupling of rays in Step 8 and the intra-cluster delays in Step 11 shall be kept unchanged per simulation drop even if UT position changes during simulation.
 Table 7.6.3.1-2 Correlation distance for spatial consistency
-Correlation distance in [m]RMaUMiUMaIndoorInFLOSNLOSO2ILOSNLOSO2ILOSNLOSO2ICluster and ray specific random variables5060151215154050151010LOS/NLOS state 60505010d_clutter?2Indoor/outdoor state505050N/AN/A
+Correlation distance in [m]
+RMa
+UMi
+UMa
+Indoor
+InF
+
+LOS
+NLOS
+O2I
+LOS
+NLOS
+O2I
+LOS
+NLOS
+O2I
+
+
+Cluster and ray specific random variables
+50
+60
+15
+12
+15
+15
+40
+50
+15
+10
+10
+LOS/NLOS state 
+60
+50
+50
+10
+d_clutter?2
+Indoor/outdoor state
+50
+50
+50
+N/A
+N/A
+
 7.6.3.2	Spatially-consistent UT/BS mobility modelling
-For mobility simulation enhancement, two alternative spatial consistency procedures – Procedure A and Procedure B – are described as follows. The procedures presented below consider the downlink direction same as in Clause 7.5.
+For mobility simulation enhancement, two alternative spatial consistency procedures ï¿½ Procedure A and Procedure B ï¿½ are described as follows. The procedures presented below consider the downlink direction same as in Clause 7.5.
 Procedure A:
 For  when a UT/BS is dropped into the network, spatially consistent powers/delays/angles of clusters are generated according to Clause 7.6.3.1. 
 The updated distance of UT/BS should be limited within 1 meter, i.e. when , and the updated procedure in the following should take the closest realization instead of . In case the absolute time of arrival modeling of clause 7.6.9 is simultaneously used, the update distance should be the minimum of 1 meter and d_3D?10.
 At , update channel cluster power/delay/angles based on UT/BS channel cluster power/delay/angles, moving speed moving direction and UT position at .
 Cluster delay is updated as: 
-	? ?_n (t_k )={?(? ?_n (t_(k-1) )-(r ?_(rx,n) (t_(k-1) )^T v ?_rx (t_(k-1) )+r ?_(tx,n) (t_(k-1) )^T v ?_tx (t_(k-1) ))/c ?t&for k>0@?_n (t_0 )+?_? (t_0 )+(d_3D (t_0))/c&for k=0)?	(7.6-9)
+	?ï¿½?_n (t_k )={?(?ï¿½?_n (t_(k-1) )-(rï¿½?_(rx,n) (t_(k-1) )^T vï¿½?_rx (t_(k-1) )+rï¿½?_(tx,n) (t_(k-1) )^T vï¿½?_tx (t_(k-1) ))/c ?t&for k>0@?_n (t_0 )+?_? (t_0 )+(d_3D (t_0))/c&for k=0)?	(7.6-9)
 where 
  is the speed of light in [m/s];
-v ?_tx (t_k ) and v ?_rx (t_k ) are the BS and UTvelocity vectors respectively, with ?¯v_tx (t_k )?_2=v_tx and ?¯v_rx (t_k )?_2=v_rx;
+vï¿½?_tx (t_k ) and vï¿½?_rx (t_k ) are the BS and UTvelocity vectors respectively, with ?ï¿½v_tx (t_k )?_2=v_tx and ?ï¿½v_rx (t_k )?_2=v_rx;
  is the 3D distance between Rx antenna and Tx antenna at  in [m];
  are the cluster delays in [s] as in Step 11 in Clause 7.5;
 , where  are the delays from Equation (7.5-1). In case the absolute time of arrival modelling of clause 7.6.9 is simultaneously used,  where ?? is determined according to clause 7.6.9. 
@@ -1074,26 +2597,26 @@ v ?_tx (t_k ) and v ?_rx (t_k ) are the BS and UTvelocity vectors respectively, 
 Also,
 		(7.6-10)
 where  and  are cluster specific zenith and azimuth angles of arrival. 
-	r ?_(tx,n) (t_(k-1) )=[?(sin?(?_(n,ZOD) (t_(k-1) ))  cos?(?_(n,AOD) (t_(k-1) ))@sin?(?_(n,ZOD) (t_(k-1) ))  sin?(?_(n,AOD) (t_(k-1) ))@cos?(?_(n,ZOD) (t_(k-1) )) )]	(7.6-10aa)
+	rï¿½?_(tx,n) (t_(k-1) )=[?(sin?(?_(n,ZOD) (t_(k-1) ))  cos?(?_(n,AOD) (t_(k-1) ))@sin?(?_(n,ZOD) (t_(k-1) ))  sin?(?_(n,AOD) (t_(k-1) ))@cos?(?_(n,ZOD) (t_(k-1) )) )]	(7.6-10aa)
 where ?_(n,ZOD) and ?_(n,AOD) are the cluster specific zenith and azimuth angles of departure.
 After updating the delays according to equation (7.6-9), the delays over the mobility range are normalized. Equation (7.5-2) of the fast fading model is replaced by
 		(7.6-10a)
 in which  covers the entire duration of the mobility model.
 Cluster powers are updated as in Step 6 using the cluster delays from Equation (7.6-10a).
 Cluster departure angles ( and ) and arrival angles ( and ) are updated using a cluster-wise transformation of the UT/BS velocity vector given by 
-	v ?_(n,rx)^' (t_k)={?(v ?_rx (t_k ) ?-v ??_tx (t_k)&for LOS@?R_(n,rx)?v ??_rx (t_k)-v ?_tx (t_k)&for NLOS)?	(7.6-10b)
-	v ?_(n,tx)^' (t_k)={?(v ?_tx (t_k ) ?-v ??_rx (t_k)&for LOS@?R_(n,tx)?v ??_tx (t_k)-v ?_rx (t_k)&for NLOS)?	(7.6-10c)
+	vï¿½?_(n,rx)^' (t_k)={?(vï¿½?_rx (t_k ) ?-vï¿½??_tx (t_k)&for LOS@?R_(n,rx)?vï¿½??_rx (t_k)-vï¿½?_tx (t_k)&for NLOS)?	(7.6-10b)
+	vï¿½?_(n,tx)^' (t_k)={?(vï¿½?_tx (t_k ) ?-vï¿½??_rx (t_k)&for LOS@?R_(n,tx)?vï¿½??_tx (t_k)-vï¿½?_rx (t_k)&for NLOS)?	(7.6-10c)
 with 
 	R_(n,rx)=R_Z (?_(n,AOD) (t_k )+?)?R_Y (?/2 ?-??_(n,ZOD) (t_k ))?[?(1&0&0@0&X_n&0@0&0&1)]?R_Y (?/2-?_(n,ZOA) (t_k ))?R_Z (-?_(n,AOA) (t_k )),
 and
 	R_(n,tx)=R_Z (-?_(n,AOD) (t_k ))?R_Y (?/2 ?-??_(n,ZOD) (t_k ))?[?(1&0&0@0&X_n&0@0&0&1)]?R_Y (?/2 ?-??_(n,ZOA) (t_k ))?R_Z (?_(n,AOA) (t_k )+?),
 where  and  being the rotation matrices around y-axis and z-axis as defined in Equation (7.1-2). Random variable  is sampled from a uniform distribution on a NLOS cluster basis and is not changed during the UT mobility within a drop. The cluster specific decorrelation distances are 60m, 15m, 50m and 10m for RMa, UMi, UMa and Indoor scenarios, respectively.
 Now, the departure and arrival angles in radians are updated as:
-	?_(n,AOD) (t_k )=?_(n,AOD) (t_(k-1) )+(?v ?_(n,rx)^' (t_(k-1) )?^T ? ?(?_(n,ZOD) (t_(k-1) ),?_(n,AOD) (t_(k-1) )))/(c?? ?_n (t_(k-1) )  sin?(?_(n,ZOD) (t_(k-1) )) ) ?t	(7.6-11)
-	?_(n,ZOD) (t_k )=?_(n,ZOD) (t_(k-1) )+(?v ?_(n,rx)^' (t_(k-1) )?^T ? ?(?_(n,ZOD) (t_(k-1) ),?_(n,AOD) (t_(k-1) )))/(c?? ?_n (t_(k-1) ) )  ?t	(7.6-12)
+	?_(n,AOD) (t_k )=?_(n,AOD) (t_(k-1) )+(?vï¿½?_(n,rx)^' (t_(k-1) )?^T ?ï¿½?(?_(n,ZOD) (t_(k-1) ),?_(n,AOD) (t_(k-1) )))/(c??ï¿½?_n (t_(k-1) )  sin?(?_(n,ZOD) (t_(k-1) )) ) ?t	(7.6-11)
+	?_(n,ZOD) (t_k )=?_(n,ZOD) (t_(k-1) )+(?vï¿½?_(n,rx)^' (t_(k-1) )?^T ?ï¿½?(?_(n,ZOD) (t_(k-1) ),?_(n,AOD) (t_(k-1) )))/(c??ï¿½?_n (t_(k-1) ) )  ?t	(7.6-12)
 and
-	?_(n,AOA) (t_k )=?_(n,AOA) (t_(k-1) )+(?v ?_(n,tx)^' (t_(k-1) )?^T ? ?(?_(n,ZOA) (t_(k-1) ),?_(n,AOA) (t_(k-1) )))/(c?? ?_n (t_(k-1) )  sin?(?_(n,ZOA) (t_(k-1) )) ) ?t	(7.6-13)
-	?_(n,ZOA) (t_k )=?_(n,ZOA) (t_(k-1) )+(?v ?_(n,tx)^' (t_(k-1) )?^T ? ?(?_(n,ZOA) (t_(k-1) ),?_(n,AOA) (t_(k-1) )))/(c?? ?_n (t_(k-1) ) ) ?t,	(7.6-14)
+	?_(n,AOA) (t_k )=?_(n,AOA) (t_(k-1) )+(?vï¿½?_(n,tx)^' (t_(k-1) )?^T ?ï¿½?(?_(n,ZOA) (t_(k-1) ),?_(n,AOA) (t_(k-1) )))/(c??ï¿½?_n (t_(k-1) )  sin?(?_(n,ZOA) (t_(k-1) )) ) ?t	(7.6-13)
+	?_(n,ZOA) (t_k )=?_(n,ZOA) (t_(k-1) )+(?vï¿½?_(n,tx)^' (t_(k-1) )?^T ?ï¿½?(?_(n,ZOA) (t_(k-1) ),?_(n,AOA) (t_(k-1) )))/(c??ï¿½?_n (t_(k-1) ) ) ?t,	(7.6-14)
 with  and  being the spherical unit vectors defined in Equations (7.1-13) and (7.1-14).
 
 Procedure B:
@@ -1120,7 +2643,7 @@ In the case of LOS condition, substitute  with  and {, , , } with {, , , } respe
 and the cluster powers are not normalized as in equation (7.6-17a), but:
 		(7.6-17c)
 where ?(.) is Dirac's delta function.
-Assign the power of each ray within a cluster as Pn / M, where M is the number of rays per cluster.
+Assign the power of each ray within a cluster as Pnï¿½/ï¿½M, where M is the number of rays per cluster.
 
 Step 7b: Apply offset angles
 The ray AOA angles are determined by
@@ -1157,13 +2680,59 @@ According to the characteristics of different cluster specific parameters and ra
 -	All-correlated: BS-UT links are correlated.
 In Table 7.6.3.4-1, correlation type for each large scale parameter, cluster specific parameter and ray specific parameter is clarified.
 Table 7.6.3.4-1: Correlation type among TRPs
-ParametersCorrelation typeDelaysSite-specificCluster powersSite-specificAOA/ZOA/AOD/ZOD offsetSite-specificAOA/ZOA/AOD/ZOD signSite-specificRandom couplingSite-specificXPRSite-specificInitial random phaseSite-specificLOS/NLOS statesSite-specificBlockage (Model A)All-correlatedO2I penetration lossAll-correlatedIndoor distanceAll-correlatedIndoor statesAll-correlated
+Parameters
+Correlation type
+Delays
+Site-specific
+Cluster powers
+Site-specific
+AOA/ZOA/AOD/ZOD offset
+Site-specific
+AOA/ZOA/AOD/ZOD sign
+Site-specific
+Random coupling
+Site-specific
+XPR
+Site-specific
+Initial random phase
+Site-specific
+LOS/NLOS states
+Site-specific
+Blockage (Model A)
+All-correlated
+O2I penetration loss
+All-correlated
+Indoor distance
+All-correlated
+Indoor states
+All-correlated
+
 Spatial consistency is not modelled in the following situations:
 -	Different link types, e.g., outdoor LOS, outdoor NLOS or O2I
 -	UE locates on different floors
 Table 7.6.3.4-2, lists conditions in which each large scale parameter, cluster specific parameter and ray specific parameter is assumed not spatially correlated. 
 Table 7.6.3.4-2: Conditions when parameters are not spatially correlated.
-ParametersUncorrelated statesDelaysOutdoor LOS/outdoor NLOS/O2I (different floors)Cluster powersOutdoor LOS/outdoor NLOS/O2I (different floors)AOA/ZOA/AOD/ZOD offsetOutdoor LOS/outdoor NLOS/O2I (different floors)AOA/ZOA/AOD/ZOD signOutdoor LOS/outdoor NLOS/O2I (different floors)Random couplingOutdoor LOS/outdoor NLOS/O2I (different floors)XPROutdoor LOS/outdoor NLOS/O2I (different floors)Initial random phaseOutdoor LOS/outdoor NLOS/O2I (different floors)BlockageOutdoor/O2I (different floors)Standard deviation for O2I penetration lossDifferent building types, i.e., high/low loss
+Parameters
+Uncorrelated states
+Delays
+Outdoor LOS/outdoor NLOS/O2I (different floors)
+Cluster powers
+Outdoor LOS/outdoor NLOS/O2I (different floors)
+AOA/ZOA/AOD/ZOD offset
+Outdoor LOS/outdoor NLOS/O2I (different floors)
+AOA/ZOA/AOD/ZOD sign
+Outdoor LOS/outdoor NLOS/O2I (different floors)
+Random coupling
+Outdoor LOS/outdoor NLOS/O2I (different floors)
+XPR
+Outdoor LOS/outdoor NLOS/O2I (different floors)
+Initial random phase
+Outdoor LOS/outdoor NLOS/O2I (different floors)
+Blockage
+Outdoor/O2I (different floors)
+Standard deviation for O2I penetration loss
+Different building types, i.e., high/low loss
+
 7.6.4	Blockage
 Blockage modelling is an add-on feature to the channel model. The method described in the following applies only when this feature is turned on. In addition, the temporal variability of the blockage modelling parameters is on-demand basis. It is also noted that the modelling of the blockage does not change LOS/NLOS state of each link.
 When blockage model is applied, the channel generation in Clause 7.5 should have several additional steps between Step 9 and 10 as illustrated in Figure 7.6.4-1.
@@ -1180,20 +2749,53 @@ For self-blocking, the blocking region in UT LCS is defined in terms of elevatio
 		(7.6-20)
 where the parameters are described in Table 7.6.4.1-1.
 Table 7.6.4.1-1: Self-blocking region parameters.
-Portrait mode260o120o100o80oLandscape mode40o160o110o75o
-For non-self-blocking k = 1, …, 4, the blocking region in GCS is defined by
+
+
+
+
+
+Portrait mode
+260o
+120o
+100o
+80o
+Landscape mode
+40o
+160o
+110o
+75o
+
+For non-self-blocking k = 1, ï¿½, 4, the blocking region in GCS is defined by
 		(7.6-21)
 where the parameters are described in Table 7.6.4.1-2, as well as the distance r between the UT and the blocker.
 Table 7.6.4.1-2: Blocking region parameters.
-Blocker index (k = 1, …, 4)r InH scenarioUniform in 
-[0o, 360o]Uniform in 
-[15o, 45o]90oUniform in 
-[5o, 15o]2 mUMi, UMa, RMa scenariosUniform in 
-[0o, 360o]Uniform in 
-[5o, 15o]90o5o10 m
+Blocker index (k = 1, ï¿½, 4)
+
+
+
+
+r
+ InH scenario
+Uniform in 
+[0o, 360o]
+Uniform in 
+[15o, 45o]
+90o
+Uniform in 
+[5o, 15o]
+2 m
+UMi, UMa, RMa scenarios
+Uniform in 
+[0o, 360o]
+Uniform in 
+[5o, 15o]
+90o
+5o
+10 m
+
 Step c: Determine the attenuation of each cluster due to blockers.
 The attenuation of each cluster due to self-blocking corresponding to the centre angle pair (,), is 30 dB provided that  and . Otherwise, the attenuation is 0 dB.
-The attenuation of each cluster due to the non-self-blocking regions (k=1, …, 4) is given by
+The attenuation of each cluster due to the non-self-blocking regions (k=1, ï¿½, 4) is given by
 		(7.6-22)
 provided that  and . Otherwise, the attenuation is 0 dB. The terms in the above equation are given as 
 		(7.6-23)
@@ -1205,22 +2807,67 @@ where
 In the above formula for ,  is the wavelength. The appropriate signs ()within the  term are described in Table 7.6.4.1-3. 
 
 Table 7.6.4.1-3: Description of signs
-(-, +) for 
-(+, -) for (-, +) for 
-(+, +) for (-, +) for 
-(-, +) for (+, +) for 
-(+, -) for (+, +) for 
-(+, +) for (+, +) for 
-(-, +) for (+, -) for 
-(+, -) for (+, -) for 
-(+, +) for (+, -) for 
-(-, +) for 
+
+
+
+
+
+(-, +) for 
+(+, -) for 
+(-, +) for 
+(+, +) for 
+(-, +) for 
+(-, +) for 
+
+(+, +) for 
+(+, -) for 
+(+, +) for 
+(+, +) for 
+(+, +) for 
+(-, +) for 
+
+(+, -) for 
+(+, -) for 
+(+, -) for 
+(+, +) for 
+(+, -) for 
+(-, +) for 
+
 Step d: Spatial and temporal consistency of each blocker.
 The centre of the blocker is generated based on a uniformly distributed random variable, which is temporally and spatially consistent. The two-dimensional autocorrelation function  can be described with sufficient accuracy by the exponential function 
 		(7.6-28)
 The spatial correlation distance  for the random variable determining the centre of the blocker is given in Table 7.6.4.1-4 for different scenarios.
 Table 7.6.4.1-4: Spatial correlation distance for different scenarios.
-Spatial correlation distance  in [m] for the random variable determining the centre of the blockerUMiUMaRMaInHLOSNLOSO2ILOSNLOSO2ILOSNLOSO2ILOSNLOS10105101051010555
+Spatial correlation distance  in [m] for the random variable determining the centre of the blocker
+UMi
+UMa
+RMa
+InH
+
+LOS
+NLOS
+O2I
+LOS
+NLOS
+O2I
+LOS
+NLOS
+O2I
+LOS
+NLOS
+
+10
+10
+5
+10
+10
+5
+10
+10
+5
+5
+5
+
 The correlation time is defined by , where  is the speed of the moving blocker.
 Note: The rectangular blocker description is chosen for self-blocking region with the specific choices of (, ) assumed here. Generalization of this description to other choices should be done with care as the rectangular description may not be accurate. 
 7.6.4.2	Blockage model B
@@ -1232,7 +2879,27 @@ Note:
 	Recommended parameters for typical blockers are provided in Table 7.6.4.2-5. 
 -	The blocking effect diminishes with increasing distance to the blocker. For implementation purposes it may be sufficient to consider only the  nearest blockers or the blockers closer than some distance from a specific UT. 
 Table 7.6.4.2-5: Recommended blocker parameters
-Typical set of blockersBlocker dimensionsMobility patternIndoor; Outdoor; InFHumanCartesian: w=0.3m; h=1.7mStationary or up to 3 km/hOutdoorVehicleCartesian: w=4.8m; h=1.4mStationary or up to 100 km/hInFAGVCartesian: w=3m; h=1.5mUp to 30 km/hInFIndustrial robotCartesian: w=2m; h=0.2mUp to 3 m/s
+
+Typical set of blockers
+Blocker dimensions
+Mobility pattern
+Indoor; Outdoor; InF
+Human
+Cartesian: w=0.3m; h=1.7m
+Stationary or up to 3 km/h
+Outdoor
+Vehicle
+Cartesian: w=4.8m; h=1.4m
+Stationary or up to 100 km/h
+InF
+AGV
+Cartesian: w=3m; h=1.5m
+Up to 30 km/h
+InF
+Industrial robot
+Cartesian: w=2m; h=0.2m
+Up to 3 m/s
+
 Step b: Determine the blockage attenuation per sub-path
 Attenuation caused by each blocker to each sub-path is modelled using a simple knife edge diffraction model and is given by 
 		(7.6-29)
@@ -1334,7 +3001,7 @@ and
 	,	(7.6-39)
 with the complex relative permittivity of the ground material given by
 	.	(7.6-40)
-The electric constant  is given by 8.854187817... × 10?12 F·m?1.
+The electric constant  is given by 8.854187817... ï¿½ 10?12 Fï¿½m?1.
 For applicable frequency ranges, the real relative permittivity can be modelled by
 	,	(7.6-41)
 while the conductivity in [S/m] may be modelled by
@@ -1342,7 +3009,71 @@ while the conductivity in [S/m] may be modelled by
 with  being the center frequency in Hz.
 A selection of material properties from [19] is given below. Since the simplified models for conductivity and relative permittivity are only applicable for frequencies between 1 and 10 GHz, Figure 7.6.8-1 presents curves up to 100 GHz at least for very, medium dry and wet ground, cf. [20].
 Table 7.6.8-1 Material properties [19]
-Material classRelative permittivityConductivityFrequency range in [GHz]Concrete5.3100.03260.80951-100Brick3.7500.03801-10Plasterboard2.9400.01160.70761-100Wood1.9900.00471.07180.001-100Floorboard3.6600.00441.351550-100Metal1010701-100Very dry ground300.000152.521-10Medium dry ground15?0.10.0351.631-10Wet ground30?0.40.151.301-10
+Material class
+Relative permittivity
+Conductivity
+Frequency range in [GHz]
+
+
+
+
+
+
+Concrete
+5.31
+0
+0.0326
+0.8095
+1-100
+Brick
+3.75
+0
+0.038
+0
+1-10
+Plasterboard
+2.94
+0
+0.0116
+0.7076
+1-100
+Wood
+1.99
+0
+0.0047
+1.0718
+0.001-100
+Floorboard
+3.66
+0
+0.0044
+1.3515
+50-100
+Metal
+1
+0
+107
+0
+1-100
+Very dry ground
+3
+0
+0.00015
+2.52
+1-10
+Medium dry ground
+15
+?0.1
+0.035
+1.63
+1-10
+Wet ground
+30
+?0.4
+0.15
+1.30
+1-10
+
 
 Figure 7.6.8-1: Relative permittivity and conductivity as a function of frequency [20]
 7.6.9	Absolute time of arrival
@@ -1350,16 +3081,30 @@ To support simulations in which absolute time of arrival is important, the propa
 	H_(u,s)^NLOS (?,t)=?_(n=1)^2??_(i=1)^3??_(m?R_i)??H_(u,s,n,m)^NLOS (t)?(?-?_(n,i)-d_3D?c-??) ?+?_(n=3)^N??H_(u,s,n)^NLOS (t)?(?-?_n-d_3D?c-??) ?	(7.6-43)
 	H_(u,s)^LOS (?,t)=?(1/(K_R+1)) H_(u,s)^NLOS (?,t)+?(K_R/(K_R+1)) H_(u,s,1)^LOS (t)?(?-?_1-d_3D?c).	(7.6-44)
 Table 7.6.9-1: Parameters for the absolute time of arrival model
-ScenariosInF-SL, InF-DLInF-SH, InF-DHlg??=?log?_10 (???1s)?_lg??-7.5-7.5?_lg??0.40.4Correlation distance in the horizontal plane [m]611
+Scenarios
+InF-SL, InF-DL
+InF-SH, InF-DH
+lg??=?log?_10 (???1s)
+?_lg??
+-7.5
+-7.5
+
+?_lg??
+0.4
+0.4
+Correlation distance in the horizontal plane [m]
+6
+11
+
 7.6.10	Dual mobility
 To support simulations that involve dual Tx and Rx mobility or scatterer mobility, the Doppler frequency component in the channel coefficient generation in step 11 in clause 7.5 should be updated as follows.
 For the LOS path, the Doppler frequency is given by
-	v_(n,m)=(r ?_(rx,n,m)^T?v ?_rx+r ?_(tx,n,m)^T?v ?_tx)/?_0 	(7.6-45)
-where r ?_(rx, n, m) and r ?_(tx, n, m)are defined in (7.5-23) and (7.5-24) respectively, and 
+	v_(n,m)=(rï¿½?_(rx,n,m)^T?vï¿½?_rx+rï¿½?_(tx,n,m)^T?vï¿½?_tx)/?_0 	(7.6-45)
+where rï¿½?_(rx, n, m) and rï¿½?_(tx, n, m)are defined in (7.5-23) and (7.5-24) respectively, and 
 
 
 For all other paths, the Doppler frequency component is given by:
-	v_(n,m)=(r ?_(rx,n,m)^T?v ?_rx+r ?_(tx,n,m)^T?v ?_tx+2??_(n,m) D?_(n,m))/?_0 	(7.6-46)
+	v_(n,m)=(rï¿½?_(rx,n,m)^T?vï¿½?_rx+rï¿½?_(tx,n,m)^T?vï¿½?_tx+2??_(n,m) D?_(n,m))/?_0 	(7.6-46)
 where D_(n,m) is a random variable from -v_scatt to v_scatt, ?_(n,m) is a random variable of Bernoulli distribution with mean p, and v_scatt is the maximum speed of the clutter. Parameter p determines the proportion of mobile scatterers and can thus be selected to appropriately model statistically larger number of mobile scatterers (higher p) or statistically smaller number of mobile scatterers (e.g. in case of a completely static environment: p=0 results in all scatteres having zero speed). A typical value of p is 0.2.
 7.6.11	Sources of EM interference
 When the simulation includes sources of EM interference in industrial scenarios, the channel(s) between the interferer(s) and the BS or UT should be modeled using the appropriate sub-scenario(s), e.g. clutter-embedded or elevated Tx or Rx and low or high clutter density. Characterization of EM interference sources is out of the scope of this TR.
@@ -1376,7 +3121,7 @@ The following step by step procedure should be used to generate channel coeffici
 Step 1: Generate departure and arrival angles
 Generate arrival angles of azimuth using the following equation
 	,	(7.7-0a)
-Where ?n,AOA is the cluster AOA and cASA is the cluster-wise rms azimuth spread of arrival angles (cluster ASA) in Tables 7.7.1.1 – 7.7.1.5 below, and ?m denotes the ray offset angles within a cluster given by Table 7.5-3. If angular scaling according to Clause 7.7.5.1 is used, this is applied to the ray angles , The generation of AOD (), ZSA (), and ZSD () follows a procedure similar to AOA as described above.
+Where ?n,AOA is the cluster AOA and cASA is the cluster-wise rms azimuth spread of arrival angles (cluster ASA) in Tables 7.7.1.1 ï¿½ 7.7.1.5 below, and ?m denotes the ray offset angles within a cluster given by Table 7.5-3. If angular scaling according to Clause 7.7.5.1 is used, this is applied to the ray angles , The generation of AOD (), ZSA (), and ZSD () follows a procedure similar to AOA as described above.
 
 Step 2: Coupling of rays within a cluster for both azimuth and elevation
 Couple randomly AOD angles  to AOA angles  within a cluster n. Couple randomly ZOD angles  with ZOA angles using the same procedure. Couple randomly AOD angles  with ZOD angles within a cluster n.
@@ -1384,21 +3129,845 @@ Couple randomly AOD angles  to AOA angles  within a cluster n. Couple randomly Z
 Step 3: Generate the cross polarization power ratios
 Generate the cross polarization power ratios (XPR) ??for each ray m of each cluster n as
 	,	(7.7-0b)
-where X is the per-cluster XPR in dB from Tables 7.7.1.1 – 7.7.1.5. 
+where X is the per-cluster XPR in dB from Tables 7.7.1.1 ï¿½ 7.7.1.5. 
 
 Step 4: Coefficient generation
-Follow the same procedure as in Steps 10 and 11 in Clause 7.5, with the exception that all clusters are treated as "weaker cluster", i.e. no further sub-clusters in delay should be generated. Additional clusters representing delay spread of the stronger clusters are already provided in Tables 7.7.1.1 – 7.7.1.5.
+Follow the same procedure as in Steps 10 and 11 in Clause 7.5, with the exception that all clusters are treated as "weaker cluster", i.e. no further sub-clusters in delay should be generated. Additional clusters representing delay spread of the stronger clusters are already provided in Tables 7.7.1.1 ï¿½ 7.7.1.5.
 
 Table 7.7.1-1. CDL-A
-Cluster #Normalized delayPower in [dB]AOD in [°]AOA in [°]ZOD in [°]ZOA in [°]10.0000-13.4-178.151.350.2125.420.38190-4.2-152.793.291.330.4025-2.2-4.2-152.793.291.340.5868-4-4.2-152.793.291.350.4610-690.276.61229460.5375-8.290.276.61229470.6708-9.990.276.61229480.5750-10.5121.5-1.8150.247.190.7618-7.5-81.7-41.955.256101.5375-15.9158.494.226.430.1111.8978-6.6-8351.9126.458.8122.2242-16.7134.8-115.9171.626132.1718-12.4-15326.6151.449.2142.4942-15.2-17276.6157.2143.1152.5119-10.8-129.9-747.2117.4163.0582-11.3-136-2340.4122.7174.0810-12.7165.4-47.243.3123.2184.4579-16.2148.4110.4161.832.6194.5695-18.3132.7144.510.827.2204.7966-18.9-118.6155.316.715.2215.0066-16.6-154.1102171.7146225.3043-19.9126.5-151.822.7150.7239.6586-29.7-56.255.2144.9156.1Per-Cluster ParametersParametercASD in [°]cASA in [°]cZSD in [°]cZSA in [°]XPR in [dB]Value5113310
+Cluster #
+Normalized delay
+Power in [dB]
+AOD in [ï¿½]
+AOA in [ï¿½]
+ZOD in [ï¿½]
+ZOA in [ï¿½]
+1
+0.0000
+-13.4
+-178.1
+51.3
+50.2
+125.4
+2
+0.3819
+0
+-4.2
+-152.7
+93.2
+91.3
+3
+0.4025
+-2.2
+-4.2
+-152.7
+93.2
+91.3
+4
+0.5868
+-4
+-4.2
+-152.7
+93.2
+91.3
+5
+0.4610
+-6
+90.2
+76.6
+122
+94
+6
+0.5375
+-8.2
+90.2
+76.6
+122
+94
+7
+0.6708
+-9.9
+90.2
+76.6
+122
+94
+8
+0.5750
+-10.5
+121.5
+-1.8
+150.2
+47.1
+9
+0.7618
+-7.5
+-81.7
+-41.9
+55.2
+56
+10
+1.5375
+-15.9
+158.4
+94.2
+26.4
+30.1
+11
+1.8978
+-6.6
+-83
+51.9
+126.4
+58.8
+12
+2.2242
+-16.7
+134.8
+-115.9
+171.6
+26
+13
+2.1718
+-12.4
+-153
+26.6
+151.4
+49.2
+14
+2.4942
+-15.2
+-172
+76.6
+157.2
+143.1
+15
+2.5119
+-10.8
+-129.9
+-7
+47.2
+117.4
+16
+3.0582
+-11.3
+-136
+-23
+40.4
+122.7
+17
+4.0810
+-12.7
+165.4
+-47.2
+43.3
+123.2
+18
+4.4579
+-16.2
+148.4
+110.4
+161.8
+32.6
+19
+4.5695
+-18.3
+132.7
+144.5
+10.8
+27.2
+20
+4.7966
+-18.9
+-118.6
+155.3
+16.7
+15.2
+21
+5.0066
+-16.6
+-154.1
+102
+171.7
+146
+22
+5.3043
+-19.9
+126.5
+-151.8
+22.7
+150.7
+23
+9.6586
+-29.7
+-56.2
+55.2
+144.9
+156.1
+Per-Cluster Parameters
+Parameter
+cASD in [ï¿½]
+cASA in [ï¿½]
+cZSD in [ï¿½]
+cZSA in [ï¿½]
+XPR in [dB]
+Value
+5
+11
+3
+3
+10
+
 Table 7.7.1-2. CDL-B
-Cluster #Normalized delayPower in [dB]AOD in [°]AOA in [°]ZOD in [°]ZOA in [°]10.000009.3-173.3105.878.920.1072-2.29.3-173.3105.878.930.2155-49.3-173.3105.878.940.2095-3.2-34.1125.5115.363.350.2870-9.8-65.4-88.0119.359.960.2986-1.2-11.4155.1103.267.570.3752-3.4-11.4155.1103.267.580.5055-5.2-11.4155.1103.267.590.3681-7.6-67.2-89.8118.282.6100.3697-352.5132.1102.066.3110.5700-8.9-72-83.6100.461.6120.5283-974.395.398.358.0131.1021-4.8-52.2103.7103.478.2141.2756-5.7-50.5-87.8102.582.0151.5474-7.561.4-92.5101.462.4161.7842-1.930.6-139.1103.078.0172.0169-7.6-72.5-90.6100.060.9182.8294-12.2-90.658.6115.282.9193.0219-9.8-77.6-79.0100.560.8203.6187-11.4-82.665.8119.657.3214.1067-14.9-103.652.7118.759.9224.2790-9.275.688.7117.860.1234.7834-11.3-77.6-60.4115.762.3Per-Cluster ParametersParametercASD in [°]cASA in [°]cZSD in [°]cZSA in [°]XPR in [dB]Value1022378
+Cluster #
+Normalized delay
+Power in [dB]
+AOD in [ï¿½]
+AOA in [ï¿½]
+ZOD in [ï¿½]
+ZOA in [ï¿½]
+1
+0.0000
+0
+9.3
+-173.3
+105.8
+78.9
+2
+0.1072
+-2.2
+9.3
+-173.3
+105.8
+78.9
+3
+0.2155
+-4
+9.3
+-173.3
+105.8
+78.9
+4
+0.2095
+-3.2
+-34.1
+125.5
+115.3
+63.3
+5
+0.2870
+-9.8
+-65.4
+-88.0
+119.3
+59.9
+6
+0.2986
+-1.2
+-11.4
+155.1
+103.2
+67.5
+7
+0.3752
+-3.4
+-11.4
+155.1
+103.2
+67.5
+8
+0.5055
+-5.2
+-11.4
+155.1
+103.2
+67.5
+9
+0.3681
+-7.6
+-67.2
+-89.8
+118.2
+82.6
+10
+0.3697
+-3
+52.5
+132.1
+102.0
+66.3
+11
+0.5700
+-8.9
+-72
+-83.6
+100.4
+61.6
+12
+0.5283
+-9
+74.3
+95.3
+98.3
+58.0
+13
+1.1021
+-4.8
+-52.2
+103.7
+103.4
+78.2
+14
+1.2756
+-5.7
+-50.5
+-87.8
+102.5
+82.0
+15
+1.5474
+-7.5
+61.4
+-92.5
+101.4
+62.4
+16
+1.7842
+-1.9
+30.6
+-139.1
+103.0
+78.0
+17
+2.0169
+-7.6
+-72.5
+-90.6
+100.0
+60.9
+18
+2.8294
+-12.2
+-90.6
+58.6
+115.2
+82.9
+19
+3.0219
+-9.8
+-77.6
+-79.0
+100.5
+60.8
+20
+3.6187
+-11.4
+-82.6
+65.8
+119.6
+57.3
+21
+4.1067
+-14.9
+-103.6
+52.7
+118.7
+59.9
+22
+4.2790
+-9.2
+75.6
+88.7
+117.8
+60.1
+23
+4.7834
+-11.3
+-77.6
+-60.4
+115.7
+62.3
+Per-Cluster Parameters
+Parameter
+cASD in [ï¿½]
+cASA in [ï¿½]
+cZSD in [ï¿½]
+cZSA in [ï¿½]
+XPR in [dB]
+Value
+10
+22
+3
+7
+8
+
 Table 7.7.1-3. CDL-C
-Cluster #Normalized delayPower in [dB]AOD in [°]AOA in [°]ZOD in [°]ZOA in [°]10-4.4-46.6-10197.287.620.2099-1.2-22.812098.672.130.2219-3.5-22.812098.672.140.2329-5.2-22.812098.672.150.2176-2.5-40.7-127.5100.670.160.636600.3170.499.275.370.6448-2.20.3170.499.275.380.6560-3.90.3170.499.275.390.6584-7.473.155.4105.267.4100.7935-7.1-64.566.595.363.8110.8213-10.780.2-48.1106.171.4120.9336-11.1-97.146.993.560.5131.2285-5.1-55.368.1103.790.6141.3083-6.8-64.3-68.7104.260.1152.1704-8.7-78.581.593.061.0162.7105-13.2102.730.7104.2100.7174.2589-13.999.2-16.494.962.3184.6003-13.988.83.893.166.7195.4902-15.8-101.9-13.792.252.9205.6077-17.192.29.7106.761.8216.3065-1693.35.693.051.9226.6374-15.7106.60.792.961.7237.0427-21.6119.5-21.9105.258248.6523-22.8-123.833.6107.857Per-Cluster ParametersParametercASD in [°]cASA in [°]cZSD in [°]cZSA in [°]XPR in [dB]Value215377
+Cluster #
+Normalized delay
+Power in [dB]
+AOD in [ï¿½]
+AOA in [ï¿½]
+ZOD in [ï¿½]
+ZOA in [ï¿½]
+1
+0
+-4.4
+-46.6
+-101
+97.2
+87.6
+2
+0.2099
+-1.2
+-22.8
+120
+98.6
+72.1
+3
+0.2219
+-3.5
+-22.8
+120
+98.6
+72.1
+4
+0.2329
+-5.2
+-22.8
+120
+98.6
+72.1
+5
+0.2176
+-2.5
+-40.7
+-127.5
+100.6
+70.1
+6
+0.6366
+0
+0.3
+170.4
+99.2
+75.3
+7
+0.6448
+-2.2
+0.3
+170.4
+99.2
+75.3
+8
+0.6560
+-3.9
+0.3
+170.4
+99.2
+75.3
+9
+0.6584
+-7.4
+73.1
+55.4
+105.2
+67.4
+10
+0.7935
+-7.1
+-64.5
+66.5
+95.3
+63.8
+11
+0.8213
+-10.7
+80.2
+-48.1
+106.1
+71.4
+12
+0.9336
+-11.1
+-97.1
+46.9
+93.5
+60.5
+13
+1.2285
+-5.1
+-55.3
+68.1
+103.7
+90.6
+14
+1.3083
+-6.8
+-64.3
+-68.7
+104.2
+60.1
+15
+2.1704
+-8.7
+-78.5
+81.5
+93.0
+61.0
+16
+2.7105
+-13.2
+102.7
+30.7
+104.2
+100.7
+17
+4.2589
+-13.9
+99.2
+-16.4
+94.9
+62.3
+18
+4.6003
+-13.9
+88.8
+3.8
+93.1
+66.7
+19
+5.4902
+-15.8
+-101.9
+-13.7
+92.2
+52.9
+20
+5.6077
+-17.1
+92.2
+9.7
+106.7
+61.8
+21
+6.3065
+-16
+93.3
+5.6
+93.0
+51.9
+22
+6.6374
+-15.7
+106.6
+0.7
+92.9
+61.7
+23
+7.0427
+-21.6
+119.5
+-21.9
+105.2
+58
+24
+8.6523
+-22.8
+-123.8
+33.6
+107.8
+57
+Per-Cluster Parameters
+Parameter
+cASD in [ï¿½]
+cASA in [ï¿½]
+cZSD in [ï¿½]
+cZSA in [ï¿½]
+XPR in [dB]
+Value
+2
+15
+3
+7
+7
+
 Table 7.7.1-4. CDL-D.
-Cluster #Cluster PASNormalized DelayPower in [dB]AOD in [°]AOA in [°]ZOD in [°]ZOA in [°]1Specular(LOS path)0-0.20-18098.581.5Laplacian0-13.50-18098.581.52Laplacian0.035-18.889.289.285.586.93Laplacian0.612-2189.289.285.586.94Laplacian1.363-22.889.289.285.586.95Laplacian1.405-17.91316397.579.46Laplacian1.804-20.11316397.579.47Laplacian2.596-21.91316397.579.48Laplacian1.775-22.934.6-13798.578.29Laplacian4.042-27.8-64.574.588.473.610Laplacian7.937-23.6-32.9127.791.378.311Laplacian9.424-24.852.6-119.6103.88712Laplacian9.708-30.0-132.1-9.180.370.613Laplacian12.525-27.777.2-83.886.572.9Per-Cluster ParametersParametercASD in [°]cASA in [°]cZSD in [°]cZSA in [°]XPR in [dB]Value583311
+Cluster #
+Cluster PAS
+Normalized Delay
+Power in [dB]
+AOD in [ï¿½]
+AOA in [ï¿½]
+ZOD in [ï¿½]
+ZOA in [ï¿½]
+1
+Specular(LOS path)
+0
+-0.2
+0
+-180
+98.5
+81.5
+
+Laplacian
+0
+-13.5
+0
+-180
+98.5
+81.5
+2
+Laplacian
+0.035
+-18.8
+89.2
+89.2
+85.5
+86.9
+3
+Laplacian
+0.612
+-21
+89.2
+89.2
+85.5
+86.9
+4
+Laplacian
+1.363
+-22.8
+89.2
+89.2
+85.5
+86.9
+5
+Laplacian
+1.405
+-17.9
+13
+163
+97.5
+79.4
+6
+Laplacian
+1.804
+-20.1
+13
+163
+97.5
+79.4
+7
+Laplacian
+2.596
+-21.9
+13
+163
+97.5
+79.4
+8
+Laplacian
+1.775
+-22.9
+34.6
+-137
+98.5
+78.2
+9
+Laplacian
+4.042
+-27.8
+-64.5
+74.5
+88.4
+73.6
+10
+Laplacian
+7.937
+-23.6
+-32.9
+127.7
+91.3
+78.3
+11
+Laplacian
+9.424
+-24.8
+52.6
+-119.6
+103.8
+87
+12
+Laplacian
+9.708
+-30.0
+-132.1
+-9.1
+80.3
+70.6
+13
+Laplacian
+12.525
+-27.7
+77.2
+-83.8
+86.5
+72.9
+Per-Cluster Parameters
+Parameter
+cASD in [ï¿½]
+cASA in [ï¿½]
+cZSD in [ï¿½]
+cZSA in [ï¿½]
+XPR in [dB]
+Value
+5
+8
+3
+3
+11
+
 Table 7.7.1-5. CDL-E.
-Cluster #Cluster PASNormalized DelayPower in [dB]AOD in [°]AOA in [°]ZOD in [°]ZOA in [°]1Specular (LOS path)0.000-0.030-18099.680.4Laplacian0.000-22.030-18099.680.42Laplacian0.5133 -15.857.518.2104.280.43Laplacian0.5440-18.157.518.2104.280.44Laplacian0.5630-19.857.518.2104.280.45Laplacian0.5440-22.9-20.1101.899.480.86Laplacian0.7112-22.416.2112.9100.886.37Laplacian1.9092-18.69.3-155.598.882.78Laplacian1.9293-20.89.3-155.598.882.79Laplacian1.9589-22.69.3-155.598.882.710Laplacian2.6426-22.319-143.3100.882.911Laplacian3.7136-25.632.7-94.796.48812Laplacian5.4524-20.20.514798.98113Laplacian12.0034-29.855.9-36.295.688.614Laplacian20.6419-29.257.6-26104.678.3Per-Cluster ParametersParametercASD in [°]cASA in [°]cZSD in [°]cZSA in [°]XPR in [dB]Value511378
+Cluster #
+Cluster PAS
+Normalized Delay
+Power in [dB]
+AOD in [ï¿½]
+AOA in [ï¿½]
+ZOD in [ï¿½]
+ZOA in [ï¿½]
+1
+Specular (LOS path)
+0.000
+-0.03
+0
+-180
+99.6
+80.4
+
+Laplacian
+0.000
+-22.03
+0
+-180
+99.6
+80.4
+2
+Laplacian
+0.5133 
+-15.8
+57.5
+18.2
+104.2
+80.4
+3
+Laplacian
+0.5440
+-18.1
+57.5
+18.2
+104.2
+80.4
+4
+Laplacian
+0.5630
+-19.8
+57.5
+18.2
+104.2
+80.4
+5
+Laplacian
+0.5440
+-22.9
+-20.1
+101.8
+99.4
+80.8
+6
+Laplacian
+0.7112
+-22.4
+16.2
+112.9
+100.8
+86.3
+7
+Laplacian
+1.9092
+-18.6
+9.3
+-155.5
+98.8
+82.7
+8
+Laplacian
+1.9293
+-20.8
+9.3
+-155.5
+98.8
+82.7
+9
+Laplacian
+1.9589
+-22.6
+9.3
+-155.5
+98.8
+82.7
+10
+Laplacian
+2.6426
+-22.3
+19
+-143.3
+100.8
+82.9
+11
+Laplacian
+3.7136
+-25.6
+32.7
+-94.7
+96.4
+88
+12
+Laplacian
+5.4524
+-20.2
+0.5
+147
+98.9
+81
+13
+Laplacian
+12.0034
+-29.8
+55.9
+-36.2
+95.6
+88.6
+14
+Laplacian
+20.6419
+-29.2
+57.6
+-26
+104.6
+78.3
+Per-Cluster Parameters
+Parameter
+cASD in [ï¿½]
+cASA in [ï¿½]
+cZSD in [ï¿½]
+cZSA in [ï¿½]
+XPR in [dB]
+Value
+5
+11
+3
+7
+8
+
 7.7.2	Tapped Delay Line (TDL) models
 The TDL models for simplified evaluations, e.g., for non-MIMO evaluations, are defined for the full frequency range from 0.5 GHz to 100 GHz with a maximum bandwidth of 2 GHz. 
 Three TDL models, namely TDL-A, TDL-B and TDL-C, are constructed to represent three different channel profiles for NLOS while TDL-D and TDL-E are constructed for LOS, the parameters of which can be found respectively in Table 7.7.2-1, Table 7.7.2-2 , Table 7.7.2-3, Table 7.7.2-4 and Table 7.7.2-5. 
@@ -1406,15 +3975,433 @@ The Doppler spectrum for each tap is characterized by a classical (Jakes) spectr
 Each TDL model can be scaled in delay so that the model achieves a desired RMS delay spread, according to the procedure described in Clause 7.7.3. 
 For LOS channel models, the K-factor of TDL-D and TDL-E can be set to a desired value following the procedure described in Clause 7.7.6.
 Table 7.7.2-1. TDL-A
-Tap #Normalized delayPower in [dB]Fading distribution10.0000-13.4Rayleigh20.38190Rayleigh30.4025-2.2Rayleigh40.5868-4Rayleigh50.4610-6Rayleigh60.5375-8.2Rayleigh70.6708-9.9Rayleigh80.5750-10.5Rayleigh90.7618-7.5Rayleigh101.5375-15.9Rayleigh111.8978-6.6Rayleigh122.2242-16.7Rayleigh132.1718-12.4Rayleigh142.4942-15.2Rayleigh152.5119-10.8Rayleigh163.0582-11.3Rayleigh174.0810-12.7Rayleigh184.4579-16.2Rayleigh194.5695-18.3Rayleigh204.7966-18.9Rayleigh215.0066-16.6Rayleigh225.3043-19.9Rayleigh239.6586-29.7Rayleigh
+Tap #
+Normalized delay
+Power in [dB]
+Fading distribution
+1
+0.0000
+-13.4
+Rayleigh
+2
+0.3819
+0
+Rayleigh
+3
+0.4025
+-2.2
+Rayleigh
+4
+0.5868
+-4
+Rayleigh
+5
+0.4610
+-6
+Rayleigh
+6
+0.5375
+-8.2
+Rayleigh
+7
+0.6708
+-9.9
+Rayleigh
+8
+0.5750
+-10.5
+Rayleigh
+9
+0.7618
+-7.5
+Rayleigh
+10
+1.5375
+-15.9
+Rayleigh
+11
+1.8978
+-6.6
+Rayleigh
+12
+2.2242
+-16.7
+Rayleigh
+13
+2.1718
+-12.4
+Rayleigh
+14
+2.4942
+-15.2
+Rayleigh
+15
+2.5119
+-10.8
+Rayleigh
+16
+3.0582
+-11.3
+Rayleigh
+17
+4.0810
+-12.7
+Rayleigh
+18
+4.4579
+-16.2
+Rayleigh
+19
+4.5695
+-18.3
+Rayleigh
+20
+4.7966
+-18.9
+Rayleigh
+21
+5.0066
+-16.6
+Rayleigh
+22
+5.3043
+-19.9
+Rayleigh
+23
+9.6586
+-29.7
+Rayleigh
+
 Table 7.7.2-2. TDL-B
-Tap #Normalized delayPower in [dB]Fading distribution10.00000Rayleigh20.1072-2.2Rayleigh30.2155-4Rayleigh40.2095-3.2Rayleigh50.2870-9.8Rayleigh60.2986-1.2Rayleigh70.3752-3.4Rayleigh80.5055-5.2Rayleigh90.3681-7.6Rayleigh100.3697-3Rayleigh110.5700-8.9Rayleigh120.5283-9Rayleigh131.1021-4.8Rayleigh141.2756-5.7Rayleigh151.5474-7.5Rayleigh161.7842-1.9Rayleigh172.0169-7.6Rayleigh182.8294-12.2Rayleigh193.0219-9.8Rayleigh203.6187-11.4Rayleigh214.1067-14.9Rayleigh224.2790-9.2Rayleigh234.7834-11.3Rayleigh
+Tap #
+Normalized delay
+Power in [dB]
+Fading distribution
+1
+0.0000
+0
+Rayleigh
+2
+0.1072
+-2.2
+Rayleigh
+3
+0.2155
+-4
+Rayleigh
+4
+0.2095
+-3.2
+Rayleigh
+5
+0.2870
+-9.8
+Rayleigh
+6
+0.2986
+-1.2
+Rayleigh
+7
+0.3752
+-3.4
+Rayleigh
+8
+0.5055
+-5.2
+Rayleigh
+9
+0.3681
+-7.6
+Rayleigh
+10
+0.3697
+-3
+Rayleigh
+11
+0.5700
+-8.9
+Rayleigh
+12
+0.5283
+-9
+Rayleigh
+13
+1.1021
+-4.8
+Rayleigh
+14
+1.2756
+-5.7
+Rayleigh
+15
+1.5474
+-7.5
+Rayleigh
+16
+1.7842
+-1.9
+Rayleigh
+17
+2.0169
+-7.6
+Rayleigh
+18
+2.8294
+-12.2
+Rayleigh
+19
+3.0219
+-9.8
+Rayleigh
+20
+3.6187
+-11.4
+Rayleigh
+21
+4.1067
+-14.9
+Rayleigh
+22
+4.2790
+-9.2
+Rayleigh
+23
+4.7834
+-11.3
+Rayleigh
+
 Table 7.7.2-3. TDL-C
-Tap #Normalized delaysPower in [dB]Fading distribution10-4.4Rayleigh20.2099-1.2Rayleigh30.2219-3.5Rayleigh40.2329-5.2Rayleigh50.2176-2.5Rayleigh60.63660Rayleigh70.6448-2.2Rayleigh80.6560-3.9Rayleigh90.6584-7.4Rayleigh100.7935-7.1Rayleigh110.8213-10.7Rayleigh120.9336-11.1Rayleigh131.2285-5.1Rayleigh141.3083-6.8Rayleigh152.1704-8.7Rayleigh162.7105-13.2Rayleigh174.2589-13.9Rayleigh184.6003-13.9Rayleigh195.4902-15.8Rayleigh205.6077-17.1Rayleigh216.3065-16Rayleigh226.6374-15.7Rayleigh237.0427-21.6Rayleigh248.6523-22.8Rayleigh
+Tap #
+Normalized delays
+Power in [dB]
+Fading distribution
+1
+0
+-4.4
+Rayleigh
+2
+0.2099
+-1.2
+Rayleigh
+3
+0.2219
+-3.5
+Rayleigh
+4
+0.2329
+-5.2
+Rayleigh
+5
+0.2176
+-2.5
+Rayleigh
+6
+0.6366
+0
+Rayleigh
+7
+0.6448
+-2.2
+Rayleigh
+8
+0.6560
+-3.9
+Rayleigh
+9
+0.6584
+-7.4
+Rayleigh
+10
+0.7935
+-7.1
+Rayleigh
+11
+0.8213
+-10.7
+Rayleigh
+12
+0.9336
+-11.1
+Rayleigh
+13
+1.2285
+-5.1
+Rayleigh
+14
+1.3083
+-6.8
+Rayleigh
+15
+2.1704
+-8.7
+Rayleigh
+16
+2.7105
+-13.2
+Rayleigh
+17
+4.2589
+-13.9
+Rayleigh
+18
+4.6003
+-13.9
+Rayleigh
+19
+5.4902
+-15.8
+Rayleigh
+20
+5.6077
+-17.1
+Rayleigh
+21
+6.3065
+-16
+Rayleigh
+22
+6.6374
+-15.7
+Rayleigh
+23
+7.0427
+-21.6
+Rayleigh
+24
+8.6523
+-22.8
+Rayleigh
+
 Table 7.7.2-4. TDL-D.
-Tap #Normalized delayPower in [dB]Fading distribution10-0.2LOS path0-13.5Rayleigh20.035-18.8Rayleigh30.612-21Rayleigh41.363-22.8Rayleigh51.405-17.9Rayleigh61.804-20.1Rayleigh72.596-21.9Rayleigh81.775-22.9Rayleigh94.042-27.8Rayleigh107.937-23.6Rayleigh119.424-24.8Rayleigh129.708-30.0Rayleigh1312.525-27.7RayleighNOTE:	The first tap follows a Ricean distribution with a K-factor of K1 = 13.3 dB and a mean power of 0dB.
+Tap #
+Normalized delay
+Power in [dB]
+Fading distribution
+1
+0
+-0.2
+LOS path
+
+0
+-13.5
+Rayleigh
+2
+0.035
+-18.8
+Rayleigh
+3
+0.612
+-21
+Rayleigh
+4
+1.363
+-22.8
+Rayleigh
+5
+1.405
+-17.9
+Rayleigh
+6
+1.804
+-20.1
+Rayleigh
+7
+2.596
+-21.9
+Rayleigh
+8
+1.775
+-22.9
+Rayleigh
+9
+4.042
+-27.8
+Rayleigh
+10
+7.937
+-23.6
+Rayleigh
+11
+9.424
+-24.8
+Rayleigh
+12
+9.708
+-30.0
+Rayleigh
+13
+12.525
+-27.7
+Rayleigh
+NOTE:	The first tap follows a Ricean distribution with a K-factor of K1 = 13.3 dB and a mean power of 0dB.
+
 Table 7.7.2-5. TDL-E.
-Tap #Normalized delayPower in [dB]Fading distribution10-0.03LOS path0-22.03Rayleigh20.5133 -15.8Rayleigh30.5440-18.1Rayleigh40.5630-19.8Rayleigh50.5440-22.9Rayleigh60.7112-22.4Rayleigh71.9092-18.6Rayleigh81.9293-20.8Rayleigh91.9589-22.6Rayleigh102.6426-22.3Rayleigh113.7136-25.6Rayleigh125.4524-20.2Rayleigh1312.0034-29.8Rayleigh1420.6519-29.2RayleighNOTE:	The first tap follows a Ricean distribution with a K-factor of K1 = 22 dB and a mean power of 0dB.
+Tap #
+Normalized delay
+Power in [dB]
+Fading distribution
+1
+0
+-0.03
+LOS path
+
+0
+-22.03
+Rayleigh
+2
+0.5133 
+-15.8
+Rayleigh
+3
+0.5440
+-18.1
+Rayleigh
+4
+0.5630
+-19.8
+Rayleigh
+5
+0.5440
+-22.9
+Rayleigh
+6
+0.7112
+-22.4
+Rayleigh
+7
+1.9092
+-18.6
+Rayleigh
+8
+1.9293
+-20.8
+Rayleigh
+9
+1.9589
+-22.6
+Rayleigh
+10
+2.6426
+-22.3
+Rayleigh
+11
+3.7136
+-25.6
+Rayleigh
+12
+5.4524
+-20.2
+Rayleigh
+13
+12.0034
+-29.8
+Rayleigh
+14
+20.6519
+-29.2
+Rayleigh
+NOTE:	The first tap follows a Ricean distribution with a K-factor of K1 = 22 dB and a mean power of 0dB.
+
 7.7.3	Scaling of delays
 The RMS delay spread values of both CDL and TDL models are normalized and they can be scaled in delay so that a desired RMS delay spread can be achieved. The scaled delays can be obtained according to the following equation: 
 		(7.7-1)
@@ -1425,9 +4412,145 @@ in which
 The example scaling parameters are selected according to Table 7.7.3-1 where the values have been chosen such that the RMS delay spreads span the range observed in measurements corresponding to the typical 5G evaluation scenarios. For information purposes, examples of such RMS delay spreads for the different scenarios are given in Table 7.7.3-2 where the "short-delay profile" corresponds to the median RMS delay spread for LOS scenarios, while "normal-delay profile" and "long-delay profile" correspond to the median and the 90th percentile RMS delay spread for NLOS scenarios according to the channel parameters in Table 7.5-6. It can therefore be understood that a particular RMS delay spread in Table 7.7.3-1 may occur in any scenario; however certain values may be more likely in some scenarios than in others. 
 The example parameters given in Table 7.7.3-1 does not preclude the use of other scaling values if this is found appropriate, for instance if additional scenarios are introduced or if e.g. the effect of beamforming needs to be captured in a TDL. Both of these examples can potentially result in an increased range of experienced RMS delay spreads.
 Table 7.7.3-1. Example scaling parameters for CDL and TDL models.
-ModelVery short delay spread10 nsShort delay spread30 nsNominal delay spread100 nsLong delay spread300 nsVery long delay spread1000 ns
+Model
+
+Very short delay spread
+10 ns
+Short delay spread
+30 ns
+Nominal delay spread
+100 ns
+Long delay spread
+300 ns
+Very long delay spread
+1000 ns
+
 Table 7.7.3-2. Scenario specific scaling factors - for information only
-Proposed Scaling Factor  in [ns]Frequency [GHz]261528396070Indoor officeShort-delay profile201616 16 16 16 16 Normal-delay profile39302420181616Long-delay profile59534743413837UMi Street-canyonShort-delay profile65453732302726 Normal-delay profile129937666615553Long-delay profile634316307301297293291UMaShort-delay profile93938580 787574Normal-delay profile363363302266249228221Long-delay profile11481148 955841786720698RMa & RMa O2IShort-delay profile3232N/AN/AN/AN/AN/ANormal-delay profile3737N/AN/AN/AN/AN/ALong-delay profile153153N/AN/AN/AN/AN/AUMi / UMa O2INormal-delay profile240Long-delay profile616
+Proposed Scaling Factor  in [ns]
+Frequency [GHz]
+
+2
+6
+15
+28
+39
+60
+70
+Indoor office
+Short-delay profile
+20
+16
+16 
+16 
+16 
+16 
+16 
+
+Normal-delay profile
+39
+30
+24
+20
+18
+16
+16
+
+Long-delay profile
+59
+53
+47
+43
+41
+38
+37
+UMi Street-canyon
+Short-delay profile
+65
+45
+37
+32
+30
+27
+26 
+
+Normal-delay profile
+129
+93
+76
+66
+61
+55
+53
+
+Long-delay profile
+634
+316
+307
+301
+297
+293
+291
+UMa
+Short-delay profile
+93
+93
+85
+80 
+78
+75
+74
+
+Normal-delay profile
+363
+363
+302
+266
+249
+228
+221
+
+Long-delay profile
+1148
+1148 
+955
+841
+786
+720
+698
+RMa & RMa O2I
+Short-delay profile
+32
+32
+N/A
+N/A
+N/A
+N/A
+N/A
+
+Normal-delay profile
+37
+37
+N/A
+N/A
+N/A
+N/A
+N/A
+
+Long-delay profile
+153
+153
+N/A
+N/A
+N/A
+N/A
+N/A
+UMi / UMa O2I
+Normal-delay profile
+240
+
+Long-delay profile
+616
+
 7.7.4	Spatial filter for generating TDL channel model
 The TDL models described in Clause 7.7.2 are generated from the CDL models assuming ideal isotropic antennas at both Tx and Rx. It is also possible to generate TDL models by assuming non-isotropic antennas like directive horn antennas or array antennas.
 The basic idea to generate a TDL model based on a filtered CDL model is shown in Figure 7.7.4-1 below.
@@ -1498,85 +4621,266 @@ After scaling the powers, the delay spread needs to be re-normalized. This is do
 7.8.1	Large scale calibration 
 For large scale calibration, fast fading is not modeled. The calibration parameters can be found in Table 7.8-1. The calibration results based on TR 38.900 V14.0.0 can be found in R1-165974.
 Table 7.8-1: Simulation assumptions for large scale calibration
-ParameterValuesScenarios UMa, UMi-Street Canyon, Indoor-office (open office)Sectorization3 sectors per cell site: 30, 150 and 270 degrees
-BS antenna configurationsMg = Ng = 1; (M,N,P) = (10, 1, 1), dV = 0.5? BS port mappingThe 10 elements are mapped to a single CRS portBS antenna electrical downtilting102 degrees for UMa and UMi Street Canyon
-110 degrees for indoorAntenna virtualizationDFT precoding according to TR 36.897 with application of panning and tilting anglesBS Tx power44 dBm for UMi-Street Canyon, 49 for UMa at 6GHz
+Parameter
+Values
+Scenarios 
+UMa, UMi-Street Canyon, Indoor-office (open office)
+Sectorization
+3 sectors per cell site: 30, 150 and 270 degrees
+
+BS antenna configurations
+Mg = Ng = 1; (M,N,P) = (10, 1, 1), dV = 0.5? 
+BS port mapping
+The 10 elements are mapped to a single CRS port
+BS antenna electrical downtilting
+102 degrees for UMa and UMi Street Canyon
+110 degrees for indoor
+Antenna virtualization
+DFT precoding according to TR 36.897 with application of panning and tilting angles
+BS Tx power
+44 dBm for UMi-Street Canyon, 49 for UMa at 6GHz
 35 dBm at 30GHz and 70 GHz for UMa and UMi-Street canyon
-24 dBm for Indoor for all carrier frequenciesBandwidth20MHz for 6GHz, and 100MHz for 30GHz and 70 GHz UT antenna configurations1 element (vertically polarized), Isotropic antenna gain patternHandover margin (for calibration)0dBUT distribution Following TR36.873 for UMa and UMi, (3D dropping)
-uniform dropping for indoor with minimum distance (2D) of 0 mUT attachmentBased on pathloss considering LOS angleUT noise figure9 dBFast fading channelFast fading channel is not modelledO2I penetration loss50% low loss and 50% high lossCarrier Frequency6 GHz, 30 GHz, 70GHzWrapping method for UMa and UMigeographical distance based wrapping (mandatory)
-radio distance (optional)Metrics1) Coupling loss – serving cell (based on LOS pathloss)2) Geometry (based on LOS pathloss) with and without white noise
+24 dBm for Indoor for all carrier frequencies
+Bandwidth
+20MHz for 6GHz, and 100MHz for 30GHz and 70 GHz 
+UT antenna configurations
+1 element (vertically polarized), Isotropic antenna gain pattern
+Handover margin (for calibration)
+0dB
+UT distribution 
+Following TR36.873 for UMa and UMi, (3D dropping)
+uniform dropping for indoor with minimum distance (2D) of 0 m
+UT attachment
+Based on pathloss considering LOS angle
+UT noise figure
+9 dB
+Fast fading channel
+Fast fading channel is not modelled
+O2I penetration loss
+50% low loss and 50% high loss
+Carrier Frequency
+6 GHz, 30 GHz, 70GHz
+Wrapping method for UMa and UMi
+geographical distance based wrapping (mandatory)
+radio distance (optional)
+Metrics
+1) Coupling loss ï¿½ serving cell (based on LOS pathloss)
+
+2) Geometry (based on LOS pathloss) with and without white noise
+
 7.8.2	Full calibration 
 The calibration parameters for full calibration including the fast fading modelling can be found in Table 7.8-2. Unspecified parameters in Table 7.8-2 are the same as those in Table 7.8-1. When P=2, X-pol (+/-45 degree) is used for BS antenna configuration 1 and X-pol (0/+90 degree) is used for UT antenna configuration. The calibration results based on TR 38.900 V14.0.0 can be found in R1-165975.
 Table 7.8-2: Simulation assumptions for full calibration
-ParameterValuesScenariosUMa, UMi-street Canyon, Indoor-office (open office)Carrier Frequency6 GHz, 30 GHz, 60GHz, 70GHzBandwidth20MHz for 6GHz, and 100MHz for 30GHz, 60 GHz and 70 GHz BS Tx power44 dBm for UMi-Street Canyon, 49 for UMa at 6GHz
+Parameter
+Values
+Scenarios
+UMa, UMi-street Canyon, Indoor-office (open office)
+Carrier Frequency
+6 GHz, 30 GHz, 60GHz, 70GHz
+Bandwidth
+20MHz for 6GHz, and 100MHz for 30GHz, 60 GHz and 70 GHz 
+BS Tx power
+44 dBm for UMi-Street Canyon, 49 for UMa at 6GHz
 35 dBm at 30GHz, 60 GHz and 70 GHz for UMa and UMi-Street canyon
-24 dBm for Indoor for all carrier frequenciesBS antenna configurationsConfig 1: M = 4,N = 4,P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? … calibration metrics 1), 2), 3) are calibrated
-Config 2: Mg = Ng = 1, M = N = 2, P = 1 … calibration metrics 1), 2), 4) are calibratedBS port mappingConfig 1: all 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrations
-Config 2: each antenna element is mapped to one CRS port UT antenna configurationsMg = Ng = 1, M = N = 1, P = 2
-UT distribution Following TR36.873 for UMa and UMi, (3D dropping)
-uniform dropping for indoor with minimum distance (2D) of 0 mUT attachment Based on RSRP (formula) from CRS port 0Polarized antenna modellingModel-2 in TR36.873UT array orientation?UT,?? uniformly distributed on [0,360] degree, ?UT,??= 90 degree, ?UT,? = 0 degreeUT antenna patternIsotropicMetrics1) Coupling loss – serving cell 2) Wideband SIR before receiver without noise3) CDF of Delay Spread and Angle Spread (ASD, ZSD, ASA, ZSA) from the serving cell (according to circular angle spread definition of TR 25.996) 4) 
+24 dBm for Indoor for all carrier frequencies
+BS antenna configurations
+Config 1: M = 4,N = 4,P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? ï¿½ calibration metrics 1), 2), 3) are calibrated
+Config 2: Mg = Ng = 1, M = N = 2, P = 1 ï¿½ calibration metrics 1), 2), 4) are calibrated
+BS port mapping
+Config 1: all 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrations
+Config 2: each antenna element is mapped to one CRS port 
+UT antenna configurations
+Mg = Ng = 1, M = N = 1, P = 2
+
+UT distribution 
+Following TR36.873 for UMa and UMi, (3D dropping)
+uniform dropping for indoor with minimum distance (2D) of 0 m
+UT attachment 
+Based on RSRP (formula) from CRS port 0
+Polarized antenna modelling
+Model-2 in TR36.873
+UT array orientation
+?UT,?? uniformly distributed on [0,360] degree, ?UT,??= 90 degree, ?UT,? = 0 degree
+UT antenna pattern
+Isotropic
+Metrics
+1) Coupling loss ï¿½ serving cell 
+
+2) Wideband SIR before receiver without noise
+
+3) CDF of Delay Spread and Angle Spread (ASD, ZSD, ASA, ZSA) from the serving cell (according to circular angle spread definition of TR 25.996) 
+
+4) 
 CDF of largest (1st) PRB singular values (serving cell) at t=0 plotted in 10*log10 scale.
 CDF of smallest (2nd) PRB singular values (serving cell) at t=0 plotted in 10*log10 scale.
 CDF of the ratio between the largest PRB singular value and the smallest PRB singular value (serving cell) at t=0 plotted in 10*log10 scale.
 
-Note: The PRB singular values of a PRB are the eigenvalues of the mean covariance matrix in the PRB.
+Note: The PRB singular values of a PRB are the eigenvalues of the mean covariance matrix in the PRB.
+
 7.8.3	Calibration of additional features 
 The calibration parameters for the calibration of oxygen absorption, large bandwidth and large antenna array, spatial consistency, and blockage can be respectively found in Table 7.8-3, 7.8-4, 7.8-5, and 7.8-6. Unspecified parameters in these tables are the same as those in Tables 7.8-1 and 7.8-2. When P=2, X-pol (+/-45 degree) is used for BS antenna configuration 1 and X-pol (0/+90 degree) is used for UT antenna configuration. The calibration results based on TR 38.900 V14.0.0 can be found in R1-1700990.
 Table 7.8-3: Simulation assumptions for calibration for oxygen absorption
-ParameterValuesScenariosUMi-street CanyonCarrier Frequency60 GHzBS antenna configurationsM = 4, N = 4, P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? BS port mappingall 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrationsCalibration methodDrop multiple users in the multiple cells randomly, and collect the following metrics for each user after attachment.Metrics1)	CDF of coupling loss (serving cell)
-2)	Wideband SINR before receiver – determined from RSRP (formula) from CRS port 0 
-3)	CDF of Delay Spread from the serving cell
+Parameter
+Values
+Scenarios
+UMi-street Canyon
+Carrier Frequency
+60 GHz
+BS antenna configurations
+M = 4, N = 4, P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? 
+BS port mapping
+all 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrations
+Calibration method
+Drop multiple users in the multiple cells randomly, and collect the following metrics for each user after attachment.
+Metrics
+1)	CDF of coupling loss (serving cell)
+2)	Wideband SINR before receiver ï¿½ determined from RSRP (formula) from CRS port 0 
+3)	CDF of Delay Spread from the serving cell
+
 Table 7.8-4: Simulation assumptions for calibration for large bandwidth and large antenna array
-ParameterValuesScenariosUMi-street CanyonCarrier Frequency30GHzBandwidth2GHzBS antenna configurationsM = 8, N = 8, P = 2, Mg = 1, Ng = 4, dH = dV = 0.5?, dH,g = dV,g = 4? BS port mappingall 64 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrationsThe number of rays per clusterNMPC = 40Calibration methodDrop multiple users in the multiple cells randomly, and collect the following metrics for each user after attachment.Metrics1)	CDF of coupling loss (serving cell)
-2)	Wideband SINR before receiver – determined from RSRP (formula) from CRS port 0
-3)	CDF of largest (1st) PRB singular values (serving cell) at t=0 plotted in 10*log10 scale
+Parameter
+Values
+Scenarios
+UMi-street Canyon
+Carrier Frequency
+30GHz
+Bandwidth
+2GHz
+BS antenna configurations
+M = 8, N = 8, P = 2, Mg = 1, Ng = 4, dH = dV = 0.5?, dH,g = dV,g = 4? 
+BS port mapping
+all 64 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrations
+The number of rays per cluster
+NMPC = 40
+Calibration method
+Drop multiple users in the multiple cells randomly, and collect the following metrics for each user after attachment.
+Metrics
+1)	CDF of coupling loss (serving cell)
+2)	Wideband SINR before receiver ï¿½ determined from RSRP (formula) from CRS port 0
+3)	CDF of largest (1st) PRB singular values (serving cell) at t=0 plotted in 10*log10 scale
+
 Table 7.8-5: Simulation assumptions for calibration for spatial consistency
-ParameterValuesScenariosUMi-street CanyonCarrier Frequency30 GHzBS antenna configurationsM = 4, N = 4, P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? BS port mappingall 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrationsUE distributionFollowing TR36.873, 3D dropping
+Parameter
+Values
+Scenarios
+UMi-street Canyon
+Carrier Frequency
+30 GHz
+BS antenna configurations
+M = 4, N = 4, P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? 
+BS port mapping
+all 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrations
+UE distribution
+Following TR36.873, 3D dropping
 uniform dropping for indoor with minimum distance of 0 m
 For Config1: 100% UE indoor and in the 1st floor
-For Config2: 100% UE outdoorMobilityConfig1: UE is stationary
-Config2: UE is moving with random direction and fixed speed, e.g., 30 km/hCalibration methodFor Config1:
-Drop multiple UEs in a single cell, determine all permutations of pairs of UEs, collect the variables for each pair and bin them into certain distance ranges, e.g., 1m/2m/10m, to get enough samples. Collect the following metrics 1) –6).
+For Config2: 100% UE outdoor
+Mobility
+Config1: UE is stationary
+Config2: UE is moving with random direction and fixed speed, e.g., 30 km/h
+Calibration method
+For Config1:
+Drop multiple UEs in a single cell, determine all permutations of pairs of UEs, collect the variables for each pair and bin them into certain distance ranges, e.g., 1m/2m/10m, to get enough samples. Collect the following metrics 1) ï¿½6).
 For Config2:
-Drop multiple users in the single cell, and collect metric 1)-2) and 7)-9) for each user after attachment.Metrics1)	CDF of coupling loss (serving cell)
-2)	Wideband SINR before receiver – determined from RSRP (formula) from CRS port 0 
+Drop multiple users in the single cell, and collect metric 1)-2) and 7)-9) for each user after attachment.
+Metrics
+1)	CDF of coupling loss (serving cell)
+2)	Wideband SINR before receiver ï¿½ determined from RSRP (formula) from CRS port 0 
 3)	Cross-correlation coefficient of delay for the third cluster between paired UEs, see note 1
 4)	Cross-correlation coefficient of AOA for the third cluster between paired UEs
 5)	Cross-correlation coefficient of LOS/NLOS status between paired UEs
 6)	Cross correlation coefficient of the channel response in Step 11 on the first non-DC subcarrier in an OFDM symbol on antenna port 0 received on the first UE antenna over multiple realizations between paired UEs
 7)	CDF of average varying rate of power for the third cluster, see note 2
 8)	CDF of average varying rate of delay for the third cluster (ns)
-9)	CDF of average varying rate of AOA for the third cluster (degree)NOTE 1	For the UT pair at a certain distance range, the variables collected by two UEs can be denoted as X and Y, respectively, then the cross-correlation coefficient for real number can be written as [E(XY)-E(X)E(Y)] /sqrt([E(X^2)-E(X)^2])/ sqrt([E(Y^2)-E(Y)^2]), the cross-correlation coefficient for complex number can be written as |[E(XY*)-E(X)E(Y)*]/sqrt([E(XX*)-E(X)E(X)*])/sqrt([E(YY*)-E(Y)E(Y)*])|.
-NOTE 2	For the average varying rate, we assume the collecting interval, e.g., 100ms, and then get the samples for a certain UE, the varying rate can be written as the standard variance of the samples per 100ms. 
+9)	CDF of average varying rate of AOA for the third cluster (degree)
+NOTE 1	For the UT pair at a certain distance range, the variables collected by two UEs can be denoted as X and Y, respectively, then the cross-correlation coefficient for real number can be written as [E(XY)-E(X)E(Y)] /sqrt([E(X^2)-E(X)^2])/ sqrt([E(Y^2)-E(Y)^2]), the cross-correlation coefficient for complex number can be written as |[E(XY*)-E(X)E(Y)*]/sqrt([E(XX*)-E(X)E(X)*])/sqrt([E(YY*)-E(Y)E(Y)*])|.
+NOTE 2	For the average varying rate, we assume the collecting interval, e.g., 100ms, and then get the samples for a certain UE, the varying rate can be written as the standard variance of the samples per 100ms. 
+
 Table 7.8-6: Simulation assumptions for calibration for blockage
-ParameterValuesScenariosUMi-street CanyonCarrier Frequency30 GHzBS antenna configurationsM = 4, N = 4, P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? BS port mappingall 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrationsCalibration methodFor Model A:
-Drop multiple users in the multiple cells, and collect the following metrics 1) – 3) for each user after attachment. Optional self-blocking feature is made mandatory in the Landscape mode only for calibration purposes.
+Parameter
+Values
+Scenarios
+UMi-street Canyon
+Carrier Frequency
+30 GHz
+BS antenna configurations
+M = 4, N = 4, P = 2, Mg = 1, Ng = 2, dH = dV = 0.5?, dH,g = dV,g = 2.5? 
+BS port mapping
+all 16 elements for each polarization on each panel are mapped to a single CRS port; panning angles of the two subarrays: (0,0) degs; same downtilt angles as used for the large-scale calibrations
+Calibration method
+For Model A:
+Drop multiple users in the multiple cells, and collect the following metrics 1) ï¿½ 3) for each user after attachment. Optional self-blocking feature is made mandatory in the Landscape mode only for calibration purposes.
 For Model B: 
 Drop a BS in (0,0,30) and a UT in (100,0,1.5), 
 Jump directly to Step 11 and replace the channel with CDL-E.
 Drop a blocking screen of size h=10m, w = 2m in (80,10,1.5)
 Move the UT from (100,0,1.5) to (100,20,1.5) in small increments. For each UT position, translate all the AODs and AOAs of CDL-E such that the specular (LOS path) of CDL-E is pointing along the direct path between the BS and UT.
-Collect metric 4)Metrics1)	CDF of coupling loss (serving cell)
-2)	Wideband SINR before receiver – determined from RSRP (formula) from CRS port 0 
+Collect metric 4)
+Metrics
+1)	CDF of coupling loss (serving cell)
+2)	Wideband SINR before receiver ï¿½ determined from RSRP (formula) from CRS port 0 
 3)	CDF of ASA from the serving cell
-4)	RSRP as a function of UT position
+4)	RSRP as a function of UT position
+
 7.8.4	Calibration of the indoor factory scenario
 For the InF, the calibration parameters can be found in Table 7.8-7. The calibration results can be found in R1-1909704.
 It should be noted absolute delay model had not been agreed by the deadline, so companies were not able to submit CDF of first path excess delay for serving cell.
 Table 7.8-7: Simulation assumptions for large scale calibration for the indoor factory scenario
-ParameterValuesScenarioInF-SL, InF-DL, InF-SH, InF-DHHall sizeInF-SL: 120x60 m
+Parameter
+Values
+Scenario
+InF-SL, InF-DL, InF-SH, InF-DH
+Hall size
+InF-SL: 120x60 m
 InF-DL: 300x150 m
 InF-SH: 300x150 m
-InF-DH: 120x60 mRoom height10 mSectorizationNoneBS antenna configurations1 element (vertically polarized), Isotropic antenna gain patternUT antenna configurations1 element (vertically polarized), Isotropic antenna gain patternHandover margin (for calibration)0dBBS deployment18 BSs on a square lattice with spacing D, located D/2 from the walls.
+InF-DH: 120x60 m
+Room height
+10 m
+Sectorization
+None
+BS antenna configurations
+1 element (vertically polarized), Isotropic antenna gain pattern
+UT antenna configurations
+1 element (vertically polarized), Isotropic antenna gain pattern
+Handover margin (for calibration)
+0dB
+BS deployment
+18 BSs on a square lattice with spacing D, located D/2 from the walls.
 -	for the small hall (L=120m x W=60m): D=20m
 -	for the big hall (L=300m x W=150m): D=50m
 
 BS height = 1.5 m for InF-SL and InF-DL
-BS-height = 8 m for for InF-SH and InF-DHUT distribution uniform dropping for indoor with minimum 2D distance of 1 m
-UT height = 1.5 mUT attachmentBased on pathloss UT noise figure9 dBCarrier frequency3.5 GHz, 28 GHzBandwidth100 MHzClutter density: rLow clutter density: 20%
-High clutter density: 60%Clutter height: h_cLow clutter density: 2 m
-High clutter density: 6 mClutter size: d_clutterLow clutter density: 10 m
-High clutter density: 2 mMetrics1) Coupling loss – serving cell2) Geometry with and without noise3) CDF of delay spread and angle spread (ASD, ZSD, ASA, ZSA) according to the definition in Annex A.14) CDF of first path excess delay for serving cell
+BS-height = 8 m for for InF-SH and InF-DH
+UT distribution 
+uniform dropping for indoor with minimum 2D distance of 1 m
+UT height = 1.5 m
+UT attachment
+Based on pathloss 
+UT noise figure
+9 dB
+Carrier frequency
+3.5 GHz, 28 GHz
+Bandwidth
+100 MHz
+Clutter density: r
+Low clutter density: 20%
+High clutter density: 60%
+Clutter height: h_c
+Low clutter density: 2 m
+High clutter density: 6 m
+Clutter size: d_clutter
+Low clutter density: 10 m
+High clutter density: 2 m
+Metrics
+1) Coupling loss ï¿½ serving cell
+
+2) Geometry with and without noise
+
+3) CDF of delay spread and angle spread (ASD, ZSD, ASA, ZSA) according to the definition in Annex A.1
+
+4) CDF of first path excess delay for serving cell
+
 8	Map-based hybrid channel model (Alternative channel model methodology)
 Map-based hybrid model is composed of a deterministic component following, e.g., METIS work [6] and a stochastic component following mainly the model described in clause 7. The channel model methodology described in this clause is an alternative to the methodology specified in clause 7, and can be used if: 
 -	The system performance is desired to be evaluated or predicted with the use of digital map to take into account the impacts from environmental structures and materials.
@@ -1616,7 +4920,25 @@ b)	Perform electric field calculations over propagation path, based on identifie
 	The details of electric field calculation can be found in [6]~[13].
 The modelling algorithms in geometry and electric field calculations for different propagation interactions are summarized in the table below.
 Table 8.4-1 Principles applied in ray-tracing
-Geometry calculationElectric field calculationLOSFree space LOSFriis equation [11]ReflectionSnell's law with image-based method [7]Fresnel equation [7]DiffractionFermat's principle [12]UTD [13]PenetrationSnell's law for transmission through slab [8]Fresnel equation [7]Scattering (upon small objects)Isotropic scattering [6]RCS-based scattering coefficient [6]Note:	For reasons of simplicity and simulation speed, the maximum order of reflection on a path without diffraction is configurable from {1,2,3}; the maximum order of diffraction on a path without reflection is configurable from {1,2}; the path containing both reflection and diffraction has 1-order reflection and 1-order diffraction, besides any potential penetrations; and the maximum order of penetration on a path is configurable, with the recommended value equal to 5. 
+
+Geometry calculation
+Electric field calculation
+LOS
+Free space LOS
+Friis equation [11]
+Reflection
+Snell's law with image-based method [7]
+Fresnel equation [7]
+Diffraction
+Fermat's principle [12]
+UTD [13]
+Penetration
+Snell's law for transmission through slab [8]
+Fresnel equation [7]
+Scattering (upon small objects)
+Isotropic scattering [6]
+RCS-based scattering coefficient [6]
+Note:	For reasons of simplicity and simulation speed, the maximum order of reflection on a path without diffraction is configurable from {1,2,3}; the maximum order of diffraction on a path without reflection is configurable from {1,2}; the path containing both reflection and diffraction has 1-order reflection and 1-order diffraction, besides any potential penetrations; and the maximum order of penetration on a path is configurable, with the recommended value equal to 5. 
 The outputs from Step 3 should at least contain following for each pair of link ends: 
 -	the LOS/NLOS flag to indicate whether a LOS propagation mechanism exists; 
 -	the number of deterministic propagation paths  (also referred as deterministic clusters in Step 8. To avoid the unnecessary computation complexity, these deterministic paths only include those paths whose powers are higher than 25dB below the maximum deterministic path power, where the path power is denoted as  and defined below); 
@@ -1629,12 +4951,12 @@ The outputs from Step 3 should at least contain following for each pair of link 
 -	to support for true motion, i.e. the case when a trajectory is specified for UT, a path ID is associated for each deterministic path. The same ID is associated for a path across a number of UT locations as far as 1) it has same interaction types in the same order and 2) its interactions occur in same walls or other surfaces. 
 	The  deterministic paths are sorted by normalized path delay () in ascending order. That is to say, = 0.
 	If =0 for a pair of link ends, the channel gain for this pair of link ends is assumed to be zero and the remaining steps are skipped with none of random cluster. 
-Step 4: Generate large scale parameters e.g. delay spread, angular spreads and Ricean K factor for random clusters. 
+Step 4: Generate large scale parameters e.g. delay spread, angular spreads and Ricean Kï¿½factor for random clusters. 
 	The generation of large scale parameters takes into account cross correlation according to Table 7.5-6 and uses the procedure described in Clause 3.3.1 of [14] with the square root matrixbeing generated using the Cholesky decomposition and the following order of the large scale parameter vector: sM = [sK, sDS, sASD, sASA, sZSD, sZSA]T. Limit random RMS azimuth arrival and azimuth departure spread values to 104 degrees, i.e., ASA= min(ASA ,104?), ASD = min(ASD ,104?). Limit random RMS zenith arrival and zenith departure spread values to 52 degrees, i.e., ZSA = min(ZSA,52?), ZSD = min(ZSD,52?). For the parameter selection from Table 7.5-6, the LOS/NLOS condition determined in Step 3 is applied. 
 Step 5: Generate delays (denoted as {?) for random clusters?
 	Delays are drawn randomly according to the exponential delay distribution 
 		(8.4-1)
-	where , Xn ~ uniform(0,1), and cluster index n = 0,…,  with  to be configurable. A recommended value for  is the number of clusters given in Table 7.5-6. 
+	where , Xnï¿½~ï¿½uniform(0,1), and cluster index nï¿½=ï¿½0,ï¿½,  with  to be configurable. A recommended value for  is the number of clusters given in Table 7.5-6. 
 	, where r? is the delay distribution proportionality factor given in Table 7.5-6. 
 	Normalise the delays by subtracting the minimum delay and sort the normalised delays to ascending order:
 		(8.4-2)
@@ -1667,7 +4989,7 @@ with constant  defined as
 		(8.4-11)
 where  is defined as a scaling factor related to the total number of clusters and is given in Table 7.5-2.
 In the LOS case, constant  also depends on the Ricean K-factor K in [dB], as generated in Step 4. Additional scaling of the angles is required to compensate for the effect of LOS peak addition to the angle spread.
-Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,–1}, and add component  to introduce random variation
+Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,ï¿½1}, and add component  to introduce random variation
 		(8.4-12)
 where is calculated as
 		(8.4-13)
@@ -1682,20 +5004,20 @@ with  defined as
 where  is a scaling factor related to the total number of clusters and is given in Table 7.5-4.
 In the LOS case, constant  also depends on the Ricean K-factor K in [dB], as generated in Step 4. Additional scaling of the angles is required to compensate for the effect of LOS peak addition to the angle spread. 
 
-Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,–1}, and add component  to introduce random variation
+Assign positive or negative sign to the angles by multiplying with a random variable Xn with uniform distribution to the discrete set of {1,ï¿½1}, and add component  to introduce random variation
 		(8.4-16)
 where  if the UT is located indoors and  if the UT is located outdoors, where  is calculated as
 		(8.4-17)
 Note that  shall be given in radians here.
 The generation of ZOD follows the same procedure as ZOA described above except equation (8.4-16) is replaced by 
 		(8.4-18)
-	where variable Xn is with uniform distribution to the discrete set of {1,–1}, , is given in Tables 7.5-7 to 7.5-11.
+	where variable Xn is with uniform distribution to the discrete set of {1,ï¿½1}, , is given in Tables 7.5-7 to 7.5-11.
 Step 8: Merge deterministic clusters and random clusters. 
 	First, remove any deterministic or random cluster with less than -25 dB power compared to max{,} for all 1?j?LRT and 1?i?LRC. Then, simply put the remaining deterministic clusters and random clusters into single set of clusters, and meanwhile maintain an attribute for each cluster to indicate whether the cluster is a deterministic cluster or a random cluster.
 Step 9: Generate ray delays and ray angle offsets inside each cluster, where the cluster can be either random or deterministic.
 Denote M as the number of rays per cluster, where M=1 if the cluster corresponds to n=1 in the LOS case, otherwise the value of M is given in Table 7.5-6.
 When : 
-The relative delay of m-th ray within n-th cluster is given by  for m = 1,…,M.
+The relative delay of m-th ray within n-th cluster is given by  for mï¿½=ï¿½1,ï¿½,M.
 The azimuth angle of arrival (AOA) for the m-th ray in n-th cluster is given by
 		(8.4-19)
 where  is the cluster-wise rms azimuth spread of arrival angles (cluster ASA) in Table 7.5-6, and offset angle ?m is given in Table 7.5-3.  equals to the AOA angle output from Step 3 if n-th cluster is deterministic cluster, and equals to the AOA angle (8.4-12) in Step 7 if n-th cluster is random cluster.
@@ -1703,7 +5025,7 @@ where  is the cluster-wise rms azimuth spread of arrival angles (cluster ASA) in
 The generation of AOD (?n,m,AOD) follows a procedure similar to AOA as described above.
 The zenith angle of arrival (ZOA) for the m-th ray in n-th cluster is given by
 		(8.4-20)
-where  is the cluster-wise rms spread of ZOA (cluster ZOA) in Table 7.5-6, and offset angle ?m is given in Table 7.5-3. Assuming that  is wrapped within [0, 360°], if , thenis set to .  equals to the ZOA angle output from Step 3 if n-th cluster is deterministic cluster, and equals to the ZOA angle (8.4-16) in Step 7 if n-th cluster is random cluster.
+where  is the cluster-wise rms spread of ZOA (cluster ZOA) in Table 7.5-6, and offset angle ?m is given in Table 7.5-3. Assuming that  is wrapped within [0, 360ï¿½], if , thenis set to .  equals to the ZOA angle output from Step 3 if n-th cluster is deterministic cluster, and equals to the ZOA angle (8.4-16) in Step 7 if n-th cluster is random cluster.
 The zenith angle of departure (ZOD) for the m-th ray in n-th cluster is given by
 		(8.4-21)
 where  is the mean of the ZSD log-normal distribution.  equals to the ZOD angle output from Step 3 if n-th cluster is deterministic cluster, and equals to the ZOD angle (8.4-18) in Step 7 if n-th cluster is random cluster.
@@ -1711,17 +5033,17 @@ When :
 The relative delay of m-th ray within n-th cluster is given by  that are sorted in ascending order, where , with the cluster delay spread as given in Table 7.5-6.  denotes the continuous uniform distribution on the interval . Note that  shall be the independently generated. 
 The azimuth angles (AOA and AOD) and zenith angles (ZOA and ZOD) for the m-th ray in n-th cluster in each frequency bin is given by
 		(8.4-22)
-for m = 1,…,M, where and  equal to the {AOA,AOD} and {ZOA, ZOD} angle outputs from Step 3 if n-th cluster is deterministic cluster, and equal to the {AOA,AOD} and {ZOA, ZOD} angle in Step 7 if n-th cluster is random cluster; and
+for mï¿½=ï¿½1,ï¿½,M, where and  equal to the {AOA,AOD} and {ZOA, ZOD} angle outputs from Step 3 if n-th cluster is deterministic cluster, and equal to the {AOA,AOD} and {ZOA, ZOD} angle in Step 7 if n-th cluster is random cluster; and
 		(8.4-23)
 with the respective cluster angular spreads as given in Tables 7.5-6 to 7.5-11.
-Assuming that is wrapped within [0, 360°], if , thenis set to .
+Assuming that is wrapped within [0, 360ï¿½], if , thenis set to .
 Step 10: Generate power of rays in each cluster, where coupling of rays within a cluster for both azimuth and elevation could be needed.
 Given  as the real power in k-th frequency bin for the n-th cluster (either deterministic or random) obtained from Step 8,
 When : 
 Couple randomly AOD angles ?n,m,AOD to AOA angles ?n,m,AOA within a cluster n. Couple randomly ZOD angles  with ZOA angles using the same procedure. Couple randomly AOD angles ?n,m,AOD with ZOD angles within a cluster n.
-The power of m-th ray in n-th cluster and in k-th frequency bin is given by  for m = 1,…,M.
+The power of m-th ray in n-th cluster and in k-th frequency bin is given by  for mï¿½=ï¿½1,ï¿½,M.
 When : 
-The power of m-th ray in n-th cluster and in k-th frequency bin is given by  for m = 1,…,M, where 
+The power of m-th ray in n-th cluster and in k-th frequency bin is given by  for mï¿½=ï¿½1,ï¿½,M, where 
 		(8.4-24)
 and , , , and  are respectively the intra-cluster delay spread and the corresponding intra-cluster angular spreads that are given in Table 7.5-6. The cluster zenith spread of departure is given by
 	,	(8.4-25)
@@ -1752,7 +5074,7 @@ The Doppler frequency component is calculated from the arrival angles (AOA, ZOA)
 		(8.4-32)
 where the corresponding delay (TOA) for cluster n=1 for a link between Rx antenna u and Tx antenna s is given by .
 In (8.4-27) and (8.4-32), the oxygen absorption loss, OLn,m(f), for each ray m in cluster n at carrier frequency f is modelled as 
-	OLn,m(f) = ?(f)/1000 · c ·  [dB]	(8.4-33)
+	OLn,m(f) = ?(f)/1000 ï¿½ c ï¿½  [dB]	(8.4-33)
 where:
 -	?(f) is the frequency dependent oxygen loss per distance (dB/km) characterized in Clause 7.6.1;
 -	c is speed of light (m/s); and
@@ -1764,7 +5086,7 @@ Further parameter definitions
 A.1	Calculation of angular spread
 Based on the circular standard deviation in directional statistics, the following expression for the angular spread AS in radians is proposed
 		(A-1)
-where  is the power for the mth subpath of the nth path and  is the subpaths angle (either AOA, AOD, ZOA, ZOD) given in radians.
+where ï¿½is the power for the mth subpath of the nth path and ï¿½is the subpaths angle (either AOA, AOD, ZOA, ZOD) given in radians.
 A.2	Calculation of mean angle
 The power weighted mean angle is given by
 		(A-2)
@@ -1773,7 +5095,256 @@ where  is the power for the mth subpath of the nth path and  is the subpaths ang
 
 Annex B: Change history
 
-Change historyDateMeetingTDocCRRevCatSubject/CommentNew version2017-02RAN1#88R1-1703641Skeleton TR based on TR 38.900 v14.2.0, adding new changes (from R1-1701231, R1-1701406, R1-1701410, R1-1701411, R1-1701412, R1-1701413, R1-1701414, R1-1701416, R1-1701417 and R1-1701425) to have a TR applicable for the frequency range 0.5 to 100 GHz0.0.12017-02RAN1#88R1-1704145Adding new agreements (from R1-1702701, R1-1703635, R1-1703873, R1-1703358, R1-1702703, R1-1703637, R1-1703354, R1-1703458, R1-1703647, R1-1701936) and reflecting comments from RAN1 e-mail discussions [88-17].0.1.02017-02RAN#75RP-170394Submitted to RAN for information1.0.02017-03RAN#75RP-170737Add TR number further to the approval of revised SID in RP-170379. Submitted to RAN for one step approval1.0.12017-03RAN#75MCC clean-up – Further to RAN#75 decision, TR goes under change control as Rel-14 14.0.02017-06RAN#76RP-1712080001-FCorrection on site specific effective height for TR38.90114.1.02017-06RAN#76RP-1712080003-FCorrection for LOS probability14.1.02017-06RAN#76RP-1712080004-FCorrection for scaling factor for ZOD generation14.1.02017-06RAN#76RP-1712080005-FCorrection for modelling of intra-cluster angular and delay spreads14.1.02017-06RAN#76RP-1712080007-FTR38.901_CR_LCS_Radiation_Field_Notation14.1.02017-06RAN#76RP-1712080008-FTR38.901_CR_Mean_angle_definition14.1.02017-06RAN#76RP-1712080009-FTR38.901_CR_O2I_penetration_loss14.1.02017-06RAN#76RP-17120800101FTR38.901_CR_Correction_on_Rural_LSP14.1.02017-06RAN#76RP-17120800111FClarification for spatial consistency procedure14.1.02017-06RAN#76RP-1712080013-FTR38.901_CR_Scenarios_in_Simulation_Assumptions14.1.02017-06RAN#76RP-1712080014-FTR38.901_CR_TDL_Spatial_Filter14.1.02017-06RAN#76RP-1712080015-FCorrection of spatial-consistency UE mobility modelling Procedure A14.1.02017-07MCC: UMa LOS probability in Table 7.4-2 is made fully visible14.1.12017-09RAN#77RP-1716480016-FCorrection on the formula of Annex A14.2.02017-09RAN#77RP-17164800182FCorrection on cross polarization power ratios in TR 38.90114.2.02017-09RAN#77RP-17164800191FTR38.901_CR_Spatially-consistent_UT_modelling14.2.02017-09RAN#77RP-17164800201FTR38.901_CR_Calibraiton_Results14.2.02017-12RAN#78RP-1726870022-FCorrection on 3D-InH channel model in TR 38.90114.3.02018-06SA#80----Update to Rel-15 version (MCC)15.0.02019-09RAN#85RP-1919440023-BAddition of indoor industrial channel model – version created in error – withdrawn15.1.02019-10RAN#85RP-1919440023-BAddition of indoor industrial channel model – creation of rel-16 report16.0.02019-12RAN#86RP-1926290024-FCR to TR 38.901 for remaining open issues in IIOT channel modelling16.1.02022-03SA#95-eUpdate to Rel-17 version (MCC)17.0.02023-12RAN#102RP-2337270025-FCR correcting scaling of angles for CDL model and a figure reference17.1.02024-03SA#103----Update to Rel-18 version (MCC)18.0.0
+Change history
+Date
+Meeting
+TDoc
+CR
+Rev
+Cat
+Subject/Comment
+New version
+2017-02
+RAN1#88
+R1-1703641
+
+
+
+Skeleton TR based on TR 38.900 v14.2.0, adding new changes (from R1-1701231, R1-1701406, R1-1701410, R1-1701411, R1-1701412, R1-1701413, R1-1701414, R1-1701416, R1-1701417 and R1-1701425) to have a TR applicable for the frequency range 0.5 to 100 GHz
+0.0.1
+2017-02
+RAN1#88
+R1-1704145
+
+
+
+Adding new agreements (from R1-1702701, R1-1703635, R1-1703873, R1-1703358, R1-1702703, R1-1703637, R1-1703354, R1-1703458, R1-1703647, R1-1701936) and reflecting comments from RAN1 e-mail discussions [88-17].
+0.1.0
+2017-02
+RAN#75
+RP-170394
+
+
+
+Submitted to RAN for information
+1.0.0
+2017-03
+RAN#75
+RP-170737
+
+
+
+Add TR number further to the approval of revised SID in RP-170379. Submitted to RAN for one step approval
+1.0.1
+2017-03
+RAN#75
+
+
+
+
+MCC clean-up ï¿½ Further to RAN#75 decision, TR goes under change control as Rel-14 
+14.0.0
+2017-06
+RAN#76
+RP-171208
+0001
+-
+F
+Correction on site specific effective height for TR38.901
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0003
+-
+F
+Correction for LOS probability
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0004
+-
+F
+Correction for scaling factor for ZOD generation
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0005
+-
+F
+Correction for modelling of intra-cluster angular and delay spreads
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0007
+-
+F
+TR38.901_CR_LCS_Radiation_Field_Notation
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0008
+-
+F
+TR38.901_CR_Mean_angle_definition
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0009
+-
+F
+TR38.901_CR_O2I_penetration_loss
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0010
+1
+F
+TR38.901_CR_Correction_on_Rural_LSP
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0011
+1
+F
+Clarification for spatial consistency procedure
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0013
+-
+F
+TR38.901_CR_Scenarios_in_Simulation_Assumptions
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0014
+-
+F
+TR38.901_CR_TDL_Spatial_Filter
+14.1.0
+2017-06
+RAN#76
+RP-171208
+0015
+-
+F
+Correction of spatial-consistency UE mobility modelling Procedure A
+14.1.0
+2017-07
+
+
+
+
+
+MCC: UMa LOS probability in Table 7.4-2 is made fully visible
+14.1.1
+2017-09
+RAN#77
+RP-171648
+0016
+-
+F
+Correction on the formula of Annex A
+14.2.0
+2017-09
+RAN#77
+RP-171648
+0018
+2
+F
+Correction on cross polarization power ratios in TR 38.901
+14.2.0
+2017-09
+RAN#77
+RP-171648
+0019
+1
+F
+TR38.901_CR_Spatially-consistent_UT_modelling
+14.2.0
+2017-09
+RAN#77
+RP-171648
+0020
+1
+F
+TR38.901_CR_Calibraiton_Results
+14.2.0
+2017-12
+RAN#78
+RP-172687
+0022
+-
+F
+Correction on 3D-InH channel model in TR 38.901
+14.3.0
+2018-06
+SA#80
+-
+-
+-
+-
+Update to Rel-15 version (MCC)
+15.0.0
+2019-09
+RAN#85
+RP-191944
+0023
+-
+B
+Addition of indoor industrial channel model ï¿½ version created in error ï¿½ withdrawn
+15.1.0
+2019-10
+RAN#85
+RP-191944
+0023
+-
+B
+Addition of indoor industrial channel model ï¿½ creation of rel-16 report
+16.0.0
+2019-12
+RAN#86
+RP-192629
+0024
+-
+F
+CR to TR 38.901 for remaining open issues in IIOT channel modelling
+16.1.0
+2022-03
+SA#95-e
+
+
+
+
+Update to Rel-17 version (MCC)
+17.0.0
+2023-12
+RAN#102
+RP-233727
+0025
+-
+F
+CR correcting scaling of angles for CDL model and a figure reference
+17.1.0
+2024-03
+SA#103
+-
+-
+-
+-
+Update to Rel-18 version (MCC)
+18.0.0
+
 [VN1]Intra Cluster Excess Delay Offset
 [VN2]Cluster Power
 [VN3]Doppler Freq Basic Equation

@@ -284,7 +284,7 @@ class Environment:
             # Use the general speed_range for the flock's speed magnitude
             flock_speed_for_this_cluster = self.rng.uniform(speed_range[0], speed_range[1]) if speed_range else 0.0
             
-            generated_shared_flock_velocity_for_cluster = np.zeros(3, dtype=float) # Initialize
+            generated_shared_flock_velocity_for_cluster = np.zeros(3, dtype=float) # Initisalise
             flock_direction = None
 
             if flock_speed_for_this_cluster > 1e-9: # Only determine direction if speed is meaningful
@@ -439,7 +439,7 @@ class Environment:
             # Phase 3: Reconcile flock velocities. If any member of a flock reflected, the flock reflects.
             for cluster_idx, cluster_data in enumerate(self.clusters):
                 original_flock_velocity = cluster_data.get('shared_flock_velocity')
-                if original_flock_velocity is None: # Not a flocking cluster or not initialized
+                if original_flock_velocity is None: # Not a flocking cluster or not initisalised
                     continue
 
                 new_collective_flock_velocity = original_flock_velocity.copy()

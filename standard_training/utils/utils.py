@@ -49,31 +49,36 @@ def load_model(config):
     
     # Check if model is in our predefined list
     model_name_lower = model_name.lower()
-    if model_name_lower in SUPPORTED_MODELS:
-        print(f"Using pre-imported model: {model_name}")
-        ModelClass = SUPPORTED_MODELS[model_name_lower]
-        model = ModelClass(**model_params)
-    else:
-        # Try dynamic import
-        try:
-            # Import the model module
-            module_path = f"standard_training.models.{model_name.lower()}"
-            model_module = importlib.import_module(module_path)
-            
-            # Get model class (assume it's capitalized)
-            model_class_name = model_name.upper()
-            ModelClass = getattr(model_module, model_class_name)
-            
-            # Instantiate the model with parameters
+    ModelClass = SUPPORTED_MODELS.get(model_name_lower)
+
+    if ModelClass is None:
+        raise ValueError(f"Model '{model_name}' not supported. Supported models: {', '.join(SUPPORTED_MODELS.keys())}")
+
+    # Instantiate the model
+    try:
+        if model_name_lower == "combined_unet_srcnn":
+            unet_combined_args = {
+                'unet_args': model_params,  # model_params is config.model.params
+                'pretrained_unet': model_config.get('pretrained_unet', None),
+                'pretrained_srcnn': model_config.get('pretrained_srcnn', None)
+            }
+            print(f"Instantiating {model_name} with specific args for UNetCombinedModel")
+            model = ModelClass(**unet_combined_args)
+        elif ModelClass: # Check if ModelClass was successfully obtained (either from SUPPORTED_MODELS or dynamic import)
+            print(f"Using model: {model_name}")
             model = ModelClass(**model_params)
-        except ImportError as e:
-            raise ImportError(f"Could not import model module for '{model_name}': {e}")
-        except AttributeError as e:
-            raise AttributeError(f"Could not find model class '{model_class_name}' in module: {e}")
-        except Exception as e:
-            raise RuntimeError(f"Error loading model '{model_name}': {e}")
+        else:
+            # This case should ideally be caught earlier if dynamic import also fails
+            raise RuntimeError(f"Model class for '{model_name}' could not be determined.")
+            
+    except TypeError as e:
+        raise TypeError(f"Error instantiating model '{model_name}' with params {model_params if model_name_lower != 'combined_unet_srcnn' else unet_combined_args}: {e}")
+    except Exception as e:
+        raise RuntimeError(f"General error during model instantiation for '{model_name}': {e}")
     
-    # Load pretrained weights if specified
+    # Load pretrained weights if specified for the entire model
+    # This is separate from component-specific pretraining (e.g. pretrained_unet for UNetCombinedModel)
+    # which should be handled during the model's own __init__.
     pretrained_path = model_config.get('pretrained_path', None)
     if pretrained_path and os.path.exists(pretrained_path):
         print(f"Loading pretrained weights from: {pretrained_path}")

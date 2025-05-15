@@ -9,14 +9,13 @@ Dependencies:
     - numpy
 """
 import torch
-from torch.utils.data import DataLoader, random_split, Subset, Dataset
+from torch.utils.data import DataLoader, Subset, Dataset
 
 # Import dataset classes
 from .standard_dataset import StandardDataset
 
 SUPPORTED_DATASETS = {
     "standard": StandardDataset,
-    "channel": StandardDataset  # Alias for backward compatibility
 }
 
 # --- Normalisation Helper Functions ---
@@ -50,7 +49,7 @@ def calculate_zscore_params(dataset):
     return mean, std
 
 def calculate_minmax_params(dataset):
-    """Calculates min and max for min-max normalization across the entire dataset.
+    """Calculates min and max for min-max normalisation across the entire dataset.
     Assumes dataset __getitem__ returns (input, target) tensors with shape (C, H, W).
     Calculates stats per channel based on the input tensors.
     """
@@ -100,7 +99,7 @@ def apply_zscore(tensor, mean_v, std_v):
     std_safe = torch.max(std_v.view(2, 1, 1), torch.tensor(1e-6, device=tensor.device))
 
     if num_channels >= 2:
-        # Apply normalization only to the first 2 channels
+        # Apply normalisation only to the first 2 channels
         result[:2] = (tensor[:2] - mean_reshaped) / std_safe
         # Channels from index 2 onwards remain unchanged in the cloned 'result'
     elif num_channels == 1:
@@ -134,7 +133,7 @@ def apply_minmax(tensor, min_val, max_val):
     denominator = torch.max(denominator, torch.tensor(1e-6, device=tensor.device)) 
 
     if num_channels >= 2:
-        # Apply normalization only to the first 2 channels
+        # Apply normalisation only to the first 2 channels
         result[:2] = (tensor[:2] - min_reshaped) / denominator
         # Channels from index 2 onwards remain unchanged
     elif num_channels == 1:
@@ -259,7 +258,7 @@ def load_data(config, mode='train'):
 
     # --- Calculate Normalisation Params from Training Set --- 
     print("\n" + "-"*60)
-    print("NORMALIZATION")
+    print("normalisATION")
     print("-"*60)
     norm_type = data_config.get('normalisation', 'none').lower()
     norm_params_input  = None

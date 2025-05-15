@@ -117,7 +117,7 @@ def _nearest_neighbor_interpolation(sample, rows, cols, n_sc, n_sym, n_channels)
     
     # For each pilot position, calculate distances to all grid points
     for ch in range(n_channels):
-        # Initialize with zeros or the original sample
+        # Initisalise with zeros or the original sample
         channel_result = np.zeros((n_sc, n_sym))
         
         # For each non-pilot position, find the nearest pilot

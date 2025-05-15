@@ -1,0 +1,74 @@
+# --- UNet SRCNN Supermask Configuration ---
+# Configuration for supermask-based continual learning on multiple pilot patterns
+
+experiment_name: unet_srcnn_supermask_continual_learning
+
+framework:
+  seed: 42
+
+model:
+  name: unet_srcnn_supermask
+  # Path to the non-supermask pretrained model (standard UNet/SRCNN) to initialise weights for training
+  pretrained_path: C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Project\standard_training\checkpoints\unet\unet_srcnn_trained_on_datasetMIXED\best_model.pth
+  # Path to a trained supermask model to use for evaluation mode
+  evaluation_path: null # C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Main\Learning_Algorithms\results\checkpoints\supermask\unet_srcnn_supermask_continual_learning-20250507_141356\final_model_all_tasks.pth
+  params:
+    unet_args:
+      base_features: 48  # Base feature multiplier for UNet
+  sparsity: 0.1          # Sparsity level for supermasks should be 1 to 5% isnt working well for low (increased to 10%)
+  alpha: 0.3             # Mixing coefficient between random and pretrained weights (0=all pretrained, 1=all random)
+  mask_pretrained: false # Whether to apply masks to pretrained weights (default: false)
+  strict_load: True
+
+data:
+  dataset_type: supermask
+  data_dir: ./data/raw/original/
+  preprocessed_dir: ./data/preprocessed/supermasks/
+  data_name: supermask_dataset1.mat         # Default dataset (will be overridden in sequential mode)
+  dataset_a_name: supermask_dataset1.mat    # Dataset with low pilot density
+  dataset_b_name: supermask_dataset2.mat    # Dataset with medium pilot density
+  dataset_c_name: supermask_dataset3.mat    # Dataset with high pilot density
+  interpolation: rbf
+  normalisation: zscore
+  normalise_target: True
+  num_workers: 0
+  validation_split: 0.15
+  test_split: 0.15
+  split_ratios: [0.7, 0.15, 0.15]
+  normalise_before_interp: false
+
+training:
+  epochs: 2
+  batch_size: 32
+  loss_function: mse
+  optimiser: adam
+  learning_rate: 5e-2
+  weight_decay: 1e-5
+  betas: [0.9, 0.999]
+  early_stopping_patience: 5
+  scheduler: True
+  scheduler_type: ReduceLROnPlateau
+  scheduler_factor: 0.5
+  scheduler_patience: 2
+  scheduler_min_lr: 1e-6
+
+  # Specific to sequential training
+  reduce_lr_for_sequential: true   # Reduce learning rate for subsequent datasets
+  sequential_lr_factor: 0.5        # Factor to multiply learning rate by for subsequent datasets
+
+evaluation:
+  metrics: [nmse, psnr]
+  plot_n_examples: 2 
+
+logging:
+  checkpoint_dir: ./continual_learning/checkpoints/supermask/
+
+hardware:
+  device: auto
+  use_amp: True
+
+# --- Supermask Specific Configuration ---
+supermask:
+  tasks: 3                # Number of tasks/masks (one for each dataset/pilot pattern)
+  sequence: [a,b,c]       # assume a = low, b = medium, c = high pilot density
+  save_task_specific_models: False  # Whether to save individual models for each task (default: False)

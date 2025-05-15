@@ -76,7 +76,7 @@ def _handle_boundaries(
             # A more accurate reflection would only flip the phase contribution from the normal direction.
             if oscillation_axis is not None and abs(oscillation_axis[i]) > 1e-6: # If movement along this axis contributed
                  adj_osc_phase = np.pi - adj_osc_phase 
-                 # Normalize phase to [0, 2*pi) or (-pi, pi] if desired, though not strictly necessary for np.sin
+                 # normalise phase to [0, 2*pi) or (-pi, pi] if desired, though not strictly necessary for np.sin
                  # adj_osc_phase = adj_osc_phase % (2 * np.pi)
 
     return adj_pos, adj_velocity, adj_osc_center, adj_osc_phase

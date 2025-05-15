@@ -23,7 +23,7 @@ from ..denoising_autoencoder import DenoisingAutoencoder, DenoisingResAutoencode
 class CombinedModel_AESRCNN(nn.Module):
     def __init__(self, autoencoder_type="residual", pretrained_autoencoder=None, pretrained_srcnn=None):
         """
-        Initialize the combined model
+        Initisalise the combined model
         
         Args:
             autoencoder_type: Type of autoencoder to use ("basic" or "residual")
@@ -32,13 +32,13 @@ class CombinedModel_AESRCNN(nn.Module):
         """
         super(CombinedModel_AESRCNN, self).__init__()
         
-        # Initialize the autoencoder
+        # Initisalise the autoencoder
         if autoencoder_type == "basic":
             self.autoencoder = DenoisingAutoencoder(input_channels=2)
         else:
             self.autoencoder = DenoisingResAutoencoder(input_channels=2)
             
-        # Initialize the SRCNN
+        # Initisalise the SRCNN
         self.srcnn = SRCNN()
         
         # Load pretrained weights if provided
