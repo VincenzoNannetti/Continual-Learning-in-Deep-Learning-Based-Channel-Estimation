@@ -17,11 +17,10 @@ cluster_radius: 6                  # Reduced from 35 in RMa preset
 # cluster_height_range: 1000        
 rms_delay_spread_ns: 250           # Modified from 129 in RMa preset
 use_aggregate_scattering: true     # Modified from false in RMa preset
+far_field_margin: 6e-2             # Far field region of 6cm
 
 # ---- Custom Movement Parameters ----
-# These parameters are unique to this config and not in presets
 scatterer_movement_type: "linear"     # Movement model to use
-far_field_margin: 6e-2                  # Far field region of 6cm
 
 # ---- Flocking Movement Parameters ----
 cluster_movement_params:

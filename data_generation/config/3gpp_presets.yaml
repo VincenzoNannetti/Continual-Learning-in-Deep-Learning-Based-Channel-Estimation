@@ -20,7 +20,7 @@ UMa:  # Urban Macrocell
   # Propagation parameters
   snr: [10, 25]                   # Signal-to-noise ratio (dB)
   use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  pathloss_model: "friis"          # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss:
     low_loss_probability: 0.5     # Probability of low-loss building material
     low_loss: 20
@@ -172,7 +172,7 @@ InF-SL:  # Indoor Factory - Sparse clutter, Low BS
   # Propagation parameters
   snr: [15, 20]                   # Signal-to-noise ratio (dB)
   use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  pathloss_model: "3gpp"         # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss: 15        # Factory walls are typically more substantial
   los_probability_indoor: 0.7     # Probability of LOS in indoor
   
@@ -246,7 +246,7 @@ InF-SH:  # Indoor Factory - Sparse clutter, High BS
   # Propagation parameters
   snr: [18, 25]                   # Signal-to-noise ratio (dB)
   use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  pathloss_model: "3gpp"         # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss: 15
   los_probability_indoor: 0.7     # Probability of LOS in indoor
   
@@ -283,7 +283,7 @@ InF-DH:  # Indoor Factory - Dense clutter, High BS
   # Propagation parameters
   snr: [12, 20]                   # Signal-to-noise ratio (dB)
   use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
+  pathloss_model: "3gpp"         # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss: 15
   los_probability_indoor: 0.7     # Probability of LOS in indoor
   

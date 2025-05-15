@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains Python scripts designed to generate datasets of Orthogonal Frequency Division Multiplexing (OFDM) channel matrices. The generation process simulates various wireless channel conditions using parameters derived from a simplified ray-tracing concept, allowing for the creation of diverse datasets suitable for research in wireless communications, machine learning for channel estimation, and other related fields.
+This directory contains Python scripts designed to generate datasets of Orthogonal Frequency Division Multiplexing (OFDM) channel matrices. The generation process simulates various wireless channel conditions using parameters derived from a simplified ray-tracing concept, allowing for the creation of diverse datasets suitable for research in wireless communications, machine learning for channel estimation, and other related fields. This simplified approach typically involves modelling a primary direct path and a configurable number of scattered paths, each characterised by specific delays, attenuations, and angles of arrival/departure, as opposed to computationally intensive full 3D ray-tracing.
 
 The core script, `generate_dataset.py`, orchestrates the generation process, leveraging configuration files and helper classes to produce the desired datasets.
 
@@ -62,7 +62,7 @@ Dataset generation is controlled by YAML files located in the `../config/` direc
 *   `subcarrier_spacing`: OFDM subcarrier spacing (Hz).
 *   `use_aggregate_scattering`: Boolean (`true`/`false`) or a list `[true, false]` to enable/disable an additional scattering term in the channel model.
 *   `blocks`: Number of 14-symbol OFDM blocks to generate per sample.
-*   `output_dir`: The directory path where the generated `.mat` file will be saved (e.g., `"./data/raw/dataset_a"`).
+*   `output_dir`: The directory path where the generated `.mat` file will be saved (e.g., `'./data/raw/dataset_a'`).
 
 Refer to the example YAML files for detailed structure.
 

@@ -1,0 +1,75 @@
+# --- Combined (DnCNN+SRCNN) Model Configuration ---
+# Based on old combined_model_training.yaml
+
+experiment_name: combined_srcnn_dncnn
+
+framework:
+  seed: 42
+
+model:
+  name: combined_srcnn_dncnn 
+  params: {} 
+  order: srcnn_first # can also be dncnn_first
+  strict_load: True
+
+  # Path to the pretrained model 
+  pretrained_path: C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Main\Learning_Algorithms\results\checkpoints\combined\combinedsrcnndn-all_test_data_SNR20_-20250423_001154\best_model.pth
+
+  # Assuming loading pretrained components, adjust paths as needed
+  pretrained_dncnn: null # path to trained DnCNN
+  pretrained_srcnn: null # path to trained SRCNN
+  strict_load: False
+
+  # This needs to be handled within CombinedModel's implementation or here
+  freeze_dncnn: False # Add freeze methods to CombinedModel 
+  freeze_srcnn: False # Add freeze methods to CombinedModel 
+
+data:
+  dataset_type: channel
+  data_dir_self: ./Learning_Algorithms/data/raw/My Data/ 
+  data_dir_paper: ./Learning_Algorithms/data/raw/Paper Data/
+  preprocessed_dir: ./Learning_Algorithms/data/preprocessed/
+  data_source: self 
+  snr: 20 
+  data_name: all_test_data_SNR20_no_agg_scatter_4blocks # all_test_data_SNR0_with_agg_scatter_4blocks_datasetB 
+  dataset_a_name: all_test_data_SNR20_no_agg_scatter_4blocks
+  dataset_b_name: all_test_data_SNR0_with_agg_scatter_4blocks_datasetB
+  num_pilots: 48
+  interpolation: rbf 
+  normalisation: minmax 
+  normalise_before_interp: True
+  normalise_target: True
+  num_workers: 0
+  validation_split: 0.15
+  test_split: 0.15
+
+training:
+  epochs: 100 
+  batch_size: 128 
+  loss_function: huber  # / mse / mae
+  # huber_delta: 0.5
+  optimiser: adam 
+  learning_rate: 4.680475913577477e-05
+  weight_decay: 0.0001 
+  betas: [0.9, 0.999]
+  eps: 1e-8
+  scheduler: True 
+  scheduler_type: ReduceLROnPlateau
+  scheduler_factor: 0.1 
+  scheduler_patience: 5 
+  scheduler_min_lr: 1e-6
+  early_stopping_patience: 15 
+
+evaluation:
+  metrics: [nmse, psnr, mse, ssim]
+  # save_results_path: ./Learning_Algorithms/results/evaluations/combined_eval.yaml 
+  save_results_dir: ./Learning_Algorithms/Catastrophic_Forgetting/results/srcnn_dncnn/eval_a
+
+
+logging:
+  checkpoint_dir: ./Learning_Algorithms/results/checkpoints/combined/ 
+
+hardware:
+  device: auto
+  use_amp: True 
+

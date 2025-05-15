@@ -1,0 +1,58 @@
+# --- Autoencoder Baseline Configuration ---
+
+experiment_name: denoising_res_autoencoder
+
+framework:
+  seed: 42
+
+model:
+  name: denoising_res_autoencoder
+  params: {input_channels: 2} 
+  pretrained_path: C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Main\Learning_Algorithms\results\checkpoints\autoencoder\autoencoder_residual_finetuned_on_datasetB\best_model.pth
+  strict_load: True
+
+data:
+  dataset_type: channel
+  data_dir_self: ./Learning_Algorithms/data/raw/My Data/ 
+  data_dir_paper: ./Learning_Algorithms/data/raw/Paper Data/
+  preprocessed_dir: ./Learning_Algorithms/data/preprocessed/
+  data_source: self 
+  snr: 20 
+  data_name: all_test_data_SNR20_no_agg_scatter_4blocks
+  dataset_a_name: all_test_data_SNR20_no_agg_scatter_4blocks
+  dataset_b_name: all_test_data_SNR0_with_agg_scatter_4blocks_datasetB 
+  num_pilots: 48 
+  interpolation: rbf 
+  normalisation: zscore 
+  normalise_before_interp: False 
+  normalise_target: True
+  num_workers: 0
+  validation_split: 0.15
+  test_split: 0.15
+
+training:
+  epochs: 100 
+  batch_size: 128 
+  loss_function: mae 
+  optimiser: adam 
+  learning_rate: 0.006190576468510403
+  weight_decay: 0
+  betas: [0.9, 0.999]
+  eps: 1e-8
+  scheduler: True 
+  scheduler_type: ReduceLROnPlateau
+  scheduler_factor: 0.1 
+  scheduler_patience: 5 
+  scheduler_min_lr: 1e-6
+  early_stopping_patience: 15 
+
+evaluation:
+  metrics: [nmse, psnr, mse, ssim]
+  save_results_dir: ./Learning_Algorithms/Catastrophic_Forgetting/results/ae_residual/finetuned_eval_a
+
+logging:
+  checkpoint_dir: ./Learning_Algorithms/results/checkpoints/autoencoder/ 
+
+hardware:
+  device: auto
+  use_amp: True 

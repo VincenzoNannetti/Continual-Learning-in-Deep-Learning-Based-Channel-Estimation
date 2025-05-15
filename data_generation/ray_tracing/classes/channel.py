@@ -17,13 +17,14 @@ def advance_phases(phases, f_D, dt):
 
 
 class Channel:
-    def __init__(self, environment, tx_antenna, rx_antenna, snr, pathloss_model="friis",
+    def __init__(self, environment, tx_antenna, rx_antenna, snr, center_frequency, pathloss_model="friis",
                  o2i_loss=0, reflection_amplitude=None, cluster_density=0.5, cluster_radius=20, 
                  los_probability_indoor=0.7, rms_delay_spread_ns=100, shadow_fading_std_db=4.0, 
                  rng=None, use_random_walk=True):
         self.environment          = environment                                                                     # Environment object containing scatterers, antennas, etc.
         self.tx_antenna           = tx_antenna                                                                      # TX antenna from environment
         self.rx_antenna           = rx_antenna                                                                      # RX antenna from environment
+        self.fc                   = center_frequency                                                                # System center frequency in Hz
         self.snr                  = snr                                                                             # determines power of noise
         self.environment_type     = environment.scatterers[0].environment_type if environment.scatterers else "UMa" # environment type from environment object
         self.pathloss_model       = pathloss_model                                                                  # pathloss model to use (friis or 3gpp)
@@ -153,7 +154,7 @@ class Channel:
         # Initialise phase tracking for all scatterers
         self.scatterer_phases = np.zeros(len(self.environment.scatterers))
 
-    def apply_channel(self, input_data, frequency, subcarrier_spacing, num_subcarriers, cyclic_prefix=0):
+    def apply_channel(self, input_data, subcarrier_spacing, num_subcarriers, cyclic_prefix=0):
         # Ensure channel parameters are prepared
         self.prepare_channel()
 
@@ -167,7 +168,7 @@ class Channel:
 
         # Pre-compute the sub-carrier frequencies for the *whole* frame
         sub_idx           = np.arange(num_subcarriers) - num_subcarriers // 2
-        subcarrier_freqs  = frequency + sub_idx * subcarrier_spacing
+        subcarrier_freqs  = self.fc + sub_idx * subcarrier_spacing
 
         # Calculate the total symbol length including cyclic prefix
         symbol_length = num_subcarriers + cyclic_prefix
@@ -219,7 +220,7 @@ class Channel:
             # Get antenna gains in linear scale
             for j in range(num_subcarriers):
                 # calculate the subcarriers frequency
-                f_k = frequency + (j - num_subcarriers // 2) * subcarrier_spacing
+                f_k = self.fc + (j - num_subcarriers // 2) * subcarrier_spacing
                 lambda_ = 3e8 / f_k # Wavelength for this subcarrier
 
                 # Determine if path is LOS based on environment
@@ -561,9 +562,63 @@ class Channel:
 
         # Precompute LOS/NLOS pathloss in dB for each scenario
         if self.environment_type == "UMa":
-            h_E = 1.0
+            # Implement UMa h_E calculation as per TR 38.901 V18.0.0, Table 7.4.1-1, Note 1
+            # fc_GHz (array of subcarrier frequencies in GHz) is already available for pathloss terms.
+            # h_UT is self.rx_height
+            # d_2d is available
+
+            # For C(d_2D, h_UT) calculation, use the system's center frequency (fc) in GHz
+            # as per 3GPP TR 38.901, which specifies f_c (centre frequency) for this parameter.
+            _center_fc_GHz_for_C = self.fc / 1e9 # System center frequency in GHz
+
+            c_threshold_num = 185 * (h_UT / 1.5)**0.4 * (_center_fc_GHz_for_C / 5.0)**-0.25
+            
+            # Vectorized C_val calculation: d_2d can be an array
+            # Create a mask for valid values to avoid invalid power computation
+            valid_mask = d_2d > c_threshold_num
+            
+            # Initialize C_val with zeros
+            C_val = np.zeros_like(d_2d)
+            
+            # Only compute the power for valid elements (where d_2d > c_threshold_num)
+            if np.any(valid_mask):
+                C_val[valid_mask] = ((d_2d[valid_mask] / c_threshold_num) - 1.0)**1.7
+            
+            prob_h_E_is_1m = 1.0 / (1.0 + C_val) # prob_h_E_is_1m can now be an array
+
+            # Vectorized h_E determination
+            # Ensure prob_h_E_is_1m is treated as an array for consistent shape handling
+            _prob_h_E_is_1m_arr = np.atleast_1d(prob_h_E_is_1m)
+            # Generate random samples with the same shape as _prob_h_E_is_1m_arr
+            random_samples = self.rng.random(size=_prob_h_E_is_1m_arr.shape)
+            
+            # Initialize h_E as an array with default value 1.0
+            h_E = np.ones_like(_prob_h_E_is_1m_arr, dtype=float) 
+            
+            # Create a mask for elements where h_E should be chosen from the distribution
+            needs_dist_choice_mask = random_samples >= _prob_h_E_is_1m_arr
+            
+            if np.any(needs_dist_choice_mask): # Proceed only if any elements need alternative h_E
+                max_h_E_val = math.floor(h_UT - 1.5) # h_UT is scalar
+                possible_h_E_values = [h_val for h_val in range(12, int(max_h_E_val) + 1, 3)]
+                
+                if possible_h_E_values:
+                    # Number of choices needed from the distribution
+                    num_choices_needed = np.sum(needs_dist_choice_mask)
+                    # Draw random choices
+                    chosen_h_values = self.rng.choice(possible_h_E_values, size=num_choices_needed)
+                    # Assign chosen values to the corresponding elements in h_E
+                    h_E[needs_dist_choice_mask] = chosen_h_values
+                # If possible_h_E_values is empty, h_E remains 1.0 for those masked elements,
+                # which aligns with the original fallback logic.
+            
+            # h_E is now an array if d_2d was an array, or a 1-element array if d_2d was scalar.
+            # This will broadcast correctly in subsequent calculations.
+            
+            # Original h_E = 1.0 line is now replaced by the logic above
             h_BS_eff = h_BS - h_E
             h_UT_eff = h_UT - h_E
+
             d_BP = 4 * h_BS_eff * h_UT_eff * (fc_Hz) / c_light
             d_BP = np.maximum(d_BP, 1.0)
 
@@ -631,8 +686,8 @@ class Channel:
             pl_nlos_dB = np.maximum(pl_nlos, pl_los_dB)
 
         else:  # InH and default
-            pl_los_dB = 32.4 + 17.3*np.log10(d_3d) + 20.0*np.log10(fc_GHz)
-            pl_nlos = 17.3 + 38.3*np.log10(d_3d) + 24.9*np.log10(fc_GHz)
+            pl_los_dB  = 32.4 + 17.3*np.log10(d_3d) + 20.0*np.log10(fc_GHz)
+            pl_nlos    = 17.3 + 38.3*np.log10(d_3d) + 24.9*np.log10(fc_GHz)
             pl_nlos_dB = np.maximum(pl_nlos, pl_los_dB)
 
         # Select per-element pathloss

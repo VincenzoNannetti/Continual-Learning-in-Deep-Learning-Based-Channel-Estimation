@@ -182,6 +182,7 @@ def run_simulation(config_path=None, preset_name=None, preset_only=False):
         environment=env,
         tx_antenna=tx_antenna,
         rx_antenna=rx_antenna,
+        center_frequency = config.get('carrier_frequency', 2490) * 1e6, # frequency in Hz
         snr=snr,
         pathloss_model=config.get('pathloss_model', 'friis'),
         rms_delay_spread_ns=config.get('rms_delay_spread_ns', 100),
@@ -195,7 +196,6 @@ def run_simulation(config_path=None, preset_name=None, preset_only=False):
     
     # OFDM setup
     subcarrier_spacing    = config.get('subcarrier_spacing', 60000)
-    carrier_frequency     = config.get('carrier_frequency', 2490) * 1e6
     num_blocks            = config.get('blocks', 4)
     num_subcarriers       = 72
     num_symbols_per_block = 14
@@ -205,7 +205,6 @@ def run_simulation(config_path=None, preset_name=None, preset_only=False):
     
     output_signal = channel.apply_channel(
         input_data,
-        carrier_frequency,
         subcarrier_spacing,
         num_subcarriers,
         cyclic_prefix
@@ -234,7 +233,11 @@ def run_simulation(config_path=None, preset_name=None, preset_only=False):
     plt.xlabel('Symbol'); plt.ylabel('Subcarrier')
     plt.tight_layout(); plt.show()
     
-    return env, channel, perfect_ch, noisy_ch
+    symbol_duration = 1.0 / subcarrier_spacing
+    total_simulation_time = num_symbols * symbol_duration
+    print(f"Total simulated physical time: {total_simulation_time:.4f} seconds")
+    
+    return env, channel, perfect_ch, noisy_ch, total_simulation_time
 
 
 def main():
@@ -262,11 +265,11 @@ def main():
     
     # Run the simulation with the specified config and preset
     if args.preset_only:
-        env, channel, perfect_ch, noisy_ch = run_simulation(preset_name=args.preset_only, preset_only=True)
+        env, channel, perfect_ch, noisy_ch, total_sim_time = run_simulation(preset_name=args.preset_only, preset_only=True)
     else:
-        env, channel, perfect_ch, noisy_ch = run_simulation(args.config, args.preset)
+        env, channel, perfect_ch, noisy_ch, total_sim_time = run_simulation(args.config, args.preset)
     
-    env.visualise_environment(show_movement=True, movement_time=3.0)
+    env.visualise_environment(show_movement=True, movement_time=total_sim_time)
 
 
 if __name__ == "__main__":
