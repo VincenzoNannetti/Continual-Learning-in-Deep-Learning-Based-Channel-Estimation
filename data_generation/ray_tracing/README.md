@@ -6,6 +6,57 @@ This directory contains Python scripts designed to generate datasets of Orthogon
 
 The core script, `generate_dataset.py`, orchestrates the generation process, leveraging configuration files and helper classes to produce the desired datasets.
 
+### System Model
+
+The ray-tracing implementation is based on the following system model:
+
+We consider a broadband OFDM system with N_t transmit and N_r receive antennas, employing K subcarriers and an OFDM symbol duration T_sym = 1/Δf, where Δf is the subcarrier spacing. The received signal vector on subcarrier k during the l-th OFDM symbol is given by:
+
+$$\mathbf{y}_k[l] = \mathbf{H}_k[l]\,\mathbf{x}_k[l] + \mathbf{n}_k[l]$$
+
+For clarity, we focus on a SISO link (i.e., $N_t = N_r = 1$). In this case, $\mathbf{H}_k[l]$ reduces to a scalar gain $h(f_k,t_l)$, and the equation becomes:
+
+$$y_k[l] = h(f_k,t_l)\,x_k[l] + n_k[l]$$
+
+with
+
+$$f_k = f_c + \left(k-\frac{K}{2}\right)\,\Delta f, \quad t_l = l\,T_{\mathrm{sym}}.$$
+
+The scalar channel gain is composed of a finite number of discrete propagation paths plus an aggregate diffuse component:
+
+$$h(f,t) = \sum_{n=0}^{N_p(t)} \beta_n(f,t)\, e^{-j2\pi f\,\tau_n(t)}\, e^{j\theta_{D,n}(t)} + H_{\mathrm{agg}}(f,t).$$
+
+
+Each discrete path contributes a complex amplitude given by:
+
+$$\beta_n(f,t) = \gamma_n(t,f)\,\sqrt{G_{\mathrm{Tx}}\,G_{\mathrm{Rx}}\,G_{\mathrm{PL},n}(f,t)}.$$
+
+The term $G_{\mathrm{PL},n}(f,t)$ represents the large-scale path-loss power gain of path $n$, implemented either via the free-space Friis formula $\left(\frac{\lambda}{4\pi d_n}\right)^2$ or based on 3GPP defined scenario-specific expressions (e.g., UMa, UMi, InF), specified by the user.
+
+The total propagation delay of path $n$ is:
+
+$$\tau_n(t) = 
+\begin{cases}
+d_0(t)/c, & n=0\\
+\frac{d_{\mathrm{Tx},s_n}(t) + d_{s_n,\mathrm{Rx}}(t)}{c} + \tau_{\mathrm{cluster},c(n)}, & n>0
+\end{cases}$$
+
+The Doppler shift for path $n$ is computed by projecting the scatterer's velocity onto those unit vectors:
+
+$$f_{D,n}(t) = \frac{f}{c}\,\left(\vec{v}_{s_n}(t)\cdot\hat{u}_{\mathrm{Tx},s_n} + \vec{v}_{s_n}(t)\cdot\hat{u}_{s_n,\mathrm{Rx}}\right)$$
+
+This per-path Doppler frequency is included within the channel coefficient as a phase rotation $\exp\{j2\pi f_{D,n}(t)\,t\}$.
+
+Unresolved multipath and aggregate diffuse reflections are modelled by a zero-mean complex Gaussian term:
+
+$$H_{\mathrm{agg}}(f,t)\sim\mathcal{CN}\left(0,\sigma_{\mathrm{agg}}^2(f,d_0)\right)$$
+
+$$\sigma_{\mathrm{agg}}^2(f,d_0) = 10^{-3.24}\,\left(\frac{f}{1\,\mathrm{GHz}}\right)^{-2}d_0^{-3}.$$
+
+For more information please refer to [Report]
+
+---
+
 ## Features
 
 *   **Configurable Environments:** Utilises YAML configuration files (`../config/`) to define a wide range of channel parameters, including:
@@ -30,6 +81,8 @@ The core script, `generate_dataset.py`, orchestrates the generation process, lev
     *   `received_matrices`: Noisy channel frequency response (complex-valued).
     *   `pilot_mask`: Integer matrix (0s and 1s) indicating the positions where pilots would be placed.
 
+---
+
 ## File Structure
 
 ```
@@ -50,6 +103,8 @@ data_generation/
     ...                         # Other custom configuration files
 ```
 
+---
+
 ## Configuration
 
 Dataset generation is controlled by YAML files located in the `../config/` directory. Each file defines the parameters for a specific dataset. Key parameters include:
@@ -65,6 +120,8 @@ Dataset generation is controlled by YAML files located in the `../config/` direc
 *   `output_dir`: The directory path where the generated `.mat` file will be saved (e.g., `'./data/raw/dataset_a'`).
 
 Refer to the example YAML files for detailed structure.
+
+---
 
 ## Running the Script
 
@@ -90,6 +147,7 @@ python -m data_generation.ray_tracing.generate_dataset --config data_generation/
 
 This command will generate 10,000 samples using the parameters defined in `urban_environment.yaml` and save the output to the directory specified within that config file (e.g., `./data/raw/urban_environment/`).
 
+---
 ## Dependencies
 
 The following Python packages are required:
@@ -102,6 +160,7 @@ The following Python packages are required:
 You can typically install them using pip:
 `pip install numpy scipy pyyaml tqdm`
 
+---
 ## Class Descriptions
 
 *   **`Channel`**: This class is responsible for simulating the effects of the wireless channel on the transmitted signal. It takes into account parameters such as antenna distance, gains, SNR, number of clusters (multipath), UE speed (Doppler), and aggregate scattering. It provides methods to obtain both the perfect (noise-free) and noisy channel matrices.
