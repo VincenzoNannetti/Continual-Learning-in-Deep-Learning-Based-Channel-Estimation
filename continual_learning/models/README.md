@@ -53,7 +53,6 @@ model = UNet_SRCNN_Supermask(
     pretrained_path="path/to/pretrained_weights.pth",
     num_tasks=3,
     sparsity=0.05,  # 5% of weights active per task
-    alpha=0.3       # Mixing coefficient between random and pretrained weights
 )
 
 # Forward pass with automatic task detection

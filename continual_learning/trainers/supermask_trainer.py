@@ -172,10 +172,6 @@ class SupermaskTrainer:
                 raise ValueError(f"Supermask model {self.model_name} requires a 'sparsity' key in the config")
             self.model_params['sparsity'] = model_config['sparsity']
 
-            if 'alpha' not in model_config:
-                raise ValueError(f"Supermask model {self.model_name} requires an 'alpha' key in the config")
-            self.model_params['alpha'] = model_config['alpha']
-
             if self.pretrained_path:
                 self.model_params['pretrained_path'] = self.pretrained_path
 

@@ -137,13 +137,11 @@ class SupermaskEvaluator:
         print(f"Loading {model_name} model...")
         ModelClass = SUPPORTED_MODELS[model_name_lower]
         
-        # Make sure model params include num_tasks, sparsity, and alpha
+        # Make sure model params include num_tasks, sparsity
         model_params = model_config.get('params', {})
         model_params['num_tasks'] = self.num_tasks
         if 'sparsity' not in model_params:
             model_params['sparsity'] = model_config.get('sparsity', 0.95)
-        if 'alpha' not in model_params:
-            model_params['alpha'] = model_config.get('alpha', 0.1)
         
         # Create model instance
         self.model = ModelClass(**model_params)

@@ -25,7 +25,7 @@ from continual_learning.models.layers.mask_conv import MaskConv
 from continual_learning.utils.supermask_utils   import set_model_task, cache_masks, set_num_tasks_learned
 
 
-def replace_conv_with_maskconv(module, num_tasks, sparsity, alpha, mask_pretrained=False):
+def replace_conv_with_maskconv(module, num_tasks, sparsity, mask_pretrained=False):
     """
     Recursively replace all nn.Conv2d layers in a module with MaskConv layers.
     Copies the original Conv2d weights into the 'pretrained' buffer of MaskConv.
@@ -34,7 +34,6 @@ def replace_conv_with_maskconv(module, num_tasks, sparsity, alpha, mask_pretrain
         module: The module to modify
         num_tasks: Number of tasks for MaskConv layers
         sparsity: Sparsity level for MaskConv layers
-        alpha: Mixing coefficient for MaskConv layers
         mask_pretrained: Whether to apply masks to pretrained weights
     """
     for name, child_module in module.named_children():
@@ -51,7 +50,6 @@ def replace_conv_with_maskconv(module, num_tasks, sparsity, alpha, mask_pretrain
                 bias=(child_module.bias is not None),
                 num_tasks=num_tasks,
                 sparsity=sparsity,
-                alpha=alpha,
                 mask_pretrained=mask_pretrained
             )
             
@@ -67,11 +65,11 @@ def replace_conv_with_maskconv(module, num_tasks, sparsity, alpha, mask_pretrain
             setattr(module, name, mask_conv)
         else:
             # Recursively apply to children
-            replace_conv_with_maskconv(child_module, num_tasks, sparsity, alpha, mask_pretrained)
+            replace_conv_with_maskconv(child_module, num_tasks, sparsity, mask_pretrained)
 
 
 class UNet_SRCNN_Supermask(nn.Module):
-    def __init__(self, pretrained_path=None, num_tasks=3, sparsity=0.05, alpha=0.3, mask_pretrained=False, unet_args={}):
+    def __init__(self, pretrained_path=None, num_tasks=3, sparsity=0.05, mask_pretrained=False, unet_args={}):
         """
         initialise the UNet SRCNN Supermask model.
         
@@ -79,7 +77,6 @@ class UNet_SRCNN_Supermask(nn.Module):
             pretrained_path: Path to pretrained UNetCombinedModel weights 
             num_tasks: Number of tasks to support (default: 3 for low/medium/high pilot patterns)
             sparsity: Sparsity level for supermasks (default: 0.05)
-            alpha: Mixing coefficient between random and pretrained weights (default: 0.3)
             mask_pretrained: Whether to apply masks to pretrained weights (default: False)
             unet_args: Arguments to pass to UNetModel constructor
         """
@@ -93,8 +90,8 @@ class UNet_SRCNN_Supermask(nn.Module):
         self.srcnn = SRCNN()
         
         # Replace all Conv2d layers with MaskConv layers
-        replace_conv_with_maskconv(self.unet, num_tasks, sparsity, alpha, mask_pretrained)
-        replace_conv_with_maskconv(self.srcnn, num_tasks, sparsity, alpha, mask_pretrained)
+        replace_conv_with_maskconv(self.unet, num_tasks, sparsity, mask_pretrained)
+        replace_conv_with_maskconv(self.srcnn, num_tasks, sparsity, mask_pretrained)
         
         # Register number of tasks
         self.num_tasks = num_tasks

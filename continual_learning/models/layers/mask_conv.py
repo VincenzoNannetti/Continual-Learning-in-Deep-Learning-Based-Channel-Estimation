@@ -18,22 +18,16 @@ import torch.nn.functional as F
 from continual_learning.utils import supermask_utils as utils
 
 class MaskConv(nn.Conv2d):
-    def __init__(self, *args, sparsity=0.05, num_tasks=3, alpha=0.3, mask_pretrained=False, **kwargs):
+    def __init__(self, *args, sparsity=0.05, num_tasks=3, mask_pretrained=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.num_tasks = num_tasks
         self.sparsity = sparsity
-        # Alpha controls mixing between random and pretrained weights
-        # alpha=1 means all random, alpha=0 means all pretrained
-        # Make alpha a learnable parameter as per original design
-        self.alpha = nn.Parameter(torch.tensor(alpha))
-        # Whether to apply the mask to pretrained weights or not
         self.mask_pretrained = mask_pretrained
         
-        # --- Safe attribute initialization --- 
-        self.task   = 0 # Default to task 0
-        self.alphas = torch.ones(self.num_tasks) / self.num_tasks 
-        self.num_tasks_learned = 1 # Default to 1 task learned initially
-        # --- End Safe init ---
+        self.task              = 0                                           # Default to task 0
+        self.alphas            = torch.ones(self.num_tasks) / self.num_tasks 
+        self.num_tasks_learned = 1                                           # Default to 1 task learned initially
+
 
         # Separate score tensors for each task
         self.scores = nn.ParameterList(
@@ -97,18 +91,14 @@ class MaskConv(nn.Conv2d):
             if self.task >= len(self.scores):
                  raise IndexError(f"Task index {self.task} out of range for scores (num_tasks={self.num_tasks})")
             subnet_scores = self.scores[self.task].abs()
-            subnet = utils.GetSubnet.apply(subnet_scores, self.sparsity)
+            subnet        = utils.GetSubnet.apply(subnet_scores, self.sparsity)
 
-        # --- Ensure mask is on correct device and dtype --- 
         subnet_mask = subnet.to(self.weight.dtype).to(self.weight.device)
-        # --- 
-
         # Apply the subnet mask to the random weights
         masked_random_weight = self.weight * subnet_mask
 
         # Check if pretrained weights exist and apply the SAME mask
         if hasattr(self, "pretrained") and self.pretrained is not None:
-            # Ensure pretrained is also on the correct device/dtype before masking
             pretrained_weights = self.pretrained.to(self.weight.dtype).to(self.weight.device)
             if pretrained_weights.shape != self.weight.shape:
                  raise ValueError(f"Shape mismatch between pretrained {pretrained_weights.shape} and random {self.weight.shape}")
@@ -120,8 +110,8 @@ class MaskConv(nn.Conv2d):
                 # Use pretrained weights as-is without masking
                 masked_pretrained_weight = pretrained_weights
             
-            # Mix the masked weights using alpha
-            final_weight = self.alpha * masked_random_weight + (1.0 - self.alpha) * masked_pretrained_weight
+            # Mix the masked weights
+            final_weight = masked_random_weight + masked_pretrained_weight
         else:
             # No pretrained weights, just use the masked random weights
             final_weight = masked_random_weight
