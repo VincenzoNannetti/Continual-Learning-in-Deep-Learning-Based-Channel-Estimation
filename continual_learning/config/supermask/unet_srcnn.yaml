@@ -1,7 +1,7 @@
 # --- UNet SRCNN Supermask Configuration ---
 # Configuration for supermask-based continual learning on multiple pilot patterns
 
-experiment_name: unet_srcnn_supermask_continual_learning
+experiment_name: unet_srcnn_supermask
 
 framework:
   seed: 42
@@ -16,7 +16,6 @@ model:
     unet_args:
       base_features: 48  # Base feature multiplier for UNet
   sparsity: 0.1          # Sparsity level for supermasks should be 1 to 5% isnt working well for low (increased to 10%)
-  alpha: 0.3             # Mixing coefficient between random and pretrained weights (0=all pretrained, 1=all random)
   mask_pretrained: false # Whether to apply masks to pretrained weights (default: false)
   strict_load: True
 
@@ -38,7 +37,7 @@ data:
   normalise_before_interp: false
 
 training:
-  epochs: 2
+  epochs: 25
   batch_size: 32
   loss_function: mse
   optimiser: adam

@@ -19,8 +19,7 @@ def advance_phases(phases, f_D, dt):
 class Channel:
     def __init__(self, environment, tx_antenna, rx_antenna, snr, center_frequency, pathloss_model="friis",
                  o2i_loss=0, reflection_amplitude=None, cluster_density=0.5, cluster_radius=20, 
-                 los_probability_indoor=0.7, rms_delay_spread_ns=100, shadow_fading_std_db=4.0, 
-                 rng=None, use_random_walk=True):
+                 los_probability_indoor=0.7, rms_delay_spread_ns=100, shadow_fading_std_db=4.0, use_random_walk=True):
         self.environment          = environment                                                                     # Environment object containing scatterers, antennas, etc.
         self.tx_antenna           = tx_antenna                                                                      # TX antenna from environment
         self.rx_antenna           = rx_antenna                                                                      # RX antenna from environment
@@ -28,9 +27,9 @@ class Channel:
         self.snr                  = snr                                                                             # determines power of noise
         self.environment_type     = environment.scatterers[0].environment_type if environment.scatterers else "UMa" # environment type from environment object
         self.pathloss_model       = pathloss_model                                                                  # pathloss model to use (friis or 3gpp)
-        self.o2i_loss             = o2i_loss                                                                        # outdoor-to-indoor penetration loss in dB
         self.reflection_amplitude = reflection_amplitude                                                            # reflection amplitude range from config
-        self.cluster_density      = cluster_density                                                                 # density of scatterers in clusters
+        self.cluster_density      = cluster_density     
+        self.o2i_loss             = o2i_loss                                                            # density of scatterers in clusters
         self.cluster_radius       = cluster_radius                                                                  # radius of clusters
         
         # Extract antenna properties
@@ -87,22 +86,13 @@ class Channel:
         self.scatterer_phases = None
 
         # Initialise random number generator
-        if rng is None:
-            self.rng = np.random.default_rng()
-        elif isinstance(rng, (np.random.RandomState, np.random.Generator)):
-            self.rng = rng
-        else:
-            # If it's not a RandomState or Generator instance, create a new one with the provided seed
-            try:
-                self.rng = np.random.default_rng(rng)
-            except:
-                self.rng = np.random.default_rng()
+        self.rng = np.random.default_rng()
                 
         self.los_probability_indoor = los_probability_indoor
         
         # Track the last shadow fading value for each link
-        self.previous_shadow_fading = 0.0
-        self.last_shadow_fading_position = np.array([0.0, 0.0])
+        self.previous_shadow_fading             = 0.0
+        self.last_shadow_fading_position        = np.array([0.0, 0.0])
         self.shadow_fading_correlation_distance = self._get_shadow_fading_correlation_distance() # Set based on environment
 
         # Default average building heights (h in Table 7.4.1-1) - simplified
@@ -145,11 +135,19 @@ class Channel:
     def prepare_channel(self):
         """Prepare channel parameters before signal processing"""
         # Generate cluster delays and powers using 3GPP power-law model
-        if self.num_cluster > 0:
+        if self.pathloss_model.lower() == "3gpp" and self.num_cluster > 0:
             self.cluster_delays, self.cluster_powers = self.draw_cluster_delays_and_powers(self.num_cluster)
         else:
             self.cluster_delays = np.array([])
             self.cluster_powers = np.array([])
+            if self.num_cluster > 0: # If not 3gpp but clusters exist, still need delays for phase shifts
+                # Simplified delay generation for non-3GPP or to ensure delays exist for phase calcs
+                # Using only RMS delay spread for a basic exponential distribution if Friis and clusters > 0
+                # This part is an assumption: if clusters exist, delays are needed for frequency selectivity
+                # even if powers are not applied in the 3GPP statistical sense.
+                # If this is not desired, cluster_delays should also be strictly empty for non-3GPP.
+                self.cluster_delays = self.rng.exponential(scale=self.rms_delay_spread_ns, size=self.num_cluster)
+                self.cluster_delays.sort()
 
         # Initialise phase tracking for all scatterers
         self.scatterer_phases = np.zeros(len(self.environment.scatterers))
@@ -194,11 +192,11 @@ class Channel:
         # Calculate the OFDM symbol duration (time step for updates)
         symbol_duration = 1.0 / subcarrier_spacing
 
-        # --- Get scatterer data from environment --- #
+        # Get scatterer data from environment 
         num_scatterers = len(self.environment.scatterers)
         if num_scatterers > 0:
-            # Get a snapshot of scatterer data from the environment
-            scatterer_positions, scatterer_velocities, reflection_coeffs, scatterer_speeds = self.environment.get_scatterer_snapshot()
+            scatterer_positions, scatterer_velocities, reflection_coeffs, scatterer_speeds, visible_mask = \
+                self.environment.get_scatterer_snapshot(tx_pos, rx_pos)
             
             # Precompute cluster IDs for all scatterers
             cluster_ids = np.array([s.cluster_id for s in self.environment.scatterers], dtype=np.int32)
@@ -210,10 +208,10 @@ class Channel:
             # Create empty arrays with correct shapes if no scatterers
             scatterer_positions   = np.empty((0, 3), dtype=float)
             scatterer_velocities  = np.empty((0, 3), dtype=float)
-            reflection_coeffs     = np.empty((0,), dtype=complex)
-            scatterer_speeds      = np.empty((0,), dtype=float)
-            cluster_ids           = np.empty((0,), dtype=np.int32)
-            self.scatterer_phases = np.empty((0,), dtype=float)
+            reflection_coeffs     = np.empty((0,),   dtype=complex)
+            scatterer_speeds      = np.empty((0,),   dtype=float)
+            cluster_ids           = np.empty((0,),   dtype=np.int32)
+            self.scatterer_phases = np.empty((0,),   dtype=float)
 
         # loop through each subcarrier of each symbol
         for i in range(no_ofdm_symbols):
@@ -240,7 +238,10 @@ class Channel:
 
                 # 3) sample the realisation:
                 # Draw one Bernoulli LOS flag for this *symbol* (keeps channel matrix stable)
-                is_los_symbol = self.rng.random() < p_los
+                if self.pathloss_model.lower() == "3gpp":
+                    is_los_symbol = self.rng.random() < p_los
+                else: # pure geometric model
+                    is_los_symbol = True # always treat direct path as LOS
 
                 # LOS gain for all sub‑carriers at once (returns length Nsc array)
                 LOS_gain_vec = self.calculate_path_gain(
@@ -253,22 +254,27 @@ class Channel:
 
                 dominant_gain = LOS_gain_vec[j]
 
-                # # --- Ground specular ---
-                # if self.include_ground_bounce:
-                #     # image method: reflect Rx in z=0 plane
-                #     img_rx = np.array([rx_pos[0], rx_pos[1], -rx_pos[2]])
-                #     d_tx_img = np.linalg.norm(img_rx - tx_pos)
-                #     d_img_rx = np.linalg.norm(rx_pos - img_rx)
-                #     d_gr = d_tx_img + d_img_rx
-                #     Γ = fresnel_coefficient(…)
-                #     ground_gain = Γ * self.calculate_path_gain(
-                #         distance=d_gr,
-                #         frequency=f_k,
-                #         g_tx_lin=g_tx_lin,
-                #         g_rx_lin=g_rx_lin,
-                #         is_los=False)
-                #     total_dominant_paths_gain += ground_gain
+                # --- Window Reflections  ---
+                if i == 0 and j == 0:  # build the list only once per OFDM frame
+                    self.window_paths = self.environment.get_valid_window_reflections(tx_pos, rx_pos)
+                
+                window_gain = 0+0j
+                if hasattr(self, 'window_paths'): # Ensure window_paths has been initialised
+                    for wp in self.window_paths:
+                        d_wp = wp["distance"]
+                        # strictly NLOS, zero Doppler (windows are static)
+                        # Pass rx_pos for shadow fading consistency if 3GPP model is used for these paths too
+                        if self.pathloss_model.lower() == "3gpp":
+                            path_gain = self.calculate_path_gain(d_wp, f_k, g_tx_lin, g_rx_lin,
+                                                                 is_los=False, rx_position=rx_pos)
+                        else: # "friis"
+                            # c0 = 3e8 # speed of light already available as 3e8
+                            wavelength_wp = 3e8 / f_k #
+                            fs_amp = wavelength_wp / (4 * np.pi * d_wp) if d_wp > 1e-9 else 0 # Avoid division by zero
+                            path_gain = fs_amp * np.sqrt(g_tx_lin * g_rx_lin) * np.exp(-1j * 2 * np.pi * d_wp / wavelength_wp)
 
+                        window_gain += wp["coeff"] * path_gain
+                # --- End Window Reflections ---
 
                 scatterer_gain = (0 + 0j) # Initialise gain from explicit scatterers
 
@@ -276,15 +282,19 @@ class Channel:
                     # --- Vectorised Scatterer Calculations --- #
 
                     # 1. Compute distances (Tx->Scatterer and Scatterer->Rx)
-                    vec_tx_sc = scatterer_positions - tx_pos # (N, 3)
+                    vec_tx_sc  = scatterer_positions - tx_pos # (N, 3)
                     dist_tx_sc = np.linalg.norm(vec_tx_sc, axis=1) # (N,) Total path distance
-                    vec_sc_rx = rx_pos - scatterer_positions # (N, 3)
+                    vec_sc_rx  = rx_pos - scatterer_positions # (N, 3)
                     dist_sc_rx = np.linalg.norm(vec_sc_rx, axis=1) # (N,)
-                    d_n_array = dist_tx_sc + dist_sc_rx # (N,) Total path distance
+                    d_n_array  = dist_tx_sc + dist_sc_rx # (N,) Total path distance
 
                     # Avoid division by zero for coincident points
-                    valid_scatterers = (dist_tx_sc > 1e-9) & (dist_sc_rx > 1e-9)
-                    valid_idx = np.where(valid_scatterers)[0]  # Get valid indices once
+                    valid_scatterers_dist_check = (dist_tx_sc > 1e-9) & (dist_sc_rx > 1e-9)
+                    
+                    # Combine distance check with visibility mask from environment
+                    # visible_mask is already the same length as scatterer_positions etc. before any filtering here.
+                    final_valid_scatterers_mask = valid_scatterers_dist_check & visible_mask
+                    valid_idx = np.where(final_valid_scatterers_mask)[0]  # Get valid indices based on combined criteria
                     
                     if len(valid_idx) > 0:
                         # Filter arrays to only include valid scatterers for calculations
@@ -303,13 +313,21 @@ class Channel:
 
                         # 2. path-gain for all valid scatterers (vector)
                         scatterer_is_los = np.zeros(_num_valid_scatterers, dtype=bool)  # reflections are NLOS
-                        path_gain_vec = self.calculate_path_gain(
-                                _d_n_array,          # vector of distances
-                                f_k,                 # scalar frequency (broadcasts)
-                                g_tx_lin,
-                                g_rx_lin,
-                                scatterer_is_los,
-                                rx_pos)
+                        if self.pathloss_model.lower() == "3gpp":
+                            path_gain_vec = self.calculate_path_gain(
+                                    _d_n_array,          # vector of distances
+                                    f_k,                 # scalar frequency (broadcasts)
+                                    g_tx_lin,
+                                    g_rx_lin,
+                                    scatterer_is_los,    # False for all scatterers
+                                    rx_pos)
+                        else: # "friis"
+                            wavelength_sc = 3e8 / f_k
+                            # Ensure _d_n_array does not contain zeros or very small numbers before division
+                            safe_d_n_array = np.maximum(_d_n_array, 1e-9)
+                            fs_amp_vec = wavelength_sc / (4 * np.pi * safe_d_n_array)
+                            phase_vec = np.exp(-1j * 2 * np.pi * safe_d_n_array / wavelength_sc)
+                            path_gain_vec = fs_amp_vec * np.sqrt(g_tx_lin * g_rx_lin) * phase_vec
 
                         scatterer_contribution_array = path_gain_vec * _reflection_coeffs   # vector
 
@@ -360,15 +378,16 @@ class Channel:
                                 
                                 # Apply cluster power weighting from the power-law model
                                 if len(self.cluster_powers) > cluster_id:
-                                    # Scale by the cluster power weight (3GPP TR 38.901, Eq 7.5-5)
-                                    cluster_power = self.cluster_powers[cluster_id]
-                                    # If the sum of contributions is non-zero, normalise by the number of 
-                                    # scatterers in the cluster to maintain relative amplitude relationships
-                                    if np.abs(sum_within_cluster) > 1e-10 and np.sum(mask) > 0:
-                                        # normalise by scatterer count, then apply cluster power 
-                                        cluster_sums[cluster_id] = sum_within_cluster * np.sqrt(cluster_power)
-                                    else:
-                                        cluster_sums[cluster_id] = 0.0
+                                    if self.pathloss_model.lower() == "3gpp":
+                                        cluster_power = self.cluster_powers[cluster_id]
+                                        if np.abs(sum_within_cluster) > 1e-10 and np.sum(mask) > 0:
+                                            # normalise by scatterer count, then apply cluster power
+                                            cluster_sums[cluster_id] = sum_within_cluster * np.sqrt(cluster_power)
+                                        else:
+                                            cluster_sums[cluster_id] = 0.0
+                                    else: # Friis or other models - do not apply 3GPP cluster power scaling
+                                        cluster_sums[cluster_id] = sum_within_cluster
+
                                 else:
                                     # Fallback if cluster powers aren't available 
                                     cluster_sums[cluster_id] = sum_within_cluster
@@ -377,7 +396,7 @@ class Channel:
                         scatterer_gain = np.sum(cluster_sums)
 
                 # Combine dominant (LOS) and explicit scatterer paths
-                total_dominant_paths_gain = dominant_gain + scatterer_gain
+                total_dominant_paths_gain = dominant_gain + scatterer_gain + window_gain
 
                 # Add aggregate scattering term H_ij if enabled
                 H_ij = (0 + 0j)
@@ -400,10 +419,11 @@ class Channel:
 
             # Update scatterer positions through the environment
             self.environment.advance(symbol_duration)
-            
+                        
             # Update scatterer snapshot for the next symbol
             if num_scatterers > 0:
-                scatterer_positions, scatterer_velocities, reflection_coeffs, scatterer_speeds = self.environment.get_scatterer_snapshot()
+                scatterer_positions, scatterer_velocities, reflection_coeffs, scatterer_speeds, visible_mask = \
+                    self.environment.get_scatterer_snapshot(tx_pos, rx_pos)
             
         # input data in time domain so convert to freq so we can multiply instead of convolve
         input_data    = np.fft.fft(input_data, axis=0)
@@ -415,7 +435,7 @@ class Channel:
         noise = self.generate_noise(output_signal)
         self.noise_matrix = noise
         output_signal = output_signal + noise
-        self.channel_matrix_noisy = output_signal # for debugging
+        self.channel_matrix_noisy = self.channel_matrix + self.noise_matrix # for debugging
 
         output_signal = np.reshape(output_signal, (output_length,-1))
         return output_signal

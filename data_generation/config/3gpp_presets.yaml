@@ -5,7 +5,6 @@
 UMa:  # Urban Macrocell
   description: "Dense urban areas with BS height (25m) above surrounding buildings"
   # Antenna parameters
-  antenna_distance: 500           # Horizontal distance between TX and RX antennas (m)
   tx_gain: 12                     # TX antenna gain (dBi)
   rx_gain: 10                     # RX antenna gain (dBi)
   tx_height: 25.0                 # Transmitter height (m)
@@ -20,7 +19,7 @@ UMa:  # Urban Macrocell
   # Propagation parameters
   snr: [10, 25]                   # Signal-to-noise ratio (dB)
   use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "friis"          # Pathloss model ("friis" or "3gpp")
+  pathloss_model: "3gpp"          # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss:
     low_loss_probability: 0.5     # Probability of low-loss building material
     low_loss: 20
@@ -43,7 +42,6 @@ UMa:  # Urban Macrocell
 UMi:  # Urban Microcell
   description: "Urban street canyons with BS height (10m) below surrounding buildings"
   # Antenna parameters
-  antenna_distance: 100           # Horizontal distance between TX and RX antennas (m)
   tx_gain: 10                     # TX antenna gain (dBi)
   rx_gain: 10                     # RX antenna gain (dBi)
   tx_height: 10.0                 # Transmitter height (m)
@@ -81,7 +79,6 @@ UMi:  # Urban Microcell
 RMa:  # Rural Macrocell
   description: "Rural areas with sparse buildings and large continuous coverage"
   # Antenna parameters
-  antenna_distance: 1732          # Horizontal distance between TX and RX antennas (m)
   tx_gain: 14                     # TX antenna gain (dBi)
   rx_gain: 10                     # RX antenna gain (dBi)
   tx_height: 35.0                 # Transmitter height (m) - typically higher in rural
@@ -89,7 +86,7 @@ RMa:  # Rural Macrocell
   
   # Cluster and scatterer parameters
   num_clusters: [8, 11]           # Number of scattering clusters
-  speed: [0, 120]                 # Scatterer speed (m/s) - higher for vehicles
+  speed: [0, 5]                 # Scatterer speed (m/s) - higher for vehicles
   cluster_density: 0.4            # Density of scatterers in clusters
   cluster_radius: 35              # Horizontal radius of clusters (m)
 
@@ -120,7 +117,6 @@ InH:  # Indoor Hotspot
   description: "Office environments and shopping malls with dense user distribution"
   environment_dimensions: [120, 50, 3] # Default L, W, H in meters for an office floor
   # Antenna parameters
-  antenna_distance: 20            # Horizontal distance between TX and RX antennas (m)
   tx_gain: 5                      # TX antenna gain (dBi)
   rx_gain: 5                      # RX antenna gain (dBi)
   tx_height: 3.0                  # Transmitter height (m) - ceiling mounted
@@ -135,7 +131,7 @@ InH:  # Indoor Hotspot
   # Propagation parameters
   snr: [15, 25]                   # Signal-to-noise ratio (dB)
   use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "3gpp"          # Pathloss model ("friis" or "3gpp")
+  pathloss_model: "friis"          # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss: 10        # Simplified indoor loss value (walls, doors)
   los_probability_indoor: 0.7     # Probability of LOS in indoor
   
@@ -157,7 +153,6 @@ InF-SL:  # Indoor Factory - Sparse clutter, Low BS
   description: "Factory hall with sparse machinery, BS below clutter height"
   environment_dimensions: [60, 40, 8] # Default L, W, H in meters
   # Antenna parameters
-  antenna_distance: 50            # Horizontal distance between TX and RX antennas (m)
   tx_gain: 5                      # TX antenna gain (dBi)
   rx_gain: 5                      # RX antenna gain (dBi)
   tx_height: 3.0                  # Transmitter height (m)
@@ -172,7 +167,7 @@ InF-SL:  # Indoor Factory - Sparse clutter, Low BS
   # Propagation parameters
   snr: [15, 20]                   # Signal-to-noise ratio (dB)
   use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "3gpp"         # Pathloss model ("friis" or "3gpp")
+  pathloss_model: "friis"         # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss: 15        # Factory walls are typically more substantial
   los_probability_indoor: 0.7     # Probability of LOS in indoor
   
@@ -194,7 +189,6 @@ InF-DL:  # Indoor Factory - Dense clutter, Low BS
   description: "Factory with dense machinery/assembly lines, BS below clutter height"
   environment_dimensions: [100, 60, 10] # Default L, W, H in meters
   # Antenna parameters
-  antenna_distance: 30            # Horizontal distance between TX and RX antennas (m)
   tx_gain: 5                      # TX antenna gain (dBi)
   rx_gain: 5                      # RX antenna gain (dBi)
   tx_height: 3.0                  # Transmitter height (m)
@@ -231,7 +225,6 @@ InF-SH:  # Indoor Factory - Sparse clutter, High BS
   description: "Factory hall with sparse machinery, BS above clutter height"
   environment_dimensions: [80, 50, 15] # Default L, W, H in meters
   # Antenna parameters
-  antenna_distance: 50            # Horizontal distance between TX and RX antennas (m)
   tx_gain: 8                      # TX antenna gain (dBi)
   rx_gain: 5                      # RX antenna gain (dBi)
   tx_height: 6.0                  # Transmitter height (m) - higher placement
@@ -268,7 +261,6 @@ InF-DH:  # Indoor Factory - Dense clutter, High BS
   description: "Factory with dense machinery, BS above clutter height"
   environment_dimensions: [120, 80, 15] # Default L, W, H in meters
   # Antenna parameters
-  antenna_distance: 30            # Horizontal distance between TX and RX antennas (m)
   tx_gain: 8                      # TX antenna gain (dBi)
   rx_gain: 5                      # RX antenna gain (dBi)
   tx_height: 6.0                  # Transmitter height (m) - higher placement

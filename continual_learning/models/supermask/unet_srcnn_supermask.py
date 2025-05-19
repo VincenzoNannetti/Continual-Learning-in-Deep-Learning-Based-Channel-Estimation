@@ -344,7 +344,7 @@ class UNet_SRCNN_Supermask(nn.Module):
             height, width = pilot_mask.shape[1], pilot_mask.shape[2]
             # Get device from input tensor for consistency
             device = x.device
-            print(f"initialising canonical masks on device: {device}")
+            print(f"Initialising canonical masks on device: {device}")
             self._initialise_canonical_masks(height, width, device)
             
         # Determine task from the first sample's mask
