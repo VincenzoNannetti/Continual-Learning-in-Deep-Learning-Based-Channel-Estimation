@@ -22,20 +22,20 @@ from shapely.ops import unary_union
 
 class Environment:
     def __init__(self, dimensions, movement_type="random_walk"):
-        self.dimensions = dimensions        # (x, y, z) dimensions of the space
-        self.scatterers = []                # list of scatterers in the environment
-        self.rx_antennas = []               # list of rx antennas in the environment
-        self.tx_antennas = []               # list of tx antennas in the environment
-        self.clusters = []                  # list of cluster centers and properties
-        self.buildings = []                 # list of buildings in the environment
-        self.rng = np.random.default_rng()  # random number generator
-        self.movement_type = movement_type  # Global movement type for scatterers
-        self.ue_movement_config = None      # Added to store UE movement config from main script
+        self.dimensions         = dimensions              # (x, y, z) dimensions of the space
+        self.scatterers         = []                      # list of scatterers in the environment
+        self.rx_antennas        = []                      # list of rx antennas in the environment
+        self.tx_antennas        = []                      # list of tx antennas in the environment
+        self.clusters           = []                      # list of cluster centers and properties
+        self.buildings          = []                      # list of buildings in the environment
+        self.rng                = np.random.default_rng() # random number generator
+        self.movement_type      = movement_type           # Global movement type for scatterers
+        self.ue_movement_config = None                    # Added to store UE movement config from main script
 
     def place_tx(self, name, position, gain_dbi):
         """Place a transmitter antenna in the environment"""
         # Check if position is within bounds
-        if not self._is_within_bounds(position):
+        if not self.is_within_bounds(position):
             raise ValueError(f"TX antenna position {position} is outside environment bounds {self.dimensions}")
         
         antenna = Antenna(name, "TX", gain_dbi, position)
@@ -45,7 +45,7 @@ class Environment:
     def place_rx(self, name, position, gain_dbi, movement_config: Optional[Dict] = None, pavement_bounds: Optional[Dict] = None): # Added movement_config and pavement_bounds
         """Place a receiver antenna in the environment"""
         # Check if position is within bounds
-        if not self._is_within_bounds(position):
+        if not self.is_within_bounds(position):
             raise ValueError(f"RX antenna position {position} is outside environment bounds {self.dimensions}")
         
         antenna = Antenna(name, "RX", gain_dbi, position, movement_config=movement_config, pavement_bounds=pavement_bounds) 
@@ -76,7 +76,7 @@ class Environment:
         """
 
         # 1) Choose one centre in the free region
-        centre_xy = self._sample_cluster_centers(
+        centre_xy = self.sample_cluster_centers(
             num_centers=1,
             radius=radius,
         )[0]
@@ -133,7 +133,7 @@ class Environment:
         })
 
         # 4) Generate scatterers around that sampled centre
-        new_scatterers = self._create_scatterers(
+        new_scatterers = self.create_scatterers(
             centre,
             num_scatterers,
             radius,
@@ -239,7 +239,7 @@ class Environment:
         closest_normal   = None
         
         # Ensure ray_origin and ray_direction are numpy arrays for consistency
-        _ray_origin    = np.array(ensure_vector3d(ray_origin), dtype=float)
+        _ray_origin    = np.array(ensure_vector3d(ray_origin),    dtype=float)
         _ray_direction = np.array(ensure_vector3d(ray_direction), dtype=float)
         
         # Normalise ray direction if it's not already (Building.intersects_ray expects normalised)
@@ -265,7 +265,7 @@ class Environment:
             
         return True, closest_distance, closest_building, closest_normal
     
-    def _sample_cluster_centers(
+    def sample_cluster_centers(
         self,
         radius: float,
         num_centers: int,
@@ -292,21 +292,19 @@ class Environment:
         
         # Define the street canyon for sampling cluster centers
         # X-dimension: full environment width, ensuring cluster fits
-        canyon_intended_x_min = 0.0 # Start of the environment
-        canyon_intended_x_max = self.dimensions[0] # End of the environment
+        canyon_intended_x_min = 0.0 
+        canyon_intended_x_max = self.dimensions[0] 
         
         # Y-dimension: centered in the environment, with a defined half-width
-        # This half-width should ideally match typical street canyon configurations (e.g., setback value)
-        street_canyon_y_center     = self.dimensions[1] / 2.0
-        street_canyon_half_width = 10.0 # This makes the canyon 20m wide, e.g., y=40 to y=60 if env_y_dim is 100.
+        street_canyon_y_center   = self.dimensions[1] / 2.0
+        street_canyon_half_width = 10.0 
 
         # Effective sampling bounds, ensuring the cluster of 'radius' fits within the canyon & environment
         effective_sample_x_min = max(canyon_intended_x_min + radius, radius)
         effective_sample_x_max = min(canyon_intended_x_max - radius, self.dimensions[0] - radius)
 
-        effective_sample_y_min = max(street_canyon_y_center - street_canyon_half_width + radius, radius) # Ensure cluster edge starts at canyon edge
-        effective_sample_y_max = min(street_canyon_y_center + street_canyon_half_width - radius, self.dimensions[1] - radius) # Ensure cluster edge ends at canyon edge
-
+        effective_sample_y_min = max(street_canyon_y_center - street_canyon_half_width + radius, radius) 
+        effective_sample_y_max = min(street_canyon_y_center + street_canyon_half_width - radius, self.dimensions[1] - radius) 
 
         # Increase attempts if the sampling region is smaller or more constrained
         max_attempts_multiplier = 20 
@@ -314,19 +312,15 @@ class Environment:
         while len(centers) < num_centers and attempts < num_centers * max_attempts_multiplier:
             attempts += 1
             
-            x_candidate, y_candidate = -1.0, -1.0 # Initialize
+            x_candidate, y_candidate = -1.0, -1.0 
 
-            # Ensure valid sampling range (e.g., if canyon is narrower than 2*radius for an axis)
+            # Ensure valid sampling range 
             if (effective_sample_x_max <= effective_sample_x_min or
                 effective_sample_y_max <= effective_sample_y_min):
-                # Fallback to broader sampling using free_region bounds if canyon definition is too restrictive
-                # This ensures we try to place clusters even if the specific canyon is too small.
                 fb_minx, fb_miny, fb_maxx, fb_maxy = free_region.bounds
                 if fb_maxx <= fb_minx or fb_maxy <= fb_miny:
-                    # If free_region itself has no valid span, something is very wrong
-                    # This might happen if buildings + buffer occupy the entire environment.
                     warnings.warn(f"Cannot sample cluster centers: free_region has no valid span. Check building layout, cluster radius, and environment dimensions.")
-                    break # Break from while loop, will likely raise RuntimeError later
+                    break 
                 x_candidate = np.random.uniform(fb_minx, fb_maxx)
                 y_candidate = np.random.uniform(fb_miny, fb_maxy)
             else:
@@ -334,16 +328,7 @@ class Environment:
                 x_candidate = np.random.uniform(effective_sample_x_min, effective_sample_x_max)
                 y_candidate = np.random.uniform(effective_sample_y_min, effective_sample_y_max)
             
-            # The free_region already accounts for building footprints buffered by 'radius'.
-            # So, if Point(x, y) is in free_region, it means a cluster centered at (x,y)
-            # with the given 'radius' will not overlap the original building footprints.
             if free_region.contains(Point(x_candidate, y_candidate)):
-                # As an additional confirmation for canyon placement,
-                # ensure the point is within the *intended* (unbuffered by radius) canyon y-limits.
-                # This helps if free_region allows points just outside the strict canyon definition.
-                # The sampled y_candidate should be within the core canyon y-band for the *center* of the cluster.
-                # The effective_sample_y already considers radius for fitting.
-                # This check is against the intended y-band for the cluster center.
                 intended_canyon_y_min = street_canyon_y_center - street_canyon_half_width
                 intended_canyon_y_max = street_canyon_y_center + street_canyon_half_width
                 if intended_canyon_y_min <= y_candidate <= intended_canyon_y_max:
@@ -353,7 +338,7 @@ class Environment:
             raise RuntimeError(f"Only got {len(centers)} / {num_centers} cluster centers. Try reducing cluster radius, number of clusters, or check building density within the canyon.")
         return centers
 
-    def _create_scatterers(self, center, num_scatterers, radius, height_range, min_distance=0.5, speed_range=None, aggregate_scattering=False, 
+    def create_scatterers(self, center, num_scatterers, radius, height_range, min_distance=0.5, speed_range=None, aggregate_scattering=False, 
                            environment_type="UMa", reflection_params_scatterer=None, carrier_freq_ghz=2.49, min_far_field=5.0,
                            cluster_movement_config: Optional[dict] = None):
         """
@@ -375,6 +360,11 @@ class Environment:
         generated_shared_flock_velocity_for_cluster = None
         flock_speed_for_this_cluster = 0.0 
 
+        # Get movement parameters from config
+        movement_params = {}
+        if cluster_movement_config and 'movement_params' in cluster_movement_config:
+            movement_params = cluster_movement_config['movement_params'].get(self.movement_type, {})
+
         if self.movement_type == "flocking":
             # Use the general speed_range for the flock's speed magnitude
             flock_speed_for_this_cluster = self.rng.uniform(speed_range[0], speed_range[1]) if speed_range else 0.0
@@ -383,9 +373,8 @@ class Environment:
             flock_direction = None
 
             if flock_speed_for_this_cluster > 1e-9: 
-                user_specified_direction = None
-                if cluster_movement_config:
-                    user_specified_direction = cluster_movement_config.get("flock_movement_direction")
+                # Get direction from movement_params if available
+                user_specified_direction = movement_params.get("flock_movement_direction")
 
                 if user_specified_direction and isinstance(user_specified_direction, (list, tuple)) and len(user_specified_direction) == 3:
                     direction_vec = np.array(user_specified_direction, dtype=float)
@@ -429,11 +418,11 @@ class Environment:
             new_pos = np.array([center[0] + dx, center[1] + dy, center[2] + dz])
 
             # 1) ensure above ground and inside bounds
-            if new_pos[2] <= 0 or not self._is_within_bounds(new_pos):
+            if new_pos[2] <= 0 or not self.is_within_bounds(new_pos):
                 continue
 
             # 2) far-field margin from antennas
-            if any(self._distance3d(new_pos, ant.get_pos()) < min_far_field
+            if any(self.distance3d(new_pos, ant.get_pos()) < min_far_field
                 for ant in self.tx_antennas + self.rx_antennas):
                 continue
 
@@ -463,30 +452,19 @@ class Environment:
             scatterer_id = f"{cluster_id_for_current_op}-{len(new_scatterers)}"
             current_scatterer_speed = flock_speed_for_this_cluster if self.movement_type == "flocking" else self.rng.uniform(speed_range[0], speed_range[1])
             
-            # This dictionary will hold the specific, sampled parameters for the scatterer
+            # Set up movement-specific parameters based on movement type
             individual_scatterer_movement_params = {}
-
-            if self.movement_type == "sinusoidal" and cluster_movement_config:
-                amp_range    = cluster_movement_config.get("amplitude_range", [0.0, 0.0])
-                period_range = cluster_movement_config.get("period_range", [1.0, 1.0])
-                axis_config  = cluster_movement_config.get("axis", "random") 
-
-                individual_scatterer_movement_params['sinusoidal_amplitude'] = self.rng.uniform(amp_range[0], amp_range[1])
-                individual_scatterer_movement_params['sinusoidal_period']    = self.rng.uniform(period_range[0], period_range[1])
-                individual_scatterer_movement_params['sinusoidal_axis']      = axis_config
             
-            elif self.movement_type == "brownian" and cluster_movement_config:
-                sigma_range = cluster_movement_config.get("sigma_brownian_range", [0.005, 0.015])
-                individual_scatterer_movement_params['sigma_brownian'] = self.rng.uniform(sigma_range[0], sigma_range[1])
-
-            elif self.movement_type == "gauss_markov" and cluster_movement_config:
-                alpha_range         = cluster_movement_config.get("alpha_gm_range", [0.3, 0.7])
-                noise_std_dev_range = cluster_movement_config.get("noise_std_dev_gm_range", [0.05, 0.15])
-                mean_vel_config     = cluster_movement_config.get("mean_velocity_gm_config", [0.,0.,0.]) 
-
-                individual_scatterer_movement_params['alpha_gm'] = self.rng.uniform(alpha_range[0], alpha_range[1])
-                individual_scatterer_movement_params['noise_std_dev_gm'] = self.rng.uniform(noise_std_dev_range[0], noise_std_dev_range[1])
-                individual_scatterer_movement_params['mean_velocity_gm_config'] = mean_vel_config
+            if self.movement_type == "random_walk":
+                individual_scatterer_movement_params = {
+                    'direction_change_prob': movement_params.get('direction_change_prob', 0.4),
+                    'max_angle_change': np.radians(movement_params.get('max_angle_change', 45))
+                }
+            elif self.movement_type == "linear":
+                if 'direction' in movement_params:
+                    individual_scatterer_movement_params = {
+                        'direction': movement_params['direction']
+                    }
             
             s = Scatterer(
                 scatterer_id,
@@ -525,7 +503,14 @@ class Environment:
         
         for rx_ant in self.rx_antennas:
             if hasattr(rx_ant, 'update_pos') and callable(getattr(rx_ant, 'update_pos')):
-                rx_ant.update_pos(dt, self.dimensions, ue_movements)
+                # Prepare building data for the UE movement module
+                building_bboxes = []
+                if self.buildings:
+                    # Pass only 2D bounding boxes for horizontal collision
+                    building_bboxes = [{'xmin': b.min_bounds[0], 'xmax': b.max_bounds[0],
+                                        'ymin': b.min_bounds[1], 'ymax': b.max_bounds[1]}
+                                       for b in self.buildings]
+                rx_ant.update_pos(dt, self.dimensions, ue_movements, buildings=building_bboxes)
 
         if self.movement_type == "flocking":
             for cluster_idx, cluster_data in enumerate(self.clusters):
@@ -570,8 +555,6 @@ class Environment:
         original_env_movement_type = self.movement_type
         self.movement_type = movement_to_visualise
         
-        # Advance environment by specified time
-        # For some movement types like random_walk, multiple small steps can be smoother
         if self.movement_type == "random_walk": 
             num_steps = 10
             dt_step = time_period / num_steps
@@ -588,11 +571,11 @@ class Environment:
         plotter.set_background(background)
         
         # Draw ground plane
-        ground_size_x = self.dimensions[0]
-        ground_size_y = self.dimensions[1]
+        ground_size_x   = self.dimensions[0]
+        ground_size_y   = self.dimensions[1]
         ground_center_x = self.dimensions[0] / 2
         ground_center_y = self.dimensions[1] / 2
-        ground_plane = pv.Plane(
+        ground_plane    = pv.Plane(
                                 center=(ground_center_x, ground_center_y, 0),
                                 direction=(0, 0, 1),
                                 i_size=ground_size_x,
@@ -615,7 +598,7 @@ class Environment:
             drawn_pos_y = log_pos[1] + visual_y_offset
             drawn_pos_z = log_pos[2]
 
-            # Mast (cylinder) - visually shifted
+            # Mast (cylinder) 
             mast_center_z = drawn_pos_z - tx_mast_height / 2.0
             antenna_base_mast = pv.Cylinder(
                 center=[drawn_pos_x, drawn_pos_y, mast_center_z],
@@ -625,7 +608,7 @@ class Environment:
             )
             plotter.add_mesh(antenna_base_mast, color='darkred', name=f'TX_Mast_{tx.name}', metallic=0.7, roughness=0.3)
 
-            # Cone (top part) - also at the visually shifted XY
+            # Cone (top part)
             antenna_top = pv.Cone(
                 center=[drawn_pos_x, drawn_pos_y, drawn_pos_z], 
                 direction=[0, 0, 1],
@@ -633,8 +616,6 @@ class Environment:
                 height=1.2 
             )
             plotter.add_mesh(antenna_top, color='red', name=f'TX_Top_{tx.name}', metallic=0.8, roughness=0.2)
-            
-            # Label - relative to the visually shifted position
             plotter.add_point_labels([drawn_pos_x, drawn_pos_y, drawn_pos_z + 1.5], [tx.name], point_size=0, font_size=12, text_color='red', shape_opacity=0)
 
         rx_positions = []
@@ -644,14 +625,14 @@ class Environment:
             antenna_base = pv.Cylinder(
                 center=[pos[0], pos[1], pos[2]/2], 
                 direction=[0, 0, 1],
-                radius=0.3, # Original RX base radius
+                radius=0.3, 
                 height=pos[2]
             )
             antenna_top = pv.Cone(
                 center=[pos[0], pos[1], pos[2]], 
                 direction=[0, 0, 1],
-                radius=0.5, # Original RX cone radius
-                height=0.8  # Original RX cone height
+                radius=0.5, 
+                height=0.8  
             )
             plotter.add_mesh(antenna_base, color='blue', name=f'RX_base_{rx.name}', metallic=0.8, roughness=0.2)
             plotter.add_mesh(antenna_top, color='blue', name=f'RX_Top_{rx.name}', metallic=0.8, roughness=0.2)
@@ -746,10 +727,10 @@ class Environment:
                 np.empty((0,), dtype=bool), # Empty visibility mask
             )
 
-        positions = np.array([s.pos for s in self.scatterers], dtype=float)
-        velocities = np.array([s.velocity_vector for s in self.scatterers], dtype=float)
+        positions         = np.array([s.pos for s in self.scatterers], dtype=float)
+        velocities        = np.array([s.velocity_vector for s in self.scatterers], dtype=float)
         reflection_coeffs = np.array([s.get_reflection_coeff() for s in self.scatterers], dtype=complex)
-        speeds = np.array([s.speed for s in self.scatterers], dtype=float)
+        speeds            = np.array([s.speed for s in self.scatterers], dtype=float)
 
         if tx_pos is not None and rx_pos is not None:
             _tx_pos = np.asarray(tx_pos, dtype=float)
@@ -775,7 +756,7 @@ class Environment:
             
         return positions, velocities, reflection_coeffs, speeds, visible_mask
     
-    def _is_within_bounds(self, position):
+    def is_within_bounds(self, position):
         """Check if position is within the environment bounds"""
         x, y, z = ensure_vector3d(position)
             
@@ -783,26 +764,26 @@ class Environment:
                 0 <= y <= self.dimensions[1] and
                 0 <= z <= self.dimensions[2])
        
-    def _distance3d(self, pos1, pos2):
+    def distance3d(self, pos1, pos2):
         """Calculate 3D distance between two positions"""
         p1 = ensure_vector3d(pos1)
         p2 = ensure_vector3d(pos2)
         return np.linalg.norm(p2 - p1)
 
-    def _los_basis(self, tx_pos, rx_pos):
-        """Return unit vector along BS→UE line and two orthogonal unit vectors spanning its normal plane."""
-        v = rx_pos - tx_pos
+    def los_basis(self, tx_pos, rx_pos):
+        """Return unit vector along BS->UE line and two orthogonal unit vectors spanning its normal plane."""
+        v     = rx_pos - tx_pos
         e_los = v / np.linalg.norm(v)
         # Find a vector not parallel to e_los, use it to build an orthonormal basis
         tmp = np.array([1,0,0]) if abs(e_los[0]) < 0.9 else np.array([0,1,0])
-        e1 = np.cross(e_los, tmp);  e1 /= np.linalg.norm(e1)
-        e2 = np.cross(e_los, e1)
+        e1  = np.cross(e_los, tmp);  e1 /= np.linalg.norm(e1)
+        e2  = np.cross(e_los, e1)
         return e_los, e1, e2
 
     def get_valid_window_reflections(self, tx: np.ndarray, rx: np.ndarray):
         """
         Return a list of dicts {pos, coeff, distance} for every first-order
-        specular reflection Tx → window → Rx that is
+        specular reflection Tx -> window -> Rx that is
           - inside the pane rectangle,
           - below the pane's angle threshold,
           - not blocked by any other building.
@@ -811,11 +792,11 @@ class Environment:
         for b in self.buildings:
             for w in b.get_windows():
                 # Ensure window normal is a unit vector for mirror reflection calculation
-                window_normal_unnormalized = w.get_normal()
-                norm_window_normal = LA.norm(window_normal_unnormalized)
+                window_normal_unnormalised = w.get_normal()
+                norm_window_normal = LA.norm(window_normal_unnormalised)
                 if norm_window_normal < 1e-9: # Skip if window normal is a zero vector
                     continue
-                n = window_normal_unnormalized / norm_window_normal
+                n = window_normal_unnormalised / norm_window_normal
                 p0  = w.get_center()
 
                 # mirror method – reflect Tx through the pane
@@ -834,33 +815,27 @@ class Environment:
                     continue
 
                 # incidence angle OK?
-                # Calculate incident ray direction (Tx to reflection point)
                 vec_tx_pref = p_ref - tx
                 norm_vec_tx_pref = LA.norm(vec_tx_pref)
-                if norm_vec_tx_pref < 1e-9: # Avoid division by zero if tx coincides with p_ref
-                    continue
-                d_in = vec_tx_pref / norm_vec_tx_pref # Normalized incident direction
-                
-                current_reflection_coeff = w.get_reflection_coefficient(d_in)
-                if np.abs(current_reflection_coeff) < 1e-12: # Use magnitude for complex numbers
+                if norm_vec_tx_pref < 1e-9: 
                     continue
 
-                # check blockage on both sub-segments, excluding the current building b
-                # Segment 1: tx to p_ref
+                d_in = vec_tx_pref / norm_vec_tx_pref 
+                
+                current_reflection_coeff = w.get_reflection_coefficient(d_in)
+                if np.abs(current_reflection_coeff) < 1e-12: 
+                    continue
+
                 dist_tx_pref = norm_vec_tx_pref 
-                seg1_block = False # Default to not blocked
-                if dist_tx_pref > 1e-6: # Only check blockage if path length is significant
-                    # check_building_intersection expects normalized direction
+                seg1_block = False 
+                if dist_tx_pref > 1e-6: 
                     seg1_block = self.check_building_intersection(tx, d_in, 
                                                               max_distance=dist_tx_pref - 1e-6, 
                                                               exclude_building_id=b.id)[0]
-
-                # Segment 2: p_ref to rx
                 vec_pref_rx = rx - p_ref
                 dist_pref_rx = LA.norm(vec_pref_rx)
-                seg2_block = False # Default to not blocked
-                if dist_pref_rx > 1e-6: # Only check blockage if path length is significant
-                    # Normalize direction for check_building_intersection
+                seg2_block = False 
+                if dist_pref_rx > 1e-6: 
                     dir_pref_rx = vec_pref_rx / dist_pref_rx
                     seg2_block = self.check_building_intersection(p_ref, dir_pref_rx, 
                                                               max_distance=dist_pref_rx - 1e-6, 
@@ -869,13 +844,6 @@ class Environment:
                 if seg1_block or seg2_block:
                     continue
 
-                # Calculate and print the incident angle for this valid reflection
-                # d_in is the normalized vector from Tx to p_ref
-                # n is the normalized window normal vector
-                cos_theta_inc = np.abs(np.dot(d_in, n))
-                incident_angle_rad = np.arccos(np.clip(cos_theta_inc, -1.0, 1.0)) # Clip for robustness
-                incident_angle_deg = np.degrees(incident_angle_rad)
-
                 reflections.append({
                     "pos":      p_ref,
                     "coeff":    current_reflection_coeff,
@@ -883,48 +851,39 @@ class Environment:
                 })
         return reflections
 
-    def _add_path(self, plotter, start, end, colour='yellow',
+    def add_path(self, plotter, start, end, colour='yellow',
                   name='ray', line_width=1.5, opacity=1.0, show_blockage_visuals=True):
-        # Ensure start and end are numpy arrays
         start = np.array(start, dtype=float)
-        end = np.array(end, dtype=float)
+        end   = np.array(end, dtype=float)
 
-        # 1. Direction and total distance
+        # Direction and total distance
         vec   = end - start
         dist  = np.linalg.norm(vec)
         if dist < 1e-9:
-            return  # degenerate path
+            return  
         d_hat = vec / dist
 
-        # 2. Check for blockage IF show_blockage_visuals is enabled
+        # Check for blockage IF show_blockage_visuals is enabled
         if show_blockage_visuals:
-            # Check just before the end point to ensure the target itself isn't counted as a blocker
             check_max_distance = max(0.0, dist - 1e-6) 
-            is_blocked_viz, _t_hit, _building_obj, _normal_hit = self.check_building_intersection(
+            is_blocked_vis, _t_hit, _building_obj, _normal_hit = self.check_building_intersection(
                 start, d_hat, max_distance=check_max_distance)
             
-            if is_blocked_viz:
-                # If blockage visuals are on AND the path is blocked, do not draw the ray at all.
+            if is_blocked_vis:
                 return 
-
-        # 3. If we reach here, either:
-        #    a) show_blockage_visuals is True and the path was NOT blocked, OR
-        #    b) show_blockage_visuals is False (so we draw regardless of blockage).
-        #    Draw the full path.
         line_full = pv.Line(start, end)
         plotter.add_mesh(line_full, color=colour, line_width=line_width, opacity=opacity,
                          name=name)
 
     def path_blocked(self, p1: np.ndarray, p2: np.ndarray, exclude_bldg_id: Optional[str] = None) -> bool:
         """Check if the path between p1 and p2 is blocked by a building."""
-        _p1 = np.asarray(p1, dtype=float)
-        _p2 = np.asarray(p2, dtype=float)
-
-        vec = _p2 - _p1
+        _p1  = np.asarray(p1, dtype=float)
+        _p2  = np.asarray(p2, dtype=float)
+        vec  = _p2 - _p1
         dist = np.linalg.norm(vec)
 
         if dist < 1e-6:
-            return False  # Coincident points, path is not considered blocked
+            return False  
         
         direction = vec / dist
         # Check slightly less than full distance to avoid issues with endpoint being on a surface
@@ -961,7 +920,7 @@ class Environment:
         main_street_y   = self.dimensions[1] / 2
         main_road_start = [0, main_street_y, 0.01]
         main_road_end   = [self.dimensions[0], main_street_y, 0.01]
-        main_road_mesh  = self._create_road_mesh(main_road_start, main_road_end, road_width, color='dimgray')
+        main_road_mesh  = self._create_road_mesh(main_road_start, main_road_end, road_width)
         if main_road_mesh:
             plotter.add_mesh(main_road_mesh, color='dimgray', name='main_street', ambient=0.3, diffuse=0.7)
 
@@ -971,15 +930,11 @@ class Environment:
             gap_length     = 6.0
             segment_length = dash_length + gap_length
             line_z_offset  = 0.015 
-
-            # Main road runs along X, Y is constant at main_street_y
             num_segments   = int(self.dimensions[0] / segment_length)
 
             for i in range(num_segments):
                 dash_start_x = i * segment_length
                 dash_end_x   = dash_start_x + dash_length
-
-                # Ensure markings don't exceed road length
                 if dash_end_x > self.dimensions[0]:
                     dash_end_x = self.dimensions[0]
                     if dash_start_x >= self.dimensions[0]:
@@ -995,7 +950,7 @@ class Environment:
         tx_positions = []
         rx_positions = []
 
-        # 1. Add a solid ground plane at z=0 (top view)
+        # Add a solid ground plane at z=0 (top view)
         ground_size_x   = self.dimensions[0]
         ground_size_y   = self.dimensions[1]
         ground_center_x = self.dimensions[0] / 2
@@ -1010,41 +965,32 @@ class Environment:
         )
         plotter.add_mesh(ground_plane, color='lightgrey', ambient=0.2, diffuse=0.8, specular=0.1, roughness=0.7, show_edges=False)
         
-        # 2. Plot TX antennas (Base Station)
+        # Plot TX antennas (Base Station)
         for tx in self.tx_antennas:
-            log_pos = np.array(tx.get_pos())
-            tx_positions.append(log_pos)
-
-            # Visual adjustments for TX antenna placement
-            tx_mast_height = 3.0
-            tx_mast_radius = 0.2
-            visual_y_offset = tx_mast_radius
-
-            drawn_pos_x = log_pos[0]
-            drawn_pos_y = log_pos[1] + visual_y_offset
-            drawn_pos_z = log_pos[2]
-
-            # Mast (cylinder)
-            mast_center_z = drawn_pos_z - tx_mast_height / 2.0
+            tip  = np.array(tx.get_pos())  
+            base = tip - np.array([0,0,3.0])
+            tx_positions.append(tip)
+            mast_radius = 0.2
+            mast_height = 3.0
+            mast_center = base + np.array([0,0,mast_height/2])
             antenna_base_mast = pv.Cylinder(
-                center=[drawn_pos_x, drawn_pos_y, mast_center_z],
-                direction=[0, 0, 1],
-                radius=tx_mast_radius,
-                height=tx_mast_height
+                center=mast_center.tolist(),
+                direction=[0,0,1],
+                radius=mast_radius,
+                height=mast_height
             )
-            plotter.add_mesh(antenna_base_mast, color='darkred', name=f'TX_Mast_{tx.name}', metallic=0.7, roughness=0.3)
+            plotter.add_mesh(antenna_base_mast, color='darkred', name=f'TX_Mast_{tx.name}')
 
-            # Cone (top part)
+            # top cone at `tip`
             antenna_top = pv.Cone(
-                center=[drawn_pos_x, drawn_pos_y, drawn_pos_z],
-                direction=[0, 0, 1],
+                center=tip.tolist(),
+                direction=[0,0,1],
                 radius=0.7,
                 height=1.2
             )
-            plotter.add_mesh(antenna_top, color='red', name=f'TX_Top_{tx.name}', metallic=0.8, roughness=0.2)
-            plotter.add_point_labels([drawn_pos_x, drawn_pos_y, drawn_pos_z + 1.5], [tx.name], point_size=0, font_size=12, text_color='red', shape_opacity=0)
+            plotter.add_mesh(antenna_top, color='red', name=f'TX_Top_{tx.name}')
 
-        # 3. Plot RX antennas (User Equipment)
+        # Plot RX antennas (User Equipment)
         for rx in self.rx_antennas:
             pos = np.array(rx.get_pos())
             rx_positions.append(pos)
@@ -1057,14 +1003,14 @@ class Environment:
             antenna_top = pv.Cone(
                 center=[pos[0], pos[1], pos[2]], 
                 direction=[0, 0, 1],
-                radius=0.5, # Original RX cone radius
-                height=0.8  # Original RX cone height
+                radius=0.5, 
+                height=0.8  
             )
             plotter.add_mesh(antenna_base, color='blue', name=f'RX_base_{rx.name}', metallic=0.8, roughness=0.2)
             plotter.add_mesh(antenna_top, color='blue', name=f'RX_Top_{rx.name}', metallic=0.8, roughness=0.2)
             plotter.add_point_labels([pos[0],pos[1],pos[2]+1.0], [rx.name], point_size=0, font_size=12, text_color='blue', shape_opacity=0)
 
-        # 4. Plot scatterers
+        # Plot scatterers
         if self.scatterers:
             scatterer_positions = np.array([s.get_pos() for s in self.scatterers])
             points = plotter.add_points(
@@ -1072,7 +1018,7 @@ class Environment:
                 render_points_as_spheres=True, name='scatterers'
             )
             
-            # 4b. Plot ray paths if requested
+            # Plot ray paths
             if show_rays and tx_positions and rx_positions:
                 # Add LOS ray between TX and RX
                 for tx_pos_single in tx_positions:
@@ -1081,12 +1027,12 @@ class Environment:
                                        colour='yellow', name='los_ray', line_width=3,
                                        show_blockage_visuals=show_blockage_visuals)
                 
-                if tx_positions and rx_positions: # Ensure first TX/RX exist
+                if tx_positions and rx_positions: 
                     tx_pos_for_rays = tx_positions[0]
                     rx_pos_for_rays = rx_positions[0]
                 
                     # Scatterer Rays
-                    if scatterer_positions.any(): # Check if scatterer_positions is not empty
+                    if scatterer_positions.any(): 
                         num_rays_to_draw = min(len(scatterer_positions), max_rays)
                         step = max(1, len(scatterer_positions) // num_rays_to_draw if num_rays_to_draw > 0 else len(scatterer_positions) + 1)
                         for i in range(0, len(scatterer_positions), step):
@@ -1114,7 +1060,7 @@ class Environment:
                                            colour='deeppink', name=f'ray_win_rx_{i}', line_width=1.5, opacity=0.7,
                                            show_blockage_visuals=show_blockage_visuals)
             
-            # 4c. Show movement paths if requested
+            # Show movement paths if requested
             if show_movement and self.scatterers:
                 # Save original scatterers
                 import copy
@@ -1138,10 +1084,9 @@ class Environment:
                 
                 # Limit the number of movement paths for performance
                 num_scatterer_paths_to_draw = min(len(scatterer_positions), max_rays) 
-                # Ensure num_scatterer_paths_to_draw is not zero to avoid division by zero
                 path_step = max(1, len(scatterer_positions) // num_scatterer_paths_to_draw if num_scatterer_paths_to_draw > 0 else len(scatterer_positions) + 1)
 
-                # Draw scatterer movement paths as lines (with stride for performance)
+                # Draw scatterer movement paths as lines 
                 movement_actors = []
                 for i in range(0, len(scatterer_positions), path_step):
                     if i < len(future_scatterer_positions):
@@ -1178,67 +1123,47 @@ class Environment:
 
                 # Restore original scatterers and RX antennas
                 self.scatterers = scatterer_backup
-                self.rx_antennas = rx_antennas_backup # Restore RX antennas
+                self.rx_antennas = rx_antennas_backup 
                 self.movement_type = original_movement_type 
 
         # Plot buildings
         if self.buildings:
-            for i, building_obj in enumerate(self.buildings): # Renamed variable
-                pos = building_obj.get_position() # This is the center
-                dims = building_obj.get_dimensions()
-                
-                # Create box for building using PyVista's Box widget centered at (0,0,0)
-                # and then translate it. Or, more directly, define by bounds.
-                
-                # Calculate bounds for PyVista Box
-                min_b, max_b = building_obj.get_bounds()
+            for i, building_obj in enumerate(self.buildings): 
+                pos = building_obj.get_position()
 
+                min_b, max_b    = building_obj.get_bounds()
                 building_box_pv = pv.Box(bounds=(min_b[0], max_b[0],
                                                  min_b[1], max_b[1],
                                                  min_b[2], max_b[2]))
-                
                 # Add building with a gray/blue color and some transparency
                 plotter.add_mesh(
                     building_box_pv, 
                     color='slategray', 
-                    opacity=1.0, # Main building is opaque
+                    opacity=1.0, 
                     show_edges=True,
                     edge_color='darkslategray', 
-                    name=f'building_{building_obj.id}' # Use building ID for name
+                    name=f'building_{building_obj.id}' 
                 )
 
                 # Plot windows for this building
-                building_pos = building_obj.get_position()
-                building_dims = building_obj.get_dimensions()
-                half_dims = building_dims / 2.0 # This was building_dims / 2.0, ensure it is float division if building_dims can be int
-
-                for win_idx, window_obj in enumerate(building_obj.get_windows()): # Iterate over Window objects
-                    # Get pre-calculated world geometry and properties from the Window object
-                    win_center = window_obj.get_center()
-                    # win_normal = window_obj.get_normal() # Not directly used for pv.Box by bounds
+                for win_idx, window_obj in enumerate(building_obj.get_windows()): 
+                    win_center   = window_obj.get_center()
                     dims_on_face = window_obj.get_dimensions_on_face()
-                    win_opacity = window_obj.get_opacity()
-                    # win_material = window_obj.get_material()
-                    face_idx = window_obj.face_index # Need face_index to determine Box orientation
+                    win_opacity  = window_obj.get_opacity()
+                    face_idx     = window_obj.face_index 
                     
-                    epsilon = 0.05 # Small thickness for the window pane
+                    epsilon = 0.05 
                     window_box_dims_vector = np.zeros(3)
 
-                    if face_idx == 0 or face_idx == 1: # X-normal faces (+X, -X)
-                        # PyVista Box lengths are [width, height, depth] in its own coord system before rotation
-                        # For a window on an X-face, its dimensions_on_face are [width_along_Y, height_along_Z]
+                    if face_idx == 0 or face_idx == 1: 
                         window_box_dims_vector = np.array([epsilon, dims_on_face[0], dims_on_face[1]])
-                    elif face_idx == 2 or face_idx == 3: # Y-normal faces (+Y, -Y)
-                        # For a window on a Y-face, its dimensions_on_face are [width_along_X, height_along_Z]
+                    elif face_idx == 2 or face_idx == 3: 
                         window_box_dims_vector = np.array([dims_on_face[0], epsilon, dims_on_face[1]])
-                    elif face_idx == 4 or face_idx == 5: # Z-normal faces (Roof/Floor)
-                        # For a window on a Z-face, its dimensions_on_face are [width_along_X, height_along_Y]
+                    elif face_idx == 4 or face_idx == 5: 
                         window_box_dims_vector = np.array([dims_on_face[0], dims_on_face[1], epsilon])
                     else:
                         continue
                     
-                    # The win_center is already the true world center of the window pane.
-                    # So, for pv.Box defined by bounds, we use this center and the calculated box dimensions.
                     half_win_box_dims = window_box_dims_vector / 2.0
                     min_win_bounds = win_center - half_win_box_dims
                     max_win_bounds = win_center + half_win_box_dims
@@ -1255,16 +1180,14 @@ class Environment:
                         name=f'building_{building_obj.id}_win_{win_idx}'
                     )
 
-        # 5. Plot clusters
-        cluster_sphere_actors = [] # To store cluster sphere actors for toggling
+        # Plot clusters
+        cluster_sphere_actors = [] 
         for i, cluster_info in enumerate(self.clusters):
-            c = cluster_info['center']
+            c      = cluster_info['center']
             radius = cluster_info['radius']
             
-            # Create the full sphere mesh with lower resolution for better performance
             sphere_mesh = pv.Sphere(radius=radius, center=[c[0], c[1], c[2]], theta_resolution=15, phi_resolution=15)
             
-            # Don't perform clipping if cluster is fully within bounds
             needs_clipping = (
                 c[2] - radius < 0 or
                 c[2] + radius > self.dimensions[2] or
@@ -1298,13 +1221,11 @@ class Environment:
                 actor = plotter.add_mesh(sphere_mesh, color='lightcoral', 
                                          opacity=0.25, name=f'cluster_sphere_{i}', 
                                          show_edges=False, 
-                                         pickable=False) # Make it not pickable if not needed
+                                         pickable=False) 
                 actor.SetVisibility(show_cluster_radii_initially)
                 cluster_sphere_actors.append(actor)
 
-        # 6. Plot bounding box (full cube wireframe)
         if show_bounds:
-            # Add a wireframe cube for the environment bounds
             cube = pv.Cube(center=(
                 self.dimensions[0] / 2,
                 self.dimensions[1] / 2,
@@ -1312,26 +1233,22 @@ class Environment:
             ), x_length=self.dimensions[0], y_length=self.dimensions[1], z_length=self.dimensions[2])
             plotter.add_mesh(cube, style='wireframe', color='dimgray', line_width=1, opacity=0.2, name='bounds')
 
-        # 7. Add grid lines (without coordinate labels)
         if show_grid:
-            # Define custom bounds for the grid, extending Z to double height
             grid_bounds = (
-                0, self.dimensions[0],  # X min, X max
-                0, self.dimensions[1],  # Y min, Y max
-                0, self.dimensions[2] * 2  # Z min, Z max (double height)
+                0, self.dimensions[0], 
+                0, self.dimensions[1], 
+                0, self.dimensions[2] * 2 
             )
             plotter.show_grid(bounds=grid_bounds, color='lightgray', fmt="%.0f")
 
-        # 8. Set camera position for optimal top and side view
         x_mid = self.dimensions[0] / 2
         y_mid = self.dimensions[1] / 2
         z_mid = self.dimensions[2] / 2
         
-        # Position camera to show top and side view
         initial_camera_position = [
-            (-self.dimensions[0] * 0.5, y_mid * 0.3, self.dimensions[2] * 1.2),  # Camera position
-            (x_mid * 0.2, y_mid, z_mid * 0.5),                                # Focal point
-            (0, 0, 1)                                                          # View-up vector (Z is up)
+            (-self.dimensions[0] * 0.5, y_mid * 0.3, self.dimensions[2] * 1.2), 
+            (x_mid * 0.2, y_mid, z_mid * 0.5),                                
+            (0, 0, 1)                                                          
         ]
         
         plotter.camera_position = initial_camera_position
@@ -1350,7 +1267,6 @@ class Environment:
         
         if show_rays:
             def toggle_rays():
-                # Toggle visibility of all general ray lines (LOS, Scatterer)
                 processed_base_rays = set()
                 for actor_name, actor in plotter.renderer.actors.items():
                     base_name_candidate = actor_name
@@ -1358,34 +1274,21 @@ class Environment:
 
                     if actor_name.endswith('_blocked_segment'):
                         base_name_candidate = actor_name.replace('_blocked_segment', '')
-                    # elif actor_name.endswith('_hit_blockage_marker'): # Marker removed, but good to be aware if re-added
-                    #     base_name_candidate = actor_name.replace('_hit_blockage_marker', '')
-                    
-                    # Check if the base_name_candidate corresponds to a LOS or Scatterer ray
                     if base_name_candidate == 'los_ray' or base_name_candidate.startswith('ray_tx_sc_') or base_name_candidate.startswith('ray_sc_rx_'):
                         is_primary_ray_actor = True
 
                     if is_primary_ray_actor and base_name_candidate not in processed_base_rays:
-                        # Determine current visibility from the main ray actor if it exists, or from a part
-                        # This assumes the original ray actor (e.g., 'los_ray') is the one determining the toggle state.
                         main_ray_actor_name = base_name_candidate
-                        visibility_to_set = True # Default to visible if main actor not found (should not happen)
-                        
+                        visibility_to_set = True 
                         if main_ray_actor_name in plotter.renderer.actors:
                             visibility_to_set = not plotter.renderer.actors[main_ray_actor_name].GetVisibility()
                             plotter.renderer.actors[main_ray_actor_name].SetVisibility(visibility_to_set)
-                        # If main actor isn't found (e.g. was entirely replaced by a blocked segment),
-                        # try to get visibility from the blocked segment itself if we found it first.
                         elif actor_name.endswith('_blocked_segment') and actor_name == (base_name_candidate + '_blocked_segment'):
                             visibility_to_set = not plotter.renderer.actors[actor_name].GetVisibility()
-                            # Set this one directly, others will follow
                             plotter.renderer.actors[actor_name].SetVisibility(visibility_to_set)
-                        
-                        # Toggle associated parts
                         blocked_segment_name = base_name_candidate + '_blocked_segment'
                         if blocked_segment_name in plotter.renderer.actors and blocked_segment_name != main_ray_actor_name:
                             plotter.renderer.actors[blocked_segment_name].SetVisibility(visibility_to_set)
-                        
                         processed_base_rays.add(base_name_candidate)
                 plotter.render()
             plotter.add_key_event('r', toggle_rays)
@@ -1393,13 +1296,11 @@ class Environment:
         
         if show_movement:
             def toggle_movement():
-                # Toggle visibility of movement lines and future points
-                for actor_name, actor in plotter.renderer.actors.items(): # Iterate through items
+                for actor_name, actor in plotter.renderer.actors.items(): 
                     if actor_name.startswith('movement_') or actor_name == 'future_points':
                         visibility = not actor.GetVisibility()
                         actor.SetVisibility(visibility)
                 plotter.render()
-            
             plotter.add_key_event('m', toggle_movement)
             instruction_text += ", 'm' to toggle movement paths"
         
@@ -1407,39 +1308,28 @@ class Environment:
             def toggle_window_rays():
                 ray_window_actors = [actor_name for actor_name in plotter.renderer.actors.keys() 
                                      if actor_name.startswith('ray_tx_win_') or actor_name.startswith('ray_win_rx_')]
-                print(f"Window ray actors found: {len(ray_window_actors)}")
                 if len(ray_window_actors) == 0:
-                    # Print info about valid window reflections
                     if self.tx_antennas and self.rx_antennas:
                         tx_pos = self.tx_antennas[0].get_pos()
                         rx_pos = self.rx_antennas[0].get_pos()
                         valid_reflections = self.get_valid_window_reflections(tx_pos, rx_pos)
-                        print(f"Valid window reflections: {len(valid_reflections)}")
-                        
                         window_count = sum(len(b.get_windows()) for b in self.buildings)
-                        print(f"Total windows in environment: {window_count}")
-                        
                         if window_count > 0 and len(valid_reflections) == 0:
                             print("No valid reflection paths found. See --debug-reflections for details.")
                         elif len(valid_reflections) > 0:
                             print("ERROR: Valid reflections exist but rays weren't drawn!")
-                
-                # Original toggle functionality
                 for actor_name, actor in plotter.renderer.actors.items():
                     if actor_name.startswith('ray_tx_win_') or actor_name.startswith('ray_win_rx_'):
                         blockage_marker_name_hit = actor_name + '_hit_blockage_marker'
                         blocked_segment_name = actor_name + '_blocked_segment'
-                        
                         visibility = not actor.GetVisibility()
-                        actor.SetVisibility(visibility) # Toggle the main ray (or its unblocked part)
+                        actor.SetVisibility(visibility) 
                         print(f"Toggled visibility of {actor_name} to {visibility}")
-
                         if blockage_marker_name_hit in plotter.renderer.actors:
                             plotter.renderer.actors[blockage_marker_name_hit].SetVisibility(visibility)
                         if blocked_segment_name in plotter.renderer.actors:
                             plotter.renderer.actors[blocked_segment_name].SetVisibility(visibility)
                 plotter.render()
-            
             plotter.add_key_event('p', toggle_window_rays)   
             instruction_text += ", 'p' to toggle window rays"
                     
@@ -1447,7 +1337,6 @@ class Environment:
             if hasattr(plotter, 'grid_actor'):
                 plotter.grid_actor.SetVisibility(not plotter.grid_actor.GetVisibility())
             plotter.render()
-            
         plotter.add_key_event('g', toggle_grid)
         instruction_text += ", 'g' to toggle grid"
         
@@ -1458,58 +1347,38 @@ class Environment:
             plotter.render()
         plotter.add_key_event('c', toggle_cluster_radii)
         instruction_text += ", 'c' to toggle cluster radii"
-        
         plotter.add_text(instruction_text, font_size=10, position='upper_left')
 
         # Add environment information
         env_info = (
             f"Environment: {self.dimensions[0]}m × {self.dimensions[1]}m × {self.dimensions[2]}m\n"
             f"Scatterer Movement: {self.movement_type}\n"
-            f"UE Movement: {self.rx_antennas[0].movement_type if self.rx_antennas else 'N/A'} (Speed: {self.rx_antennas[0].speed if self.rx_antennas else 'N/A'} m/s)\n"
+            f"UE Movement: {self.rx_antennas[0].movement_type if self.rx_antennas else 'N/A'} (Speed: {round(self.rx_antennas[0].speed, 3) if self.rx_antennas else 'N/A'} m/s)\n"
             f"Scatterers: {len(self.scatterers)}, Clusters: {len(self.clusters)}\n"
             f"Buildings: {len(self.buildings)}"
         )
         plotter.add_text(env_info, font_size=10, position='lower_left')
-
-        # Ensure default trackball interactor for navigation
         plotter.enable_trackball_style()
-
-        # Add an orientation marker
         plotter.add_camera_orientation_widget()
-
         plotter.show()
 
-    def _create_road_mesh(self, start_point, end_point, width, color='darkgrey', name='road_segment'):
+    def create_road_mesh(self, start_point, end_point, width):
         """Creates a PyVista mesh for a road segment."""
         start_point = np.array(start_point, dtype=float)
-        end_point = np.array(end_point, dtype=float)
-        
-        # Road direction and length
-        direction = end_point - start_point
-        length = np.linalg.norm(direction)
-        if length < 1e-6: # Avoid division by zero for very short segments
+        end_point   = np.array(end_point, dtype=float)
+        direction   = end_point - start_point
+        length      = np.linalg.norm(direction)
+        if length < 1e-6: 
             return None
         direction_norm = direction / length
-        
-        # Perpendicular direction for width (assuming road is on XY plane)
-        # If roads can be on arbitrary planes, this needs to be more general
         perp_direction = np.array([-direction_norm[1], direction_norm[0], 0])
-        
-        # Define the four corners of the road segment
         half_width_vec = perp_direction * (width / 2)
-        
         corner1 = start_point - half_width_vec
         corner2 = start_point + half_width_vec
         corner3 = end_point + half_width_vec
         corner4 = end_point - half_width_vec
-        
-        # Create a polygon (quad) for the road segment
-        # PyVista expects points in a specific order for faces
-        points = np.array([corner1, corner2, corner3, corner4])
-        # Define the face connecting these points
-        # The face is a list of [num_points, point_idx1, point_idx2, ...]
-        faces = np.hstack([[4], np.arange(4)]).tolist() 
-        
+        points  = np.array([corner1, corner2, corner3, corner4])
+        faces   = np.hstack([[4], np.arange(4)]).tolist() 
         road_mesh = pv.PolyData(points, faces=faces)
         return road_mesh
 

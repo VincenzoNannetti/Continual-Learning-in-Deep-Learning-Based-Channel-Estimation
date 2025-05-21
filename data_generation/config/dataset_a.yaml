@@ -1,72 +1,70 @@
-# Dataset A - Low multipath, good SNR environment
-
-# ---- System Parameters ----
-blocks: 40                       # Number of OFDM blocks per sample
+blocks: 5                       # Number of OFDM blocks per sample
 carrier_frequency: 2490         # Carrier frequency (MHz)
 subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
+rms_delay_spread_ns: 45   
+use_aggregate_scattering: true     
+far_field_margin: 6e-2  
 
-# ---- Environment Type and Dimensions ----
-environment_type: "UMa"                 # Which 3GPP preset to use as base (RMa = Rural Macrocell)
-# environment_dimensions: [1000, 1000, 310]  # Dimensions of the environment (x, y, z) - not in presets
+environment:
+  environment_type: "UMa"             
+  environment_dimensions: [200,100,100]
+  road_width: 20
+  pavement_width: 3.5
+  buildings_per_side: 10
+  floor_height: 3.0
 
-# ---- Parameter Overrides ----
-# Override these specific parameters from the RMa preset
-# num_clusters: [1, 5]               # Deliberately reduced from [8, 11] in RMa preset
-# cluster_density: 1.0               # Increased from 0.4 in RMa preset
-# cluster_radius: 6                  # Reduced from 35 in RMa preset
-# cluster_height_range: 1000        
-# rms_delay_spread_ns: 250           # Modified from 129 in RMa preset
-# use_aggregate_scattering: true     # Modified from false in RMa preset
-# far_field_margin: 6e-2             # Far field region of 6cm
+antennas:
+  tx_antenna:
+    gain: 15
+    target_height: 25.0
+  rx_antenna:
+    gain: 0
+    target_height: 1.5
+    movement:
+      type: "linear"
+      speed: [100,200]
+      linear_params:
+        direction: [1, 0, 0] 
 
-# ---- Custom Movement Parameters ----
-scatterer_movement_type: "flocking"     # Movement model to use
+      forward_back_params:
+        direction: [1, 0, 0] 
+        distance: 20         
 
-# ---- Flocking Movement Parameters ----
-cluster_movement_params:
-  flock_movement_direction: [1, 0, 0] # Direction vector [x, y, z]
+      circular_params:
+        center_offset: [10, 0] 
+        radius: 1              
+        clockwise: true        
 
-# ---- Output Settings ----
-output_dir: "./data/raw/ray_tracing/dataset_a" # Output directory for this dataset
+      zigzag_params:
+        main_direction: [1, 0, 0] 
+        leg_length: 10            
+        angle_deg: 45             
+        num_legs: 6               
 
-# ---- UE Movement Parameters ----
-ue_movement:
-  type: "linear"  # Options: "static", "linear", "circular", "zigzag", "forward_back", "cross_road", "curve"
-  speed: 1      # m/s (ignored if type is "static")
+clusters:
+  num_aerial_clusters_rng:    [2, 4]
+  num_ground_clusters_rng:    [5, 12]
+  num_scatterers_per_cluster: 50
+  movement_type:              "flocking"
+  speed_range:                [0,0]
+  density:                    0.5
+  reflection_amplitude:       null
+  
+  # Movement-specific parameters for different movement types
+  movement_params:
+    # Random walk parameters
+    random_walk:
+      direction_change_prob: 0.4
+      max_angle_change: 45  
+    
+    # Linear movement parameters
+    linear:
+      direction: [1, 0, 0]
+    
+    # Flocking movement parameters
+    flocking:
+      flock_movement_direction: [1, 0, 0]
 
-  # Parameters for "linear" movement
-  # Direction vector [x, y, z]. UE moves indefinitely in this direction.
-  # For UE, z-component is typically 0 to keep it at UE height.
-  linear_params:
-    direction: [1, 0, 0] # Example: Move along the positive x-axis
 
-  # Parameters for "forward_back" movement
-  # forward_back_params:
-  #   direction: [1, 0, 0] # Main direction of forward movement
-  #   distance: 20         # Distance to move forward before returning (m)
-
-  # Parameters for "circular" movement
-  # circular_params:
-    # center_offset: [10, 0] # Offset [x,y] from UE's initial position to define circle center
-    # radius: 5              # Radius of the circular path (m)
-    # clockwise: true        # Direction of movement
-
-  # Parameters for "zigzag" movement
-  # zigzag_params:
-  #   main_direction: [1, 0, 0] # Overall direction of travel
-  #   leg_length: 10            # Length of each "zig" or "zag" segment (m)
-  #   angle_deg: 45             # Angle of deviation from main_direction (degrees)
-  #   num_legs: 6               # Number of legs to perform (optional, for finite zigzag)
-
-  # Parameters for "cross_road" - This is more complex as it needs scene context
-  # cross_road_params:
-  #   target_y_relative: 0.8  # e.g., target y is 0.8 * environment_y_dimension
-  #   axis_of_crossing: "y" # "x" or "y"
-
-  # Parameters for "curve" movement (e.g., a circular arc)
-  # curve_params:
-  #   center_offset: [0, 20] # Offset [x,y] from UE's initial position for curve center
-  #   radius: 20
-  #   start_angle_deg: 0     # Relative to UE's initial orientation or absolute?
-  #   end_angle_deg: 90
-  #   clockwise: true
+# Output Settings
+output_dir: "./data/raw/ray_tracing/dataset_a" 

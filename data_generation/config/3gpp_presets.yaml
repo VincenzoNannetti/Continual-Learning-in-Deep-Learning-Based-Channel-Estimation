@@ -18,8 +18,8 @@ UMa:  # Urban Macrocell
 
   # Propagation parameters
   snr: [10, 25]                   # Signal-to-noise ratio (dB)
-  use_aggregate_scattering: true  # Use H_{ij} term for diffuse scattering
-  pathloss_model: "3gpp"          # Pathloss model ("friis" or "3gpp")
+  use_aggregate_scattering: false  # Use H_{ij} term for diffuse scattering
+  pathloss_model: "friis"          # Pathloss model ("friis" or "3gpp")
   o2i_penetration_loss:
     low_loss_probability: 0.5     # Probability of low-loss building material
     low_loss: 20

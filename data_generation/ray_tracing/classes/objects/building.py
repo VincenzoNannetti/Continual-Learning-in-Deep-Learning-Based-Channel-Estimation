@@ -12,9 +12,9 @@ from .window import Window
 class Building:
     def __init__(self, 
                  id_: str,
-                 position: List[float],  # Center position of the building
-                 dimensions: List[float],  # Width, length, height
-                 reflection_coefficient: float = 0.0,  # Default reflection coefficient
+                 position: List[float],  
+                 dimensions: List[float],  
+                 reflection_coefficient: float = 0.0, 
                  material: str = "concrete"):
         """
         Initialise a building in the environment.
@@ -34,7 +34,7 @@ class Building:
         
         # Calculate corners for collision detection
         self._calculate_bounds()
-        self.windows = [] # Initialize list to store window definitions
+        self.windows = [] 
         
     def _calculate_bounds(self):
         """Calculate the min/max bounds of the building."""
@@ -95,22 +95,9 @@ class Building:
         
         # Check if intersection is in front of the ray origin
         if t_min < 0:
-            # If t_min is negative, the intersection point is behind the ray origin.
-            # However, if t_max is positive, the ray originates inside the box.
-            # For simplicity in this context (blocking), we might still consider this an "intersection"
-            # if the ray *ends* outside. But for standard ray-tracing, an intersection point
-            # must be t > 0. Let's stick to t_min > 0 for a valid "hit from outside".
-            # If t_max is also negative, the entire box is behind the ray.
-            if t_max < 0: # both t_min and t_max are negative
+            if t_max < 0: 
                  return False, None, None
-
-            # If t_min < 0 and t_max > 0, ray origin is inside the box.
-            # This case means the ray starts inside the building.
-            # For a blocking scenario, this could be handled differently,
-            # but for a simple intersection test from outside, we usually require t_min > 0.
-            # For now, let's return True, distance 0, as it's "intersecting" by being inside.
-            # Or, to be more strict for an external ray hitting an external face:
-            return False, None, None # Sticking to t_min > 0 for external hit.
+            return False, None, None 
             
         return True, t_min, normal
     
@@ -162,13 +149,13 @@ class Building:
         
         # Create a Window object, passing self (this Building instance)
         new_window = Window(
-            building=self,
-            face_index=face_index,
-            position_on_face=position_on_face,
-            dimensions_on_face=window_dimensions,
-            material=material,
-            opacity=opacity,
-            reflection_amplitude=reflection_amplitude
+            building             = self,
+            face_index           = face_index,
+            position_on_face     = position_on_face,
+            dimensions_on_face   = window_dimensions,
+            material             = material,
+            opacity              = opacity,
+            reflection_amplitude = reflection_amplitude
         )
         self.windows.append(new_window)
 
