@@ -1,4 +1,4 @@
-# Continual Learning for Deep Wireless Channel Estimation
+# Towards Continual Learning in Deep Learning-based Channel Estimation
 
 ## Project Overview
 
