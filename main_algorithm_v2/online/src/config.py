@@ -5,9 +5,8 @@ Extends the offline configuration with online-specific parameters.
 
 import yaml
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 import os
-import sys
 
 # Import the offline config
 from main_algorithm_v2.offline.src.config import ExperimentConfig as OfflineExperimentConfig, load_config as load_offline_config
@@ -121,7 +120,7 @@ def load_online_config(config_path: str) -> OnlineExperimentConfig:
             raise FileNotFoundError(f"Offline config file not found: {offline_config_path}")
         
         offline_config = load_offline_config(offline_config_path)
-        print(f"📁 Offline config loaded from separate file: {offline_config_path}")
+        print(f" Offline config loaded from separate file: {offline_config_path}")
         
     else:
         # Extract config from checkpoint
@@ -138,7 +137,7 @@ def load_online_config(config_path: str) -> OnlineExperimentConfig:
         if not os.path.exists(checkpoint_path):
             raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_path}")
         
-        print(f"📦 Loading offline config from checkpoint: {checkpoint_path}")
+        print(f" Loading offline config from checkpoint: {checkpoint_path}")
         import torch
         
         try:
@@ -156,16 +155,16 @@ def load_online_config(config_path: str) -> OnlineExperimentConfig:
                 # Assume it's already an OfflineExperimentConfig object
                 offline_config = config_data
                 
-            print(f"✅ Offline config extracted from checkpoint successfully")
+            print(f" Offline config extracted from checkpoint successfully")
             
         except Exception as e:
             raise RuntimeError(f"Error extracting config from checkpoint: {e}")
     
     online_config.offline_config = offline_config
     
-    print(f"📋 Online config loaded from: {config_path}")
-    print(f"🎯 Experiment: {online_config.experiment_name}")
-    print(f"🤖 Model: {offline_config.model.name}")
+    print(f" Online config loaded from: {config_path}")
+    print(f" Experiment: {online_config.experiment_name}")
+    print(f" Model: {offline_config.model.name}")
     
     return online_config
 

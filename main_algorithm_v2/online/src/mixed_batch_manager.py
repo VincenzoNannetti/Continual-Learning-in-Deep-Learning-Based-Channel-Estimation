@@ -13,7 +13,7 @@ similarity between the distributions.
 import torch
 import torch.nn.functional as F
 import numpy as np
-from typing import Dict, Tuple, List, Optional, Any
+from typing import Dict, Tuple, List, Any
 import random
 
 
@@ -48,7 +48,7 @@ class MixedBatchManager:
         self.total_online_samples = 0
         self.similarity_history = []
         
-        print(f"🔀 MixedBatchManager initialized:")
+        print(f" MixedBatchManager initialized:")
         print(f"   Offline samples per batch: {self.m_offline}")
         print(f"   Online samples per batch: {self.m_online}")
         print(f"   Adaptive weighting: {self.adaptive_weighting}")
@@ -268,7 +268,7 @@ class MixedBatchManager:
     def print_status(self):
         """Print current status of mixed batch creation."""
         stats = self.get_stats()
-        print(f"\n🔀 MIXED BATCH MANAGER STATUS:")
+        print(f"\n MIXED BATCH MANAGER STATUS:")
         print("-" * 45)
         print(f"   Batches created: {stats['batches_created']}")
         print(f"   Total samples used: {stats['total_offline_samples'] + stats['total_online_samples']}")

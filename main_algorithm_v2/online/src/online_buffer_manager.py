@@ -41,7 +41,7 @@ class OnlineReplayBuffer:
         input_cpu = input_data.detach().clone().cpu()
         target_cpu = target_data.detach().clone().cpu()
         
-        # 🔧 MEMORY MANAGEMENT STRATEGY POINT 🔧
+        #  MEMORY MANAGEMENT STRATEGY POINT 
         # This is where you can implement your own sample selection logic!
         self._add_with_strategy((input_cpu, target_cpu))
         
@@ -49,7 +49,7 @@ class OnlineReplayBuffer:
     
     def _add_with_strategy(self, sample: Tuple[torch.Tensor, torch.Tensor]):
         """
-        🔧 CUSTOMIZE THIS METHOD FOR YOUR MEMORY MANAGEMENT STRATEGY! 🔧
+         CUSTOMIZE THIS METHOD FOR YOUR MEMORY MANAGEMENT STRATEGY! 
         
         Current implementation: Simple FIFO (First In, First Out)
         
@@ -127,7 +127,7 @@ class OnlineBufferManager:
         # Domain-specific buffers (created on-demand)
         self.domain_buffers: Dict[int, OnlineReplayBuffer] = {}
         
-        print(f"🧠 OnlineBufferManager initialized:")
+        print(f" OnlineBufferManager initialized:")
         print(f"   Enabled: {self.enabled}")
         print(f"   Buffer size per domain: {self.buffer_size}")
         print(f"   Memory strategy: {self.strategy}")
@@ -151,7 +151,7 @@ class OnlineBufferManager:
                 buffer_size=self.buffer_size,
                 strategy=self.strategy
             )
-            print(f"📝 Created new online buffer for domain {domain_id} (size: {self.buffer_size})")
+            print(f" Created new online buffer for domain {domain_id} (size: {self.buffer_size})")
         
         return self.domain_buffers[domain_id]
     
@@ -224,7 +224,7 @@ class OnlineBufferManager:
     
     def print_status(self):
         """Print current status of all buffers."""
-        print(f"\n🧠 ONLINE BUFFER MANAGER STATUS:")
+        print(f"\n ONLINE BUFFER MANAGER STATUS:")
         print(f"   Active domains: {len(self.domain_buffers)}")
         print(f"   Total samples: {self.get_total_samples()}")
         

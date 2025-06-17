@@ -16,9 +16,8 @@ import random
 import time
 import torch
 import numpy as np
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any
 import os
-import sys
 from datetime import datetime
 
 # Import offline utilities
@@ -69,7 +68,7 @@ class OnlineContinualLearner:
         print(f"Device: {self.device}")
         
         # Initialize model manager with EWC support
-        print("\n[MODEL] Initializing model manager...")
+        print("\n[MODEL] Initialising model manager...")
         self.model_manager = OnlineModelManager(
             self.config.offline_checkpoint_path,
             self.device,
@@ -83,7 +82,7 @@ class OnlineContinualLearner:
         print(f"Model: {model_info['model_name']}")
         
         # Initialize data pipeline
-        print("\n[DATA] Initializing data pipeline...")
+        print("\n[DATA] Initialising data pipeline...")
         norm_stats = self.model_manager.get_normalisation_stats()
         raw_data_config = self.config.raw_data.model_dump()
         domain_remapping = raw_data_config.get('domain_remapping', {})
@@ -133,7 +132,7 @@ class OnlineContinualLearner:
         
         # Initialize comprehensive metrics collector
         if self.config.online_evaluation.verbose:
-            print("\n[METRICS] Initializing comprehensive metrics collection...")
+            print("\n[METRICS] Initialising comprehensive metrics collection...")
         metrics_dir = os.path.join("main_algorithm_v2", "online", "eval", self.config.experiment_name)
         self.metrics_collector = ComprehensiveMetricsCollector(save_dir=metrics_dir)
         if self.config.online_evaluation.verbose:
@@ -507,12 +506,12 @@ class OnlineContinualLearner:
                         self.adaptation_tracker['domain_specialization_scores'][domain_id_str].append(specialization_score)
                         
                         if self.config.online_evaluation.verbose:
-                            print(f"[ADAPTATION] ✅ Success! Domain {domain_id_str}: {improvement:.6f} improvement")
+                            print(f"[ADAPTATION]  Success! Domain {domain_id_str}: {improvement:.6f} improvement")
                             print(f"             Specialization: {specialization_score:.2f}% better than baseline")
                     else:
                         self.adaptation_tracker['failed_adaptations'] += 1
                         if self.config.online_evaluation.verbose:
-                            print(f"[ADAPTATION] ❌ Failed. Domain {domain_id_str}: {improvement:.6f} (degraded)")
+                            print(f"[ADAPTATION]  Failed. Domain {domain_id_str}: {improvement:.6f} (degraded)")
                     
                     # Store adaptation history
                     self.adaptation_tracker['domain_adaptation_history'][domain_id_str].append({
@@ -642,7 +641,7 @@ class OnlineContinualLearner:
             # Save intermediate results
             if sample_num % (self.config.online_evaluation.log_frequency * 50) == 0:
                 intermediate_file = self.metrics_collector.save_results(f"intermediate_{sample_num}")
-                print(f"         💾 Intermediate results saved: {intermediate_file}")
+                print(f"          Intermediate results saved: {intermediate_file}")
     
     def print_detailed_status(self):
         """Print detailed status of the online learning system."""
@@ -695,13 +694,13 @@ class OnlineContinualLearner:
                 
                 # Provide analysis (no recommendations for changes)
                 if mean_ratio < 0.05:
-                    print(f"     📊 Analysis: EWC penalty is very low ({mean_ratio:.3f})")
+                    print(f"      Analysis: EWC penalty is very low ({mean_ratio:.3f})")
                 elif mean_ratio > 0.5:
-                    print(f"     📊 Analysis: EWC penalty is very high ({mean_ratio:.3f})")
+                    print(f"      Analysis: EWC penalty is very high ({mean_ratio:.3f})")
                 elif 0.1 <= mean_ratio <= 0.2:
-                    print(f"     📊 Analysis: EWC penalty ratio is in typical range ({mean_ratio:.3f})")
+                    print(f"      Analysis: EWC penalty ratio is in typical range ({mean_ratio:.3f})")
                 else:
-                    print(f"     📊 Analysis: EWC penalty ratio is moderate ({mean_ratio:.3f})")
+                    print(f"      Analysis: EWC penalty ratio is moderate ({mean_ratio:.3f})")
     
     def print_final_summary(self, total_time: float):
         """Print final summary of the online learning session."""
@@ -761,7 +760,7 @@ class OnlineContinualLearner:
                 positive_improvements = [i for i in improvements if i > 0]
                 
                 if positive_improvements:
-                    trend = "📈" if improvements[-1] > improvements[0] else "📉"
+                    trend = "" if improvements[-1] > improvements[0] else ""
                     print(f"   Domain {domain_id}: {len(history)} adaptations, "
                           f"avg improvement: {np.mean(positive_improvements):.6f} {trend}")
         
@@ -773,13 +772,13 @@ class OnlineContinualLearner:
         
         # Validate our proof-of-concept
         if success_rate > 60:
-            print(f"\n✅ PROOF-OF-CONCEPT VALIDATION: SUCCESS!")
+            print(f"\n PROOF-OF-CONCEPT VALIDATION: SUCCESS!")
             print(f"   Online LoRA adaptation is working effectively ({success_rate:.1f}% success)")
         elif success_rate > 30:
-            print(f"\n⚠️  PROOF-OF-CONCEPT VALIDATION: PARTIALLY WORKING")
+            print(f"\n️  PROOF-OF-CONCEPT VALIDATION: PARTIALLY WORKING")
             print(f"   Online LoRA adaptation shows some benefit ({success_rate:.1f}% success)")
         else:
-            print(f"\n❌ PROOF-OF-CONCEPT VALIDATION: NEEDS INVESTIGATION")
+            print(f"\n PROOF-OF-CONCEPT VALIDATION: NEEDS INVESTIGATION")
             print(f"   Online LoRA adaptation success rate is low ({success_rate:.1f}%)")
         
         # Per-domain statistics
@@ -843,10 +842,10 @@ class OnlineContinualLearner:
             print(f"   System health: {health['status']}")
             if health['warnings']:
                 for warning in health['warnings']:
-                    print(f"     ⚠️  {warning}")
+                    print(f"     ️  {warning}")
             if health['errors']:
                 for error in health['errors']:
-                    print(f"     ❌ {error}")
+                    print(f"      {error}")
         
         # Generate transfer metrics report
         if self.transfer_tracker.domain_snapshots:
@@ -854,7 +853,7 @@ class OnlineContinualLearner:
         
         # Save comprehensive results
         report_file = self.metrics_collector.save_results("online_continual_learning")
-        print(f"\n   📊 Comprehensive metrics saved to: {report_file}")
+        print(f"\n    Comprehensive metrics saved to: {report_file}")
         
         # Save results
         if self.config.online_metrics.save_detailed_results:

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Simple script to analyze your offline continual learning model with the existing checkpoint.
 """
@@ -17,7 +16,7 @@ def run_analysis():
     checkpoint_path = current_dir / "checkpoints" / "lora" / "FINAL_WITH_REPLAY.pth"
     output_dir = current_dir / "analysis_results"
     
-    print("🚀 OFFLINE CONTINUAL LEARNING ANALYSIS")
+    print(" OFFLINE CONTINUAL LEARNING ANALYSIS")
     print("=" * 50)
     print(f"Checkpoint: {checkpoint_path}")
     print(f"Output: {output_dir}")
@@ -25,7 +24,7 @@ def run_analysis():
     
     # Check if checkpoint exists
     if not checkpoint_path.exists():
-        print(f"❌ Error: Checkpoint not found at {checkpoint_path}")
+        print(f" Error: Checkpoint not found at {checkpoint_path}")
         print("Available files in checkpoints/lora/:")
         lora_dir = current_dir / "checkpoints" / "lora"
         if lora_dir.exists():
@@ -34,7 +33,7 @@ def run_analysis():
                     print(f"  - {file.name}")
         return False
     
-    print(f"✅ Found checkpoint: {checkpoint_path.name}")
+    print(f" Found checkpoint: {checkpoint_path.name}")
     
     # Run evaluation
     cmd = [
@@ -44,9 +43,9 @@ def run_analysis():
         "--num_plot_samples", "5"
     ]
     
-    print(f"\n🔧 Running: {' '.join([cmd[0]] + [cmd[1]] + [cmd[2]] + ['<checkpoint>'] + cmd[4:])}")
+    print(f"\n Running: {' '.join([cmd[0]] + [cmd[1]] + [cmd[2]] + ['<checkpoint>'] + cmd[4:])}")
     print("\n" + "=" * 50)
-    print("🏃‍♂️ STARTING EVALUATION...")
+    print("‍️ STARTING EVALUATION...")
     print("This will evaluate across all 9 domains and generate plots.")
     print("=" * 50)
     
@@ -54,19 +53,19 @@ def run_analysis():
         result = subprocess.run(cmd, cwd=current_dir, check=True)
         
         print("\n" + "=" * 50)
-        print("✅ EVALUATION COMPLETED!")
-        print(f"📊 Results saved to: {output_dir}")
-        print("📈 Check the comprehensive report and plots!")
+        print(" EVALUATION COMPLETED!")
+        print(f" Results saved to: {output_dir}")
+        print(" Check the comprehensive report and plots!")
         print("=" * 50)
         
         return True
         
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Evaluation failed with return code {e.returncode}")
+        print(f"\n Evaluation failed with return code {e.returncode}")
         return False
         
     except KeyboardInterrupt:
-        print("\n⚠️ Evaluation interrupted by user.")
+        print("\n️ Evaluation interrupted by user.")
         return False
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ def get_device(device_config: str) -> torch.device:
         device = torch.device(device_config)
     
     # Print device diagnostics
-    print("\n🔍 Device Diagnostics:")
+    print("\n Device Diagnostics:")
     print(f"   Device config: {device_config}")
     print(f"   CUDA available: {torch.cuda.is_available()}")
     if torch.cuda.is_available():
@@ -94,7 +94,7 @@ def load_pretrained_model(config: dict, device: torch.device):
             'mean_targets': torch.tensor(norm_stats_lists['mean_targets'], dtype=torch.float32).squeeze().view(-1, 1, 1),
             'std_targets': torch.tensor(norm_stats_lists['std_targets'], dtype=torch.float32).squeeze().view(-1, 1, 1)
         }
-        print("\n📊 Normalisation stats loaded and reshaped for (C, H, W) data:")
+        print("\n Normalisation stats loaded and reshaped for (C, H, W) data:")
         for key, value in norm_stats.items():
             print(f"   {key}: shape {value.shape}")
     else:
@@ -110,7 +110,7 @@ def load_pretrained_model(config: dict, device: torch.device):
     
     # Use the model parameters from the checkpoint (these match the saved weights)
     model_params = checkpoint_config['model']['params']
-    print(f"\n🏗️ Creating model with architecture from checkpoint:")
+    print(f"\n️ Creating model with architecture from checkpoint:")
     print(f"   Base features: {model_params['base_features']}")
     print(f"   Depth: {model_params['depth']}")
     print(f"   SRCNN channels: {model_params['srcnn_channels']}")
@@ -138,11 +138,11 @@ def load_pretrained_model(config: dict, device: torch.device):
     model = model.to(device)
     
     # Verify model is on correct device
-    print(f"\n🔍 Model Device Check:")
+    print(f"\n Model Device Check:")
     print(f"   Model device: {next(model.parameters()).device}")
     print(f"   Expected device: {device}")
     
-    print(f"✅ Pretrained model loaded successfully")
+    print(f" Pretrained model loaded successfully")
     print(f"   Model parameters: {sum(p.numel() for p in model.parameters()):,}")
     print(f"   Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
     
@@ -171,7 +171,7 @@ def create_dataloader(domain_name: str, config: dict, norm_stats: dict,
         raise ValueError(f"Could not determine SNR for domain: {domain_name}")
     
     # Create dataset - this will load from preprocessed cache if available
-    print(f"📚 Loading dataset: {domain_name}")
+    print(f" Loading dataset: {domain_name}")
     print(f"   Data dir: {config['data']['data_dir']}")
     print(f"   Preprocessed dir: {config['data']['preprocessed_dir']}")
     print(f"   Using SNR: {snr} dB")
@@ -185,10 +185,10 @@ def create_dataloader(domain_name: str, config: dict, norm_stats: dict,
             preprocessed_dir=config['data']['preprocessed_dir'],
             all_data=False
         )
-        print(f"   ✅ Successfully loaded {len(dataset)} samples")
+        print(f"    Successfully loaded {len(dataset)} samples")
     except FileNotFoundError as e:
-        print(f"   ❌ Dataset not found: {e}")
-        print(f"   💡 Expected preprocessed file: {config['data']['preprocessed_dir']}/tester_data/{domain_name}_snr{snr}_thin_plate_spline.mat")
+        print(f"    Dataset not found: {e}")
+        print(f"    Expected preprocessed file: {config['data']['preprocessed_dir']}/tester_data/{domain_name}_snr{snr}_thin_plate_spline.mat")
         raise
     
     # Split into train/val/test using the same splits as the main pipeline
@@ -244,7 +244,7 @@ def evaluate_all_previous_domains(trainer: ExperienceReplayTrainer, config: dict
     if not completed_tasks:
         return {}
     
-    print(f"\n🔍 Evaluating on {len(completed_tasks)} previous domains...")
+    print(f"\n Evaluating on {len(completed_tasks)} previous domains...")
     
     results = {}
     for domain_name in completed_tasks:
@@ -267,7 +267,7 @@ def evaluate_all_previous_domains(trainer: ExperienceReplayTrainer, config: dict
             'std_psnr': float(torch.tensor(psnr_values).std())
         }
         
-        print(f"📊 Aggregate Results:")
+        print(f" Aggregate Results:")
         print(f"   SSIM: {aggregate['mean_ssim']:.4f} ± {aggregate['std_ssim']:.4f}")
         print(f"   NMSE: {aggregate['mean_nmse']:.8f} ± {aggregate['std_nmse']:.8f}")
         print(f"   PSNR: {aggregate['mean_psnr']:.2f} ± {aggregate['std_psnr']:.2f}")
@@ -389,24 +389,24 @@ def calculate_continual_learning_metrics(all_results: dict, domains: list) -> di
 def print_continual_learning_summary(metrics: dict, domains: list):
     """Print a comprehensive summary of continual learning performance."""
     print(f"\n{'='*60}")
-    print(f"📊 CONTINUAL LEARNING PERFORMANCE SUMMARY")
+    print(f" CONTINUAL LEARNING PERFORMANCE SUMMARY")
     print(f"{'='*60}")
     
-    print(f"🎯 Final Average Performance (ACC): {metrics.get('ACC', 0.0):.4f}")
-    print(f"📉 Backward Transfer (BWT):        {metrics.get('BWT', 0.0):+.4f}")
+    print(f" Final Average Performance (ACC): {metrics.get('ACC', 0.0):.4f}")
+    print(f" Backward Transfer (BWT):        {metrics.get('BWT', 0.0):+.4f}")
     print(f"   └─ {'Positive = Learning helps, Negative = Forgetting' if metrics.get('BWT', 0) < 0 else 'Positive = Learning helps!'}")
     
-    print(f"📈 Forward Transfer (FWT):         {metrics.get('FWT', 0.0):+.4f}")
+    print(f" Forward Transfer (FWT):         {metrics.get('FWT', 0.0):+.4f}")
     print(f"   └─ {'Positive = Knowledge transfer benefit' if metrics.get('FWT', 0) > 0 else 'Negative = Interference'}")
     
-    print(f"🧠 Forgetting:                    {metrics.get('Forgetting', 0.0):.4f}")
+    print(f" Forgetting:                    {metrics.get('Forgetting', 0.0):.4f}")
     print(f"   └─ {'Lower is better (less forgetting)' if metrics.get('Forgetting', 0) > 0 else 'No forgetting detected!'}")
     
-    print(f"🎓 Learning Accuracy:              {metrics.get('Learning_ACC', 0.0):.4f}")
+    print(f" Learning Accuracy:              {metrics.get('Learning_ACC', 0.0):.4f}")
     
     # Performance matrix visualization
     if 'performance_matrix' in metrics:
-        print(f"\n📋 Performance Matrix (rows=after task, cols=on task):")
+        print(f"\n Performance Matrix (rows=after task, cols=on task):")
         print(f"     ", end="")
         for i, domain in enumerate(domains):
             print(f"{domain[:8]:>8}", end=" ")
@@ -465,7 +465,7 @@ def save_metrics_to_csv(metrics: dict, domains: list, results_dir: str, method_n
         matrix_file = os.path.join(results_dir, f"{method_name}_performance_matrix_{timestamp}.csv")
         matrix_df.to_csv(matrix_file, index=False)
         
-        print(f"📊 Metrics saved:")
+        print(f" Metrics saved:")
         print(f"   Summary: {summary_file}")
         print(f"   Performance Matrix: {matrix_file}")
     
@@ -505,7 +505,7 @@ class EarlyStoppingTracker:
             
         if self.counter >= self.patience:
             self.early_stop = True
-            print(f"⏹️ Early stopping triggered at epoch {epoch}")
+            print(f"️ Early stopping triggered at epoch {epoch}")
             print(f"   Best score: {self.best_score:.6f} at epoch {self.best_epoch}")
             
         return self.early_stop
@@ -518,7 +518,7 @@ def main(config_path: str):
     config = load_config(config_path)
     device = get_device(config['hardware']['device'])
     
-    print(f"🚀 Starting Experience Replay Training")
+    print(f" Starting Experience Replay Training")
     print(f"   Device: {device}")
     print(f"   Buffer size: {config['method']['buffer_size']}")
     print(f"   Replay ratio: {config['method']['replay_batch_ratio']}")
@@ -535,9 +535,9 @@ def main(config_path: str):
                 config=config,
                 tags=config['logging']['wandb']['tags']
             )
-            print(f"📊 W&B initialized: {wandb_run.name}")
+            print(f" W&B initialized: {wandb_run.name}")
         except Exception as e:
-            print(f"⚠️ W&B initialization failed: {e}")
+            print(f"️ W&B initialization failed: {e}")
             wandb_run = None
     
     # Load pretrained model and normalisation stats
@@ -560,14 +560,14 @@ def main(config_path: str):
     # Main continual learning loop
     for task_idx, domain_name in enumerate(config['data']['sequence']):
         print(f"\n{'='*60}")
-        print(f"🎯 Task {task_idx + 1}/{len(config['data']['sequence'])}: {domain_name}")
+        print(f" Task {task_idx + 1}/{len(config['data']['sequence'])}: {domain_name}")
         print(f"{'='*60}")
         
         # Create data loaders for current task
         train_loader = create_dataloader(domain_name, config, norm_stats, split='train')
         val_loader = create_dataloader(domain_name, config, norm_stats, split='val')
         
-        print(f"📚 Data loaded:")
+        print(f" Data loaded:")
         print(f"   Training samples: {len(train_loader.dataset)}")
         print(f"   Validation samples: {len(val_loader.dataset)}")
         
@@ -659,7 +659,7 @@ def main(config_path: str):
                     for metric_name, value in eval_results['aggregate'].items():
                         wandb_run.log({f'aggregate_{metric_name}': value})
         
-        print(f"✅ Task {domain_name} completed. Best validation loss: {best_val_loss:.6f}")
+        print(f" Task {domain_name} completed. Best validation loss: {best_val_loss:.6f}")
         
         # Clear CUDA cache
         if torch.cuda.is_available():
@@ -677,13 +677,13 @@ def main(config_path: str):
         with open(results_file, 'w') as f:
             json.dump(all_results, f, indent=2)
         
-        print(f"📁 Results saved to: {results_file}")
+        print(f" Results saved to: {results_file}")
     
     # Save final model with experience buffer
     final_checkpoint_path = os.path.join(config['logging']['checkpoint_dir'], f"final_replay_buffer{config['method']['buffer_size']}_model.pth")
     trainer.save_checkpoint("final", 0, 0.0, final_checkpoint_path)
     
-    print(f"\n🎉 Experience Replay training completed!")
+    print(f"\n Experience Replay training completed!")
     print(f"   Domains trained: {len(completed_tasks)}")
     print(f"   Buffer size: {config['method']['buffer_size']}")
     print(f"   Final buffer utilization: {trainer.get_buffer_statistics()['utilization']:.2%}")

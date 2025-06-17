@@ -72,7 +72,7 @@ def load_pretrained_model(config: dict, device: torch.device):
             'mean_targets': torch.tensor(norm_stats_lists['mean_targets'], dtype=torch.float32).squeeze().view(-1, 1, 1),
             'std_targets': torch.tensor(norm_stats_lists['std_targets'], dtype=torch.float32).squeeze().view(-1, 1, 1)
         }
-        print("\n📊 Normalisation stats loaded and reshaped for (C, H, W) data:")
+        print("\n Normalisation stats loaded and reshaped for (C, H, W) data:")
         for key, value in norm_stats.items():
             print(f"   {key}: shape {value.shape}")
     elif 'config' in checkpoint and 'norm_stats' in checkpoint['config']:
@@ -92,7 +92,7 @@ def load_pretrained_model(config: dict, device: torch.device):
     
     # Use the model parameters from the checkpoint (these match the saved weights)
     model_params = checkpoint_config['model']['params']
-    print(f"\n🏗️ Creating model with architecture from checkpoint:")
+    print(f"\n️ Creating model with architecture from checkpoint:")
     print(f"   Base features: {model_params['base_features']}")
     print(f"   Depth: {model_params['depth']}")
     print(f"   SRCNN channels: {model_params['srcnn_channels']}")
@@ -119,7 +119,7 @@ def load_pretrained_model(config: dict, device: torch.device):
     
     model = model.to(device)
     
-    print(f"✅ Pretrained model loaded successfully")
+    print(f" Pretrained model loaded successfully")
     print(f"   Model parameters: {sum(p.numel() for p in model.parameters()):,}")
     print(f"   Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
     
@@ -148,7 +148,7 @@ def create_dataloader(domain_name: str, config: dict, norm_stats: dict,
         raise ValueError(f"Could not determine SNR for domain: {domain_name}")
     
     # Create dataset - this will load from preprocessed cache if available
-    print(f"📚 Loading dataset: {domain_name}")
+    print(f" Loading dataset: {domain_name}")
     print(f"   Data dir: {config['data']['data_dir']}")
     print(f"   Preprocessed dir: {config['data']['preprocessed_dir']}")
     print(f"   Using SNR: {snr} dB")
@@ -162,10 +162,10 @@ def create_dataloader(domain_name: str, config: dict, norm_stats: dict,
             preprocessed_dir=config['data']['preprocessed_dir'],
             all_data=False
         )
-        print(f"   ✅ Successfully loaded {len(dataset)} samples")
+        print(f"    Successfully loaded {len(dataset)} samples")
     except FileNotFoundError as e:
-        print(f"   ❌ Dataset not found: {e}")
-        print(f"   💡 Expected preprocessed file: {config['data']['preprocessed_dir']}/tester_data/{domain_name}_snr{snr}_thin_plate_spline.mat")
+        print(f"    Dataset not found: {e}")
+        print(f"    Expected preprocessed file: {config['data']['preprocessed_dir']}/tester_data/{domain_name}_snr{snr}_thin_plate_spline.mat")
         raise
     
     # Split into train/val/test using the same splits as the main pipeline
@@ -234,7 +234,7 @@ def evaluate_all_previous_domains(trainer: EWCTrainer, config: dict, norm_stats:
     if not domains_to_evaluate:
         return {}
     
-    print(f"\n🔍 Evaluating on {len(domains_to_evaluate)} domains...")
+    print(f"\n Evaluating on {len(domains_to_evaluate)} domains...")
     
     results = {}
     for domain_name in domains_to_evaluate:
@@ -261,7 +261,7 @@ def evaluate_all_previous_domains(trainer: EWCTrainer, config: dict, norm_stats:
                 'std_psnr': float(torch.tensor(psnr_values).std()) if len(psnr_values) > 1 else 0.0
             }
             
-            print(f"📊 Aggregate Results (previous domains):")
+            print(f" Aggregate Results (previous domains):")
             print(f"   SSIM: {aggregate['mean_ssim']:.4f} ± {aggregate['std_ssim']:.4f}")
             print(f"   NMSE: {aggregate['mean_nmse']:.8f} ± {aggregate['std_nmse']:.8f}")
             print(f"   PSNR: {aggregate['mean_psnr']:.2f} ± {aggregate['std_psnr']:.2f}")
@@ -288,12 +288,12 @@ def calculate_continual_learning_metrics(all_results: dict, domains: list,
     performance_matrix = {}  # R[i][j] = performance on task j after training task i
     pre_training_matrix = {}  # R0[i] = performance on task i before training task i
     
-    print(f"\n📊 Building performance matrices for {num_tasks} tasks...")
+    print(f"\n Building performance matrices for {num_tasks} tasks...")
     
     # Extract performance matrices from results
     for task_idx, current_domain in enumerate(domains):
         if current_domain not in all_results:
-            print(f"⚠️ Missing results for {current_domain}")
+            print(f"️ Missing results for {current_domain}")
             continue
             
         performance_matrix[task_idx] = {}
@@ -456,7 +456,7 @@ def calculate_continual_learning_metrics(all_results: dict, domains: list,
     # This will be filled in by the main function
     metrics['memory_footprint_mb'] = 0.0
     
-    print(f"✅ Metrics calculated:")
+    print(f" Metrics calculated:")
     print(f"   ACC: {metrics['ACC']:.4f}")
     print(f"   BWT: {metrics['BWT']:+.4f}")
     print(f"   FWT: {metrics['FWT']:+.4f}")
@@ -471,42 +471,42 @@ def calculate_continual_learning_metrics(all_results: dict, domains: list,
 def print_continual_learning_summary(metrics: dict, domains: list):
     """Print a comprehensive summary of continual learning performance."""
     print(f"\n{'='*70}")
-    print(f"📊 CONTINUAL LEARNING PERFORMANCE SUMMARY")
+    print(f" CONTINUAL LEARNING PERFORMANCE SUMMARY")
     print(f"{'='*70}")
     
-    print(f"🎯 Final Average Performance (ACC): {metrics.get('ACC', 0.0):.4f}")
-    print(f"📉 Backward Transfer (BWT):        {metrics.get('BWT', 0.0):+.4f}")
+    print(f" Final Average Performance (ACC): {metrics.get('ACC', 0.0):.4f}")
+    print(f" Backward Transfer (BWT):        {metrics.get('BWT', 0.0):+.4f}")
     print(f"   └─ {'Positive = Forgetting, Negative = Retention' if metrics.get('BWT', 0) > 0 else 'No forgetting detected'}")
     
-    print(f"📈 Forward Transfer (FWT):         {metrics.get('FWT', 0.0):+.4f}")
+    print(f" Forward Transfer (FWT):         {metrics.get('FWT', 0.0):+.4f}")
     print(f"   └─ {'Positive = Poor generalisation to new domains' if metrics.get('FWT', 0.0) > 0 else 'Negative = Good zero-shot generalisation'}")
     
-    print(f"🧠 Average Forgetting:             {metrics.get('Forgetting', 0.0):.4f}")
+    print(f" Average Forgetting:             {metrics.get('Forgetting', 0.0):.4f}")
     print(f"   └─ {'Lower is better (less forgetting)' if metrics.get('Forgetting', 0) > 0 else 'No forgetting detected!'}")
     
-    print(f"🎓 Learning Accuracy:              {metrics.get('Learning_ACC', 0.0):.4f}")
+    print(f" Learning Accuracy:              {metrics.get('Learning_ACC', 0.0):.4f}")
     
-    print(f"🔄 Forward Plasticity:             {metrics.get('Forward_Plasticity', 0.0):+.4f}")
+    print(f" Forward Plasticity:             {metrics.get('Forward_Plasticity', 0.0):+.4f}")
     print(f"   └─ How much model improves on new tasks during training")
     
-    print(f"💾 Memory Footprint:               {metrics.get('memory_footprint_mb', 0.0):.2f} MB")
+    print(f" Memory Footprint:               {metrics.get('memory_footprint_mb', 0.0):.2f} MB")
     
     # Training efficiency
     if 'total_training_time_seconds' in metrics:
         total_time = metrics['total_training_time_seconds']
         avg_time = metrics['average_training_time_seconds']
-        print(f"⏱️ Training Time:                  {total_time:.1f}s total, {avg_time:.1f}s avg/task")
+        print(f"️ Training Time:                  {total_time:.1f}s total, {avg_time:.1f}s avg/task")
     
     # Per-task forgetting details
     if 'per_task_forgetting' in metrics and metrics['per_task_forgetting']:
-        print(f"\n🔍 Per-Task Forgetting:")
+        print(f"\n Per-Task Forgetting:")
         for domain, forgetting in metrics['per_task_forgetting'].items():
-            status = "📉" if forgetting > 0.01 else "✅"
+            status = "" if forgetting > 0.01 else ""
             print(f"   {status} {domain[:20]:20s}: {forgetting:+.4f}")
     
     # Performance matrix visualization
     if 'performance_matrix' in metrics:
-        print(f"\n📋 Performance Matrix (rows=after task, cols=on task):")
+        print(f"\n Performance Matrix (rows=after task, cols=on task):")
         print(f"     ", end="")
         for i, domain in enumerate(domains):
             print(f"{domain[:8]:>8}", end=" ")
@@ -610,7 +610,7 @@ def save_metrics_to_csv(metrics: dict, domains: list, results_dir: str, method_n
                 task_specific_file = os.path.join(results_dir, f"{method_name}_task_specific_{timestamp}.csv")
                 task_df.to_csv(task_specific_file, index=False)
         
-        print(f"📊 Metrics saved:")
+        print(f" Metrics saved:")
         print(f"   Summary: {summary_file}")
         print(f"   Performance Matrix: {matrix_file}")
         if per_task_forgetting_file:
@@ -654,7 +654,7 @@ class EarlyStoppingTracker:
             
         if self.counter >= self.patience:
             self.early_stop = True
-            print(f"⏹️ Early stopping triggered at epoch {epoch}")
+            print(f"️ Early stopping triggered at epoch {epoch}")
             print(f"   Best score: {self.best_score:.6f} at epoch {self.best_epoch}")
             
         return self.early_stop
@@ -674,7 +674,7 @@ def calculate_baselines(model: torch.nn.Module, config: dict, norm_stats: dict,
     Returns:
         Dictionary mapping domain names to baseline performance metrics
     """
-    print(f"\n🎯 Calculating empirical baselines on pretrained model...")
+    print(f"\n Calculating empirical baselines on pretrained model...")
     
     baselines = {}
     model.eval()
@@ -698,7 +698,7 @@ def calculate_baselines(model: torch.nn.Module, config: dict, norm_stats: dict,
             
             print(f"      SSIM: {metrics['ssim']:.4f}, NMSE: {metrics['nmse']:.8f}, PSNR: {metrics['psnr']:.2f}")
     
-    print(f"✅ Baselines calculated for {len(baselines)} domains")
+    print(f" Baselines calculated for {len(baselines)} domains")
     return baselines
 
 
@@ -865,7 +865,7 @@ def evaluate_before_training(model: torch.nn.Module, domain_name: str,
     Returns:
         Dictionary containing evaluation metrics
     """
-    print(f"   📊 Pre-training evaluation on {domain_name}...")
+    print(f"    Pre-training evaluation on {domain_name}...")
     
     # Create test dataloader for evaluation
     val_loader = create_dataloader(domain_name, config, norm_stats, split='test')
@@ -894,16 +894,16 @@ def main(config_path: str):
     import random
     np.random.seed(seed)
     random.seed(seed)
-    print(f"🎲 Random seeds set to {seed}")
+    print(f" Random seeds set to {seed}")
     
-    print(f"🚀 Starting EWC Training")
+    print(f" Starting EWC Training")
     print(f"   Device: {device}")
     print(f"   EWC λ: {config['method']['ewc_lambda']}")
     print(f"   Domains: {len(config['data']['sequence'])}")
     
     # Wandb disabled for this script
     wandb_run = None
-    print("📊 W&B logging disabled")
+    print(" W&B logging disabled")
     
     # Load pretrained model and normalisation stats
     model, norm_stats = load_pretrained_model(config, device)
@@ -933,7 +933,7 @@ def main(config_path: str):
     # Main continual learning loop
     for task_idx, domain_name in enumerate(config['data']['sequence']):
         print(f"\n{'='*60}")
-        print(f"🎯 Task {task_idx + 1}/{len(config['data']['sequence'])}: {domain_name}")
+        print(f" Task {task_idx + 1}/{len(config['data']['sequence'])}: {domain_name}")
         print(f"{'='*60}")
         
         # Start timing this task
@@ -949,7 +949,7 @@ def main(config_path: str):
         train_loader = create_dataloader(domain_name, config, norm_stats, split='train')
         val_loader = create_dataloader(domain_name, config, norm_stats, split='val')
         
-        print(f"📚 Data loaded:")
+        print(f" Data loaded:")
         print(f"   Training samples: {len(train_loader.dataset)}")
         print(f"   Validation samples: {len(val_loader.dataset)}")
         
@@ -997,7 +997,7 @@ def main(config_path: str):
         # Record training time for this task
         task_training_time = time.perf_counter() - task_start_time
         training_times[domain_name] = task_training_time
-        print(f"⏱️ Task {domain_name} training time: {task_training_time:.1f} seconds")
+        print(f"️ Task {domain_name} training time: {task_training_time:.1f} seconds")
         
         # After task completion: compute Fisher matrix
         trainer.after_task_completion(domain_name, val_loader)
@@ -1020,7 +1020,7 @@ def main(config_path: str):
             
             # W&B logging disabled
         
-        print(f"✅ Task {domain_name} completed. Best validation loss: {best_val_loss:.6f}")
+        print(f" Task {domain_name} completed. Best validation loss: {best_val_loss:.6f}")
         
         # Clear CUDA cache
         if torch.cuda.is_available():
@@ -1038,13 +1038,13 @@ def main(config_path: str):
         with open(results_file, 'w') as f:
             json.dump(all_results, f, indent=2)
         
-        print(f"📁 Results saved to: {results_file}")
+        print(f" Results saved to: {results_file}")
     
     # Save final model with all Fisher matrices
     final_checkpoint_path = os.path.join(config['logging']['checkpoint_dir'], "final_ewc_model.pth")
     trainer.save_checkpoint("final", 0, 0.0, final_checkpoint_path)
     
-    print(f"\n🎉 EWC training completed!")
+    print(f"\n EWC training completed!")
     print(f"   Domains trained: {len(completed_tasks)}")
     print(f"   Fisher matrices computed: {len(trainer.fisher_matrices)}")
     print(f"   Final model saved: {final_checkpoint_path}")
@@ -1065,7 +1065,7 @@ def main(config_path: str):
     
     total_memory_mb = model_params + fisher_params
     
-    print(f"\n💾 Memory Footprint:")
+    print(f"\n Memory Footprint:")
     print(f"   Model parameters: {model_params:.2f} MB")
     print(f"   Fisher matrices: {fisher_params:.2f} MB")
     print(f"   Total: {total_memory_mb:.2f} MB")

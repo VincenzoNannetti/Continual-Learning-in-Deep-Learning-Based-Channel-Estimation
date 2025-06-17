@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 """
-Optuna hyperparameter optimization for LoRA-based continual learning.
+Optuna hyperparameter optimisation for LoRA-based continual learning.
 This differs from standard training by evaluating across ALL domains and optimizing LoRA-specific parameters.
 """
 
@@ -12,9 +11,8 @@ import argparse
 import wandb
 import numpy as np
 import time
-import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 # Ensure the script can find modules
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -293,7 +291,7 @@ def create_lora_rank_suggestions(trial: optuna.Trial, num_domains: int = 9,
     domain_ranks = {str(target_domain): target_rank}
     
     mode = "CHUNK" if target_domain_override is not None else "FULL SYSTEMATIC"
-    print(f"  🎯 {mode} SINGLE-DOMAIN TRAINING:")
+    print(f"   {mode} SINGLE-DOMAIN TRAINING:")
     print(f"     Trial {trial.number}: Train ONLY on Domain {target_domain} with rank {target_rank}")
     print(f"     Progress: Rank {rank_index+1}/{len(rank_options)} for Domain {target_domain}")
     print(f"     Configuration: {domain_ranks}")
@@ -316,7 +314,7 @@ def create_lora_alpha_suggestions(trial: optuna.Trial, num_domains: int = 9,
     # Only for the domain(s) we're actually training
     domain_alphas = {domain_id: rank for domain_id, rank in domain_ranks.items()}
     
-    print(f"  📐 Using ALPHA = RANK strategy for target domain: {domain_alphas}")
+    print(f"   Using ALPHA = RANK strategy for target domain: {domain_alphas}")
     
     return domain_alphas
 
@@ -374,7 +372,7 @@ def suggest_lora_params_from_sweep(trial: optuna.Trial, sweep_params_space: dict
     
     print(f"  LoRA Ranks: {lora_ranks}")
     print(f"  LoRA Alphas: {lora_alphas}")
-    print(f"  📊 Alpha/Rank Ratios: {', '.join([f'D{k}: {v}/{lora_ranks[k]}={v/lora_ranks[k]:.1f}' for k, v in lora_alphas.items()])}")
+    print(f"   Alpha/Rank Ratios: {', '.join([f'D{k}: {v}/{lora_ranks[k]}={v/lora_ranks[k]:.1f}' for k, v in lora_alphas.items()])}")
     
     return suggested_params
 
@@ -417,7 +415,7 @@ def update_config_with_trial_params(base_config: dict, trial_params: dict):
             # For single-domain training, set the data sequence to only the target domain
             target_domain = int(list(value.keys())[0])  # Get the single domain we're training
             updated_config.setdefault('data', {})['sequence'] = [target_domain]
-            print(f"  🎯 Modified config to train only on domain {target_domain}")
+            print(f"   Modified config to train only on domain {target_domain}")
             
         elif key == 'task_lora_alphas':
             # Convert string keys to integers for the config
@@ -577,7 +575,7 @@ def analyze_systematic_domain_results(study: optuna.Study) -> Dict[int, int]:
         Dictionary mapping domain_id -> best_rank
     """
     print("\n" + "="*80)
-    print("📊 SINGLE-DOMAIN RANK ANALYSIS")
+    print(" SINGLE-DOMAIN RANK ANALYSIS")
     print("="*80)
     
     # Group trials by domain
@@ -615,7 +613,7 @@ def analyze_systematic_domain_results(study: optuna.Study) -> Dict[int, int]:
     
     # Find best rank for each domain
     best_ranks = {}
-    print(f"\n📋 SINGLE-DOMAIN RESULTS:")
+    print(f"\n SINGLE-DOMAIN RESULTS:")
     
     for domain in sorted(domain_results.keys()):
         domain_trials = sorted(domain_results[domain], key=lambda x: x['score'], reverse=True)
@@ -624,14 +622,14 @@ def analyze_systematic_domain_results(study: optuna.Study) -> Dict[int, int]:
             best_trial = domain_trials[0]
             best_ranks[domain] = best_trial['rank']
             
-            print(f"\n🎯 Domain {domain} (Single-Domain Training):")
+            print(f"\n Domain {domain} (Single-Domain Training):")
             for i, trial_data in enumerate(domain_trials):
-                status = "🥇" if i == 0 else "  "
+                status = "" if i == 0 else "  "
                 print(f"  {status} Rank {trial_data['rank']:2d}: Score {trial_data['score']:.6f} (Trial {trial_data['trial_number']})")
     
     # Summary
     print(f"\n" + "="*80)
-    print("🏆 OPTIMAL RANKS PER DOMAIN (Single-Domain Training):")
+    print(" OPTIMAL RANKS PER DOMAIN (Single-Domain Training):")
     print("="*80)
     
     optimal_config = {}
@@ -639,11 +637,11 @@ def analyze_systematic_domain_results(study: optuna.Study) -> Dict[int, int]:
         optimal_config[domain] = rank
         print(f"Domain {domain}: Rank {rank}")
     
-    print(f"\n📋 Configuration for continual learning:")
+    print(f"\n Configuration for continual learning:")
     print(f"task_lora_ranks: {optimal_config}")
     print(f"task_lora_alphas: {optimal_config}  # alpha = rank strategy")
     
-    print(f"\n💡 Next steps:")
+    print(f"\n Next steps:")
     print(f"1. Use these optimal ranks in your continual learning training")
     print(f"2. Each domain was optimized independently")
     print(f"3. Test the combined configuration on continual learning")
@@ -716,9 +714,9 @@ def main_lora_optuna():
     # Set target domain override if provided
     if args.target_domain is not None:
         study._target_domain_override = args.target_domain
-        print(f"🎯 CHUNK MODE: Only testing Domain {args.target_domain}")
+        print(f" CHUNK MODE: Only testing Domain {args.target_domain}")
     else:
-        print(f"🔄 FULL MODE: Testing all domains systematically")
+        print(f" FULL MODE: Testing all domains systematically")
     
     def study_callback(study_obj: optuna.Study, trial_result: optuna.trial.FrozenTrial):
         if study_summary_wandb_run:
@@ -771,7 +769,7 @@ def main_lora_optuna():
             best_rank_idx = best_trial.number % len(rank_options)
             best_rank = rank_options[best_rank_idx]
             
-            print(f"\n🥇 BEST OVERALL TRIAL:")
+            print(f"\n BEST OVERALL TRIAL:")
             print(f"Trial #{best_trial.number}: Domain {best_domain} with Rank {best_rank}")
             print(f"Score: {study.best_value:.6f}")
             

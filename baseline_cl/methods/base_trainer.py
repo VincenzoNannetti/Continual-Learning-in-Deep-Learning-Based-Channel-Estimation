@@ -327,7 +327,7 @@ class BaseContinualTrainer(ABC):
         torch.save(checkpoint, save_path)
         
         if is_best:
-            print(f"💾 NEW BEST for Domain {task_id}: {val_loss:.6f} (Epoch {epoch+1})")
+            print(f" NEW BEST for Domain {task_id}: {val_loss:.6f} (Epoch {epoch+1})")
     
     @abstractmethod
     def get_method_state(self) -> Dict:

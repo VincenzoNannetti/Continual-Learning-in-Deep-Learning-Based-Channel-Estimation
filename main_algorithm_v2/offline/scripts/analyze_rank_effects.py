@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Analysis script for studying the effect of LoRA rank on performance across domains.
 This script creates systematic experiments to understand rank-performance relationships.
@@ -59,7 +58,7 @@ def create_rank_configs(base_config_path: str, ranks: List[int], output_dir: str
     Returns:
         List of paths to created configuration files
     """
-    print(f"📋 Creating rank configurations for ranks: {ranks}")
+    print(f" Creating rank configurations for ranks: {ranks}")
     
     base_config = load_config(base_config_path)
     config_paths = []
@@ -89,7 +88,7 @@ def create_rank_configs(base_config_path: str, ranks: List[int], output_dir: str
             yaml.dump(config_dict, f, default_flow_style=False)
             
         config_paths.append(str(config_path))
-        print(f"  ✅ Created config for rank {rank}: {config_path}")
+        print(f"   Created config for rank {rank}: {config_path}")
     
     return config_paths
 
@@ -123,13 +122,13 @@ def evaluate_rank_performance(checkpoint_path: str, config_path: str,
                 print(f"    Domain {domain_id}: NMSE={domain_metrics.get('nmse', 0):.4f}, "
                       f"SSIM={domain_metrics.get('ssim', 0):.4f}")
             except Exception as e:
-                print(f"    ⚠️ Failed to evaluate domain {domain_id}: {e}")
+                print(f"    ️ Failed to evaluate domain {domain_id}: {e}")
                 results[domain_id] = {'nmse': float('inf'), 'ssim': 0.0, 'psnr': 0.0}
                 
         return results
         
     except Exception as e:
-        print(f"❌ Failed to load model from {checkpoint_path}: {e}")
+        print(f" Failed to load model from {checkpoint_path}: {e}")
         return {domain_id: {'nmse': float('inf'), 'ssim': 0.0, 'psnr': 0.0} 
                 for domain_id in domain_ids}
 
@@ -154,7 +153,7 @@ def train_single_domain_rank_models(base_config_path: str, domain_ids: List[str]
     
     for domain_id in domain_ids:
         for rank in ranks:
-            print(f"\n🔄 Training single-domain model: Domain {domain_id}, Rank {rank}")
+            print(f"\n Training single-domain model: Domain {domain_id}, Rank {rank}")
             
             # Create single-domain config
             config = load_config(base_config_path)
@@ -191,14 +190,14 @@ def train_single_domain_rank_models(base_config_path: str, domain_ids: List[str]
                     checkpoint_files = list(checkpoint_dir.glob("*.pt"))
                     if checkpoint_files:
                         checkpoints[(domain_id, rank)] = str(checkpoint_files[0])
-                        print(f"  ✅ Training completed: {checkpoint_files[0]}")
+                        print(f"   Training completed: {checkpoint_files[0]}")
                     else:
-                        print(f"  ⚠️ Training completed but no checkpoint found")
+                        print(f"  ️ Training completed but no checkpoint found")
                 else:
-                    print(f"  ❌ Training failed: {result.stderr}")
+                    print(f"   Training failed: {result.stderr}")
                     
             except Exception as e:
-                print(f"  ❌ Training error: {e}")
+                print(f"   Training error: {e}")
             
             # Clean up temporary config
             temp_config_path.unlink(missing_ok=True)
@@ -222,7 +221,7 @@ def analyze_rank_effects_from_checkpoints(checkpoints: Dict[Tuple[str, int], str
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    print(f"\n🔍 Analyzing rank effects from {len(checkpoints)} checkpoints...")
+    print(f"\n Analyzing rank effects from {len(checkpoints)} checkpoints...")
     
     # Collect results
     results = []
@@ -231,13 +230,13 @@ def analyze_rank_effects_from_checkpoints(checkpoints: Dict[Tuple[str, int], str
     for domain_id in domain_ids:
         for rank in ranks:
             if (domain_id, rank) not in checkpoints:
-                print(f"  ⚠️ Missing checkpoint for domain {domain_id}, rank {rank}")
+                print(f"  ️ Missing checkpoint for domain {domain_id}, rank {rank}")
                 continue
                 
             checkpoint_path = checkpoints[(domain_id, rank)]
             config_path = output_dir / "configs" / f"rank_{rank}_config.yaml"
             
-            print(f"  📊 Evaluating Domain {domain_id}, Rank {rank}...")
+            print(f"   Evaluating Domain {domain_id}, Rank {rank}...")
             
             # Evaluate this model on ALL domains to see cross-domain effects
             domain_results = evaluate_rank_performance(
@@ -261,7 +260,7 @@ def analyze_rank_effects_from_checkpoints(checkpoints: Dict[Tuple[str, int], str
     # Save results
     csv_path = output_dir / f"rank_analysis_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
     df.to_csv(csv_path, index=False)
-    print(f"💾 Results saved to: {csv_path}")
+    print(f" Results saved to: {csv_path}")
     
     # Create visualizations
     create_rank_analysis_plots(df, output_dir)
@@ -272,7 +271,7 @@ def create_rank_analysis_plots(df: pd.DataFrame, output_dir: Path):
     """Create comprehensive plots for rank analysis."""
     setup_plotting()
     
-    print("\n📊 Creating rank analysis plots...")
+    print("\n Creating rank analysis plots...")
     
     # Filter for target domain performance (training domain == evaluation domain)
     target_df = df[df['is_target_domain'] == True].copy()
@@ -378,7 +377,7 @@ def create_rank_analysis_plots(df: pd.DataFrame, output_dir: Path):
     if not df[df['is_target_domain'] == False].empty:
         create_cross_domain_transfer_plot(df, output_dir)
     
-    print("  ✅ All plots created successfully!")
+    print("   All plots created successfully!")
 
 def create_cross_domain_transfer_plot(df: pd.DataFrame, output_dir: Path):
     """Create plots showing cross-domain transfer effects."""
@@ -551,7 +550,7 @@ def create_rank_recommendation_report(df: pd.DataFrame, output_dir: Path):
             efficiency = rank_data['ssim'].mean() / rank
             f.write(f"Rank {rank}: SSIM per parameter unit = {efficiency:.6f}\n")
     
-    print(f"📄 Comprehensive report saved to: {report_path}")
+    print(f" Comprehensive report saved to: {report_path}")
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze LoRA rank effects on domain performance")
@@ -580,7 +579,7 @@ def main():
         config = load_config(args.base_config)
         args.domain_ids = [str(d) for d in config.data.sequence]
     
-    print("🚀 LORA RANK ANALYSIS")
+    print(" LORA RANK ANALYSIS")
     print("=" * 50)
     print(f"Base Config: {args.base_config}")
     print(f"Ranks to Test: {args.ranks}")
@@ -590,14 +589,14 @@ def main():
     
     if args.analyze_only:
         # Analyze existing results
-        print(f"📊 Analyzing existing results from: {args.analyze_only}")
+        print(f" Analyzing existing results from: {args.analyze_only}")
         df = pd.read_csv(args.analyze_only)
         create_rank_analysis_plots(df, output_dir)
         create_rank_recommendation_report(df, output_dir)
         
     elif args.train_models:
         # Train new models
-        print("🏋️ Training single-domain models for each rank...")
+        print("️ Training single-domain models for each rank...")
         checkpoints = train_single_domain_rank_models(
             args.base_config, args.domain_ids, args.ranks, output_dir / "checkpoints"
         )
@@ -608,11 +607,11 @@ def main():
             )
             create_rank_recommendation_report(df, output_dir)
         else:
-            print("❌ No successful training runs completed.")
+            print(" No successful training runs completed.")
     
     elif args.checkpoints_dir:
         # Use existing checkpoints
-        print(f"📂 Using existing checkpoints from: {args.checkpoints_dir}")
+        print(f" Using existing checkpoints from: {args.checkpoints_dir}")
         
         # Discover checkpoints
         checkpoints = {}
@@ -635,14 +634,14 @@ def main():
             )
             create_rank_recommendation_report(df, output_dir)
         else:
-            print("❌ No checkpoints found with expected naming pattern.")
+            print(" No checkpoints found with expected naming pattern.")
     
     else:
-        print("❌ Please specify either --train_models, --checkpoints_dir, or --analyze_only")
+        print(" Please specify either --train_models, --checkpoints_dir, or --analyze_only")
         return
     
-    print("\n✅ Rank analysis completed successfully!")
-    print(f"📁 Check results in: {output_dir}")
+    print("\n Rank analysis completed successfully!")
+    print(f" Check results in: {output_dir}")
 
 if __name__ == "__main__":
     main() 

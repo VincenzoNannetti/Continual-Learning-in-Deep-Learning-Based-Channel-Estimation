@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Evaluation script for Standard Training 2.0.
 Loads a trained model and evaluates its performance on the test set.
@@ -23,7 +22,7 @@ from standard_training_2.models.autoencoder import DenoisingAutoencoder
 from standard_training_2.models.residual_autoencoder import DenoisingResAutoencoder
 from standard_training_2.models.srcnn_dncnn import CombinedModel_SRCNNDnCNN
 from standard_training_2.models.ae_srcnn import CombinedModel_AESRCNN
-from standard_training_2.plotting_utils import plot_evaluation_samples
+from standard_training_2.tests.plotting_utils import plot_evaluation_samples
 
 def load_config_from_yaml(config_path):
     """Load configuration file safely from YAML."""
@@ -67,7 +66,7 @@ def load_model_from_config(config):
         # Count parameters for the combined model
         param_counts = model.count_submodule_parameters()
         
-        print(f"✅ Created UNet+SRCNN combined model:")
+        print(f" Created UNet+SRCNN combined model:")
         print(f"   - UNet: {param_counts['unet']:,} parameters")
         print(f"   - SRCNN: {param_counts['srcnn']:,} parameters")
         print(f"   - Total: {param_counts['total']:,} parameters")
@@ -75,13 +74,13 @@ def load_model_from_config(config):
     elif model_name == 'srcnn':
         # SRCNN standalone model
         model = SRCNN()
-        print(f"✅ Created SRCNN model with {sum(p.numel() for p in model.parameters()):,} parameters")
+        print(f" Created SRCNN model with {sum(p.numel() for p in model.parameters()):,} parameters")
         
     elif model_name == 'dncnn':
         # DnCNN standalone model
         num_channels = model_params.get('num_channels', 2)
         model = DnCNN(num_channels=num_channels)
-        print(f"✅ Created DnCNN model with {sum(p.numel() for p in model.parameters()):,} parameters")
+        print(f" Created DnCNN model with {sum(p.numel() for p in model.parameters()):,} parameters")
         
     elif model_name == 'combined_srcnn_dncnn':
         # Combined SRCNN+DnCNN model (order configurable)
@@ -100,7 +99,7 @@ def load_model_from_config(config):
         # Count parameters for the combined model
         param_counts = model.count_submodule_parameters()
         
-        print(f"✅ Created {order.upper()} combined model:")
+        print(f" Created {order.upper()} combined model:")
         print(f"   - DnCNN: {param_counts['dncnn']:,} parameters")
         print(f"   - SRCNN: {param_counts['srcnn']:,} parameters")
         print(f"   - Total: {param_counts['total']:,} parameters")
@@ -118,7 +117,7 @@ def load_model_from_config(config):
         # Count parameters for the combined model
         param_counts = model.count_submodule_parameters()
         
-        print(f"✅ Created {autoencoder_type.title()} Autoencoder+SRCNN combined model:")
+        print(f" Created {autoencoder_type.title()} Autoencoder+SRCNN combined model:")
         print(f"   - Autoencoder: {param_counts['autoencoder']:,} parameters")
         print(f"   - SRCNN: {param_counts['srcnn']:,} parameters")
         print(f"   - Total: {param_counts['total']:,} parameters")
@@ -127,13 +126,13 @@ def load_model_from_config(config):
         # Basic denoising autoencoder
         input_channels = model_params.get('input_channels', 2)
         model = DenoisingAutoencoder(input_channels=input_channels)
-        print(f"✅ Created Basic Denoising Autoencoder with {sum(p.numel() for p in model.parameters()):,} parameters")
+        print(f" Created Basic Denoising Autoencoder with {sum(p.numel() for p in model.parameters()):,} parameters")
             
     elif model_name == 'denoising_res_autoencoder':
         # Residual denoising autoencoder
         input_channels = model_params.get('input_channels', 2)
         model = DenoisingResAutoencoder(input_channels=input_channels)
-        print(f"✅ Created Residual Denoising Autoencoder with {sum(p.numel() for p in model.parameters()):,} parameters")
+        print(f" Created Residual Denoising Autoencoder with {sum(p.numel() for p in model.parameters()):,} parameters")
         
     else:
         raise ValueError(f"Unsupported model name: {model_name}. Supported: 'unet', 'srcnn', 'dncnn', 'unet_srcnn', 'combined_srcnn_dncnn', 'combined_ae_srcnn', 'denoising_autoencoder', 'denoising_res_autoencoder'")

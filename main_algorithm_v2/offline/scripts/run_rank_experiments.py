@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Simple script to analyze the offline continual learning algorithm using existing checkpoints.
 """
@@ -19,7 +18,7 @@ def run_domain_analysis():
     domain_ids = ["0", "1", "2", "3", "4", "5", "6", "7", "8"]
     output_dir = current_dir / "analysis_results"  # Simplified path
     
-    print("🚀 STARTING OFFLINE CONTINUAL LEARNING ANALYSIS")
+    print(" STARTING OFFLINE CONTINUAL LEARNING ANALYSIS")
     print("=" * 60)
     print(f"Checkpoint: {checkpoint_path}")
     print(f"Base Config: {base_config}")
@@ -29,7 +28,7 @@ def run_domain_analysis():
     
     # Check if checkpoint exists
     if not checkpoint_path.exists():
-        print(f"❌ Error: Checkpoint not found at {checkpoint_path}")
+        print(f" Error: Checkpoint not found at {checkpoint_path}")
         print("Available files in checkpoints/lora/:")
         lora_dir = current_dir / "checkpoints" / "lora"
         if lora_dir.exists():
@@ -39,7 +38,7 @@ def run_domain_analysis():
     
     # Check if config exists
     if not base_config.exists():
-        print(f"❌ Error: Config not found at {base_config}")
+        print(f" Error: Config not found at {base_config}")
         print("Looking for alternative config files...")
         configs_dir = current_dir / "configs"
         if configs_dir.exists():
@@ -54,11 +53,11 @@ def run_domain_analysis():
                 base_config = file
                 break
     
-    print(f"✅ Using checkpoint: {checkpoint_path}")
-    print(f"✅ Using config: {base_config}")
+    print(f" Using checkpoint: {checkpoint_path}")
+    print(f" Using config: {base_config}")
     
     # Run evaluation using the existing evaluate.py script
-    print("\n🔧 Running comprehensive evaluation...")
+    print("\n Running comprehensive evaluation...")
     
     cmd = [
         sys.executable, "evaluate.py",
@@ -69,7 +68,7 @@ def run_domain_analysis():
     
     print(f"Command: {' '.join(cmd)}")
     print("\n" + "=" * 60)
-    print("🏃‍♂️ STARTING EVALUATION...")
+    print("‍️ STARTING EVALUATION...")
     print("This will evaluate the model on all domains and generate plots.")
     print("=" * 60)
     
@@ -77,8 +76,8 @@ def run_domain_analysis():
         result = subprocess.run(cmd, cwd=current_dir, check=True)
         
         print("\n" + "=" * 60)
-        print("✅ EVALUATION COMPLETED SUCCESSFULLY!")
-        print(f"📊 Check results in: {output_dir}")
+        print(" EVALUATION COMPLETED SUCCESSFULLY!")
+        print(f" Check results in: {output_dir}")
         print("=" * 60)
         
         # Also create a domain comparison analysis
@@ -87,27 +86,27 @@ def run_domain_analysis():
         return True
         
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Evaluation failed with return code {e.returncode}")
+        print(f"\n Evaluation failed with return code {e.returncode}")
         return False
         
     except KeyboardInterrupt:
-        print("\n⚠️ Evaluation interrupted by user.")
+        print("\n️ Evaluation interrupted by user.")
         return False
 
 def create_domain_comparison_analysis(results_dir):
     """Create additional domain comparison plots from the evaluation results."""
     
-    print("\n📊 Creating domain comparison analysis...")
+    print("\n Creating domain comparison analysis...")
     
     # Look for CSV results file
     csv_files = list(Path(results_dir).glob("*evaluation*.csv"))
     
     if not csv_files:
-        print("⚠️ No CSV results found for additional analysis")
+        print("️ No CSV results found for additional analysis")
         return
     
     csv_file = csv_files[0]
-    print(f"📄 Using results from: {csv_file}")
+    print(f" Using results from: {csv_file}")
     
     # Create a simple analysis script
     analysis_script = f"""
@@ -131,7 +130,7 @@ plt.rcParams.update({{
 df = pd.read_csv('{csv_file}')
 output_dir = Path('{results_dir}')
 
-print("📊 Creating domain performance comparison plots...")
+print(" Creating domain performance comparison plots...")
 
 # Create domain comparison plots
 fig, axes = plt.subplots(2, 2, figsize=(15, 12))
@@ -193,12 +192,12 @@ plt.savefig(output_dir / 'domain_performance_analysis.png', dpi=300, bbox_inches
 plt.close()
 
 # Create performance statistics
-print("\\n📊 Domain Performance Statistics:")
+print("\\n Domain Performance Statistics:")
 print(f"NMSE - Mean: {{np.mean(nmse_values):.2e}}, Std: {{np.std(nmse_values):.2e}}")
 print(f"SSIM - Mean: {{np.mean(ssim_values):.3f}}, Std: {{np.std(ssim_values):.3f}}")
 print(f"PSNR - Mean: {{np.mean(psnr_values):.2f}}, Std: {{np.std(psnr_values):.2f}}")
 
-print("\\n🏆 Best/Worst Performing Domains:")
+print("\\n Best/Worst Performing Domains:")
 best_ssim_idx = np.argmax(ssim_values)
 worst_ssim_idx = np.argmin(ssim_values)
 best_nmse_idx = np.argmin(nmse_values)
@@ -209,7 +208,7 @@ print(f"Worst SSIM: Domain {{domains.iloc[worst_ssim_idx]}} ({{ssim_values[worst
 print(f"Best NMSE: Domain {{domains.iloc[best_nmse_idx]}} ({{nmse_values[best_nmse_idx]:.2e}})")
 print(f"Worst NMSE: Domain {{domains.iloc[worst_nmse_idx]}} ({{nmse_values[worst_nmse_idx]:.2e}})")
 
-print("\\n✅ Domain analysis plots saved to: domain_performance_analysis.png")
+print("\\n Domain analysis plots saved to: domain_performance_analysis.png")
 """
     
     # Write and execute the analysis script
@@ -219,9 +218,9 @@ print("\\n✅ Domain analysis plots saved to: domain_performance_analysis.png")
     
     try:
         subprocess.run([sys.executable, str(script_path)], cwd=results_dir, check=True)
-        print("✅ Domain comparison analysis completed!")
+        print(" Domain comparison analysis completed!")
     except Exception as e:
-        print(f"⚠️ Could not create additional analysis: {e}")
+        print(f"️ Could not create additional analysis: {e}")
 
 if __name__ == "__main__":
     success = run_domain_analysis()

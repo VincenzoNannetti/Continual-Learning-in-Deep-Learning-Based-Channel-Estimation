@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Lightweight training script for Standard Training 2.0
 Loads data, adds noise, interpolates, and trains UNet model.
@@ -30,7 +29,7 @@ from standard_training_2.models.autoencoder import DenoisingAutoencoder
 from standard_training_2.models.residual_autoencoder import DenoisingResAutoencoder
 from standard_training_2.models.srcnn_dncnn import CombinedModel_SRCNNDnCNN
 from standard_training_2.models.ae_srcnn import CombinedModel_AESRCNN
-from standard_training_2.plotting_utils import plot_training_curves, plot_evaluation_samples # Import from new location
+from standard_training_2.tests.plotting_utils import plot_training_curves, plot_evaluation_samples # Import from new location
 
 def load_config(config_path):
     """Load configuration file safely."""
@@ -873,11 +872,11 @@ def main(args):
                     wandb.summary.update(eval_metrics)
                     wandb.log(eval_metrics)  # Also log as regular metrics
                     
-                    print(f"✅ Logged evaluation metrics to W&B summary: {list(eval_metrics.keys())}")
+                    print(f" Logged evaluation metrics to W&B summary: {list(eval_metrics.keys())}")
                     
                     # Give W&B time to sync before Optuna tries to fetch
                     time.sleep(2)
-                    print(f"✅ W&B run ready for Optuna: {wandb.run.id}")
+                    print(f" W&B run ready for Optuna: {wandb.run.id}")
                     
                     # Generate evaluation plots if configured
                     plot_examples = config.get('evaluation', {}).get('plot_examples', 0)
@@ -921,7 +920,7 @@ def main(args):
                                 display_plots=False,  # Don't display plots in training script
                                 interpolated_data=interpolated_data
                             )
-                            print(f"✅ Generated {num_plots_actual} evaluation plots in {checkpoint_dir}")
+                            print(f" Generated {num_plots_actual} evaluation plots in {checkpoint_dir}")
                         except Exception as e:
                             print(f"Warning: Failed to generate evaluation plots: {e}")
                             import traceback

@@ -4,7 +4,6 @@ Enhanced with comprehensive plotting and continual learning metrics.
 """
 import argparse
 import torch
-import torch.nn as nn
 import numpy as np
 import os
 import sys
@@ -20,8 +19,7 @@ sys.path.insert(0, current_dir)
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.config import ExperimentConfig
-from src.data import get_dataloaders, get_norm_stats_from_checkpoint
+from src.data import get_dataloaders
 from src.utils import get_device, load_lora_model_for_evaluation
 
 # Import plotting utilities
@@ -399,8 +397,8 @@ def calculate_continual_learning_metrics(all_task_metrics, task_sequence):
     Returns:
         dict: Comprehensive BWT, FWT, and performance metrics
     """
-    print("\n🧮 Calculating LoRA Continual Learning Metrics...")
-    print("   📝 Note: LoRA uses task-specific adapters with parameter isolation")
+    print("\n Calculating LoRA Continual Learning Metrics...")
+    print("    Note: LoRA uses task-specific adapters with parameter isolation")
     
     # Group tasks by domain characteristics (SNR levels)
     # Tasks 0,1,2: High SNR, Tasks 3,4,5: Low SNR, Tasks 6,7,8: Med SNR
@@ -414,10 +412,10 @@ def calculate_continual_learning_metrics(all_task_metrics, task_sequence):
     cl_metrics = {}
     
     # First, analyse performance by domain groups
-    print("\n  📊 Domain-Specific Performance Analysis:")
+    print("\n   Domain-Specific Performance Analysis:")
     for group_name, group_tasks in domain_groups.items():
         group_display = group_name.replace('_', ' ').title()
-        print(f"\n    🎯 {group_display} Domains (Tasks {group_tasks}):")
+        print(f"\n     {group_display} Domains (Tasks {group_tasks}):")
         
         for metric_name in ['ssim', 'nmse']:
             group_values = []
@@ -433,7 +431,7 @@ def calculate_continual_learning_metrics(all_task_metrics, task_sequence):
                 print(f"      {metric_name.upper()}: {group_mean:.4f} ± {group_std:.4f} (CV: {group_cv:.4f})")
     
     for metric_name in metrics_to_analyze:
-        print(f"\n  📈 Analyzing {metric_name.upper()}...")
+        print(f"\n   Analyzing {metric_name.upper()}...")
         
         # Extract metric values for all tasks
         metric_values = []
@@ -487,10 +485,10 @@ def calculate_continual_learning_metrics(all_task_metrics, task_sequence):
         
         # Additional check: if BWT is significantly negative, there might be an issue
         if calculated_bwt < -0.1:
-            print(f"    ⚠️  WARNING: High within-domain variation detected for {metric_name.upper()}")
+            print(f"    ️  WARNING: High within-domain variation detected for {metric_name.upper()}")
             print(f"    This might indicate adapter isolation issues!")
         elif abs(calculated_bwt) < 0.05:
-            print(f"    ✅ Excellent: Very low within-domain variation for {metric_name.upper()}")
+            print(f"     Excellent: Very low within-domain variation for {metric_name.upper()}")
         
         lora_bwt = calculated_bwt
         
@@ -568,7 +566,7 @@ def calculate_continual_learning_metrics(all_task_metrics, task_sequence):
             }
         }
         
-        print(f"\n  🎯 LoRA-Specific Analysis:")
+        print(f"\n   LoRA-Specific Analysis:")
         print(f"    • Task-specific adapters ensure NO parameter interference")
         print(f"    • Performance differences reflect domain SNR characteristics")
         print(f"    • High SNR domains: Tasks 0,1,2 (easier)")
@@ -595,7 +593,7 @@ def save_comprehensive_results(all_task_metrics, cl_metrics, save_dir, config):
     save_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     
-    print(f"\n💾 Saving Comprehensive Evaluation Results...")
+    print(f"\n Saving Comprehensive Evaluation Results...")
     
     # 1. Save detailed JSON results
     detailed_results = {
@@ -615,7 +613,7 @@ def save_comprehensive_results(all_task_metrics, cl_metrics, save_dir, config):
     json_file = save_dir / f"lora_comprehensive_evaluation_{timestamp}.json"
     with open(json_file, 'w') as f:
         json.dump(detailed_results, f, indent=2)
-    print(f"   📄 Detailed JSON: {json_file}")
+    print(f"    Detailed JSON: {json_file}")
     
     # 2. Save CSV for plotting compatibility (similar to baseline methods)
     csv_data = []
@@ -643,7 +641,7 @@ def save_comprehensive_results(all_task_metrics, cl_metrics, save_dir, config):
     csv_df = pd.DataFrame(csv_data)
     csv_file = save_dir / f"lora_final_evaluation_{timestamp}.csv"
     csv_df.to_csv(csv_file, index=False)
-    print(f"   📊 Plotting CSV: {csv_file}")
+    print(f"    Plotting CSV: {csv_file}")
     
     # 3. Save continual learning summary (compatible with CL comparison plots)
     if cl_metrics and 'summary' in cl_metrics:
@@ -670,7 +668,7 @@ def save_comprehensive_results(all_task_metrics, cl_metrics, save_dir, config):
         cl_summary_df = pd.DataFrame(cl_summary_data)
         cl_summary_file = save_dir / f"lora_continual_learning_summary_{timestamp}.csv"
         cl_summary_df.to_csv(cl_summary_file, index=False)
-        print(f"   📈 CL Summary CSV: {cl_summary_file}")
+        print(f"    CL Summary CSV: {cl_summary_file}")
     
     # 4. Save performance comparison table (LaTeX format)
     latex_file = save_dir / f"lora_performance_table_{timestamp}.tex"
@@ -691,9 +689,9 @@ def save_comprehensive_results(all_task_metrics, cl_metrics, save_dir, config):
         f.write("\\end{tabular}\n")
         f.write("\\label{tab:lora_performance}\n")
         f.write("\\end{table}\n")
-    print(f"   📝 LaTeX Table: {latex_file}")
+    print(f"    LaTeX Table: {latex_file}")
     
-    print(f"✅ All results saved to: {save_dir}")
+    print(f" All results saved to: {save_dir}")
     
     return {
         'json_file': str(json_file),
@@ -751,31 +749,31 @@ def main(checkpoint_path: str, output_dir: str = None, num_plot_samples: int = 3
 
     # --- Comprehensive Analysis and Comparison ---
     print("\n" + "="*80)
-    print("🏆 COMPREHENSIVE LoRA CONTINUAL LEARNING EVALUATION REPORT")
+    print(" COMPREHENSIVE LoRA CONTINUAL LEARNING EVALUATION REPORT")
     print("="*80)
     
-    print(f"\n📍 Model Checkpoint: {checkpoint_path}")
-    print(f"📊 Task Sequence: {config.data.sequence}")
-    print(f"🧠 Method: LoRA-based Continual Learning with Task-Specific Adapters")
-    print(f"✅ Metrics: Corrected implementation (SSIM on magnitude, proper NMSE)")
+    print(f"\n Model Checkpoint: {checkpoint_path}")
+    print(f" Task Sequence: {config.data.sequence}")
+    print(f" Method: LoRA-based Continual Learning with Task-Specific Adapters")
+    print(f" Metrics: Corrected implementation (SSIM on magnitude, proper NMSE)")
     
-    print(f"\n--- 📈 Per-Domain Performance ---")
+    print(f"\n---  Per-Domain Performance ---")
     for task_id, metrics in all_task_metrics.items():
-        print(f"\n🎯 Domain {task_id}:")
+        print(f"\n Domain {task_id}:")
         print(f"   • SSIM: {metrics['ssim']:.4f}")
         print(f"   • NMSE: {metrics['nmse']:.8f}")
         print(f"   • PSNR: {metrics['psnr']:.2f} dB")
     
-    print(f"\n--- 🧮 Continual Learning Analysis ---")
+    print(f"\n---  Continual Learning Analysis ---")
     if 'summary' in cl_metrics:
         summary = cl_metrics['summary']
-        print(f"\n🔍 Overall Metrics:")
+        print(f"\n Overall Metrics:")
         print(f"   • Backward Transfer (BWT): {summary['overall_bwt']:.4f}")
         print(f"   • Forward Transfer (FWT): {summary['overall_fwt']:.4f}")
         print(f"   • Final Performance: {summary['overall_final_performance']:.4f}")
         print(f"   • Tasks Completed: {summary['num_tasks']}")
         
-        print(f"\n📊 Per-Metric Analysis:")
+        print(f"\n Per-Metric Analysis:")
         for metric_name in ['ssim', 'nmse', 'psnr']:
             if metric_name in cl_metrics:
                 metric_data = cl_metrics[metric_name]
@@ -790,16 +788,16 @@ def main(checkpoint_path: str, output_dir: str = None, num_plot_samples: int = 3
     psnr_values = [metrics['psnr'] for metrics in all_task_metrics.values()]
     ssim_values = [metrics['ssim'] for metrics in all_task_metrics.values()]
     
-    print(f"\n--- 📊 Statistical Summary ---")
-    print(f"   📉 NMSE: {np.mean(nmse_values):.8f} ± {np.std(nmse_values):.8f}")
+    print(f"\n---  Statistical Summary ---")
+    print(f"    NMSE: {np.mean(nmse_values):.8f} ± {np.std(nmse_values):.8f}")
     print(f"      • Range: [{np.min(nmse_values):.8f}, {np.max(nmse_values):.8f}]")
-    print(f"   📶 PSNR: {np.mean(psnr_values):.2f} ± {np.std(psnr_values):.2f} dB")
+    print(f"    PSNR: {np.mean(psnr_values):.2f} ± {np.std(psnr_values):.2f} dB")
     print(f"      • Range: [{np.min(psnr_values):.2f}, {np.max(psnr_values):.2f}] dB")
-    print(f"   🎯 SSIM: {np.mean(ssim_values):.4f} ± {np.std(ssim_values):.4f}")
+    print(f"    SSIM: {np.mean(ssim_values):.4f} ± {np.std(ssim_values):.4f}")
     print(f"      • Range: [{np.min(ssim_values):.4f}, {np.max(ssim_values):.4f}]")
     
     # Domain difficulty analysis
-    print(f"\n--- 🏅 Domain Difficulty Ranking ---")
+    print(f"\n---  Domain Difficulty Ranking ---")
     domain_difficulty = []
     for task_id, metrics in all_task_metrics.items():
         # Use NMSE as difficulty measure (higher NMSE = more difficult)
@@ -809,17 +807,17 @@ def main(checkpoint_path: str, output_dir: str = None, num_plot_samples: int = 3
     domain_difficulty.sort(key=lambda x: x[1])
     
     for i, (task_id, nmse, ssim, psnr) in enumerate(domain_difficulty):
-        difficulty = "🟢 Easy" if i < len(domain_difficulty)//3 else "🟡 Medium" if i < 2*len(domain_difficulty)//3 else "🔴 Hard"
+        difficulty = "Easy" if i < len(domain_difficulty)//3 else "Medium" if i < 2*len(domain_difficulty)//3 else " Hard"
         print(f"   {i+1}. Domain {task_id}: {difficulty} (NMSE: {nmse:.8f})")
     
     # Comparison with expected LoRA behavior
-    print(f"\n--- 🔬 LoRA-Specific Analysis ---")
-    print(f"   ✅ Expected: NO catastrophic forgetting due to task-specific adapter isolation")
-    print(f"   ✅ Expected: Performance differences reflect domain characteristics only")
-    print(f"   📊 Corrected BWT: {summary['overall_bwt']:.4f} (task-specific adapters = no forgetting)")
+    print(f"\n---  LoRA-Specific Analysis ---")
+    print(f"    Expected: NO catastrophic forgetting due to task-specific adapter isolation")
+    print(f"    Expected: Performance differences reflect domain characteristics only")
+    print(f"    Corrected BWT: {summary['overall_bwt']:.4f} (task-specific adapters = no forgetting)")
     
-    print(f"   🎉 Perfect: LoRA adapters provide complete parameter isolation!")
-    print(f"   📊 Performance grouped by domain SNR levels:")
+    print(f"    Perfect: LoRA adapters provide complete parameter isolation!")
+    print(f"    Performance grouped by domain SNR levels:")
     print(f"      • High SNR (Tasks 0,1,2): Easier domains with better performance")
     print(f"      • Medium SNR (Tasks 6,7,8): Moderate difficulty domains")  
     print(f"      • Low SNR (Tasks 3,4,5): Challenging domains with expected lower performance")
@@ -828,24 +826,24 @@ def main(checkpoint_path: str, output_dir: str = None, num_plot_samples: int = 3
     nmse_cv = np.std(nmse_values) / np.mean(nmse_values) if np.mean(nmse_values) > 0 else 0
     ssim_cv = np.std(ssim_values) / np.mean(ssim_values) if np.mean(ssim_values) > 0 else 0
     
-    print(f"\n--- 📏 Performance Consistency ---")
-    print(f"   📉 NMSE Coefficient of Variation: {nmse_cv:.4f}")
-    print(f"   🎯 SSIM Coefficient of Variation: {ssim_cv:.4f}")
+    print(f"\n---  Performance Consistency ---")
+    print(f"    NMSE Coefficient of Variation: {nmse_cv:.4f}")
+    print(f"    SSIM Coefficient of Variation: {ssim_cv:.4f}")
     
     if nmse_cv < 0.5 and ssim_cv < 0.3:
-        print(f"   🎉 Excellent: Very consistent performance across domains!")
+        print(f"    Excellent: Very consistent performance across domains!")
     elif nmse_cv < 1.0 and ssim_cv < 0.5:
-        print(f"   👍 Good: Reasonably consistent performance")
+        print(f"    Good: Reasonably consistent performance")
     else:
-        print(f"   ⚠️  Warning: High variability across domains")
+        print(f"   ️  Warning: High variability across domains")
     
-    print(f"\n--- 📁 Output Files ---")
-    print(f"   📄 Detailed results, CSV files, and LaTeX tables saved to: {output_dir}")
-    print(f"   📊 Compatible with baseline comparison plotting scripts")
-    print(f"   🎨 Individual sample plots saved with heatmaps")
+    print(f"\n---  Output Files ---")
+    print(f"    Detailed results, CSV files, and LaTeX tables saved to: {output_dir}")
+    print(f"    Compatible with baseline comparison plotting scripts")
+    print(f"    Individual sample plots saved with heatmaps")
     
     print("="*80)
-    print("🎯 EVALUATION COMPLETE - Ready for Method Comparison!")
+    print(" EVALUATION COMPLETE - Ready for Method Comparison!")
     print("="*80)
 
 if __name__ == '__main__':

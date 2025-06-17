@@ -50,7 +50,7 @@ class EWCTrainer(BaseContinualTrainer):
         self.optimal_params = {}   # Optimal parameters for each task
         self.task_importance = {}  # Overall importance score per task
         
-        print(f"🧠 EWC initialized with λ = {ewc_lambda}")
+        print(f" EWC initialized with λ = {ewc_lambda}")
         if fisher_samples:
             print(f"   Fisher computation will use {fisher_samples} samples per task")
         else:
@@ -103,7 +103,7 @@ class EWCTrainer(BaseContinualTrainer):
         For EWC, this just involves tracking the new task.
         """
         self.current_task_id = task_id
-        print(f"🎯 EWC preparing for task {task_id}")
+        print(f" EWC preparing for task {task_id}")
         
         if len(self.fisher_matrices) > 0:
             print(f"   Previous tasks: {list(self.fisher_matrices.keys())}")
@@ -116,7 +116,7 @@ class EWCTrainer(BaseContinualTrainer):
         This is the core of EWC - we estimate the importance of each parameter
         for the task we just learned.
         """
-        print(f"\n🧠 Computing Fisher Information Matrix for task {task_id}...")
+        print(f"\n Computing Fisher Information Matrix for task {task_id}...")
         
         # Set model to evaluation mode for Fisher computation
         self.model.eval()
@@ -193,7 +193,7 @@ class EWCTrainer(BaseContinualTrainer):
             'samples_used': sample_count
         }
         
-        print(f"   ✅ Fisher computation complete for task {task_id}")
+        print(f"    Fisher computation complete for task {task_id}")
         print(f"      Samples used: {sample_count}")
         print(f"      Parameters tracked: {num_params:,}")
         print(f"      Mean Fisher value: {mean_fisher:.2e}")
@@ -237,7 +237,7 @@ class EWCTrainer(BaseContinualTrainer):
         self.task_importance = state.get('task_importance', {})
         self.completed_tasks = state.get('completed_tasks', [])
         
-        print(f"🔄 EWC state loaded:")
+        print(f" EWC state loaded:")
         print(f"   Fisher matrices for {len(self.fisher_matrices)} tasks")
         print(f"   Completed tasks: {self.completed_tasks}")
         print(f"   λ = {self.ewc_lambda}")
@@ -248,7 +248,7 @@ class EWCTrainer(BaseContinualTrainer):
             print("No EWC statistics available (no tasks completed)")
             return
         
-        print(f"\n📊 EWC Statistics:")
+        print(f"\n EWC Statistics:")
         print(f"   λ_EWC = {self.ewc_lambda}")
         print(f"   Tasks with Fisher matrices: {len(self.fisher_matrices)}")
         

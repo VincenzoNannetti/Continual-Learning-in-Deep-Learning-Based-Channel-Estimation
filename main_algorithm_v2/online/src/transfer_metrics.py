@@ -13,8 +13,7 @@ References:
 
 import torch
 import numpy as np
-from typing import Dict, List, Tuple, Optional, Any
-from collections import defaultdict
+from typing import Dict, List, Optional, Any
 import time
 from dataclasses import dataclass
 

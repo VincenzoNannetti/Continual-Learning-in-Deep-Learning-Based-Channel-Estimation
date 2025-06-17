@@ -7,7 +7,7 @@ drift detection, and hybrid triggers.
 """
 
 import time
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 from enum import Enum
 from .loss_functions import exponential_moving_average
 
@@ -243,7 +243,7 @@ class DriftTrigger(BaseTrigger):
                 # Initialize moving average with warmup period average
                 self.moving_average = sum(self.warmup_losses) / len(self.warmup_losses)
                 self.is_warmup_complete = True
-                print(f"🔔 Drift trigger warmup complete. Initial moving average: {self.moving_average:.6f}")
+                print(f" Drift trigger warmup complete. Initial moving average: {self.moving_average:.6f}")
             
             return False
         
@@ -257,7 +257,7 @@ class DriftTrigger(BaseTrigger):
         if drift_detected:
             self.drift_detections += 1
             self.trigger_count += 1
-            print(f"🚨 Drift detected! Loss: {current_loss:.6f} > Threshold: {threshold:.6f}")
+            print(f" Drift detected! Loss: {current_loss:.6f} > Threshold: {threshold:.6f}")
         
         # Update moving average using exponential moving average
         self.moving_average = exponential_moving_average(
@@ -348,7 +348,7 @@ class TriggerManager:
         else:
             raise ValueError(f"Unknown trigger type: {trigger_type}")
         
-        print(f"🔔 TriggerManager initialized with {trigger_type} trigger")
+        print(f" TriggerManager initialized with {trigger_type} trigger")
         print(f"   Config: {self.config}")
     
     def should_trigger_update(self, **kwargs) -> bool:
@@ -367,7 +367,7 @@ class TriggerManager:
     def reset_trigger(self):
         """Reset trigger state."""
         self.trigger.reset()
-        #print(f"🔔 Trigger reset: {self.trigger.name}")
+        #print(f" Trigger reset: {self.trigger.name}")
     
     def get_trigger_stats(self) -> Dict[str, Any]:
         """Get comprehensive trigger statistics."""
@@ -376,7 +376,7 @@ class TriggerManager:
     def print_status(self):
         """Print current trigger status."""
         stats = self.get_trigger_stats()
-        print(f"\n🔔 TRIGGER STATUS ({stats['name']}):")
+        print(f"\n TRIGGER STATUS ({stats['name']}):")
         print("-" * 40)
         
         if stats['name'] == 'time_trigger':

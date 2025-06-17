@@ -7,7 +7,6 @@ particularly the masked NMSE that operates only on pilot positions.
 
 import torch
 import numpy as np
-from typing import Tuple, Optional
 
 
 def masked_nmse(prediction: torch.Tensor, 

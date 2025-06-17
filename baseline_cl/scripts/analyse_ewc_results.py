@@ -42,10 +42,10 @@ def load_final_model_and_calculate_memory(config: dict) -> float:
         final_model_path = os.path.join(config['logging']['checkpoint_dir'], "final_ewc_model.pth")
         
         if not os.path.exists(final_model_path):
-            print(f"⚠️ Final model not found at {final_model_path}")
+            print(f"️ Final model not found at {final_model_path}")
             return 0.0
         
-        print(f"📁 Loading final model from {final_model_path}")
+        print(f" Loading final model from {final_model_path}")
         checkpoint = torch.load(final_model_path, map_location=device)
         
         # Calculate model memory
@@ -68,7 +68,7 @@ def load_final_model_and_calculate_memory(config: dict) -> float:
         
         total_memory_mb = model_params + fisher_params
         
-        print(f"💾 Memory Footprint:")
+        print(f" Memory Footprint:")
         print(f"   Model parameters: {model_params:.2f} MB")
         print(f"   Fisher matrices: {fisher_params:.2f} MB")
         print(f"   Total: {total_memory_mb:.2f} MB")
@@ -76,7 +76,7 @@ def load_final_model_and_calculate_memory(config: dict) -> float:
         return total_memory_mb
         
     except Exception as e:
-        print(f"⚠️ Could not calculate memory footprint: {e}")
+        print(f"️ Could not calculate memory footprint: {e}")
         return 0.0
 
 def main():
@@ -96,18 +96,18 @@ def main():
     args = parser.parse_args()
     config_path = args.config
     
-    print(f"📄 Loading config from: {config_path}")
+    print(f" Loading config from: {config_path}")
     config = load_config(config_path)
     
     # Find results file
     results_dir = config['evaluation']['results_dir']
-    print(f"🔍 Looking for results in: {results_dir}")
+    print(f" Looking for results in: {results_dir}")
     
     try:
         results_file = find_latest_results_file(results_dir)
-        print(f"📁 Found results file: {results_file}")
+        print(f" Found results file: {results_file}")
     except FileNotFoundError:
-        print(f"❌ No results files found in {results_dir}")
+        print(f" No results files found in {results_dir}")
         print(f"   Make sure training completed and saved results")
         return
     
@@ -115,18 +115,18 @@ def main():
     with open(results_file, 'r') as f:
         all_results = json.load(f)
     
-    print(f"✅ Loaded results for {len(all_results)} domains")
+    print(f" Loaded results for {len(all_results)} domains")
     
     # Get domain sequence from config
     domains = config['data']['sequence']
     completed_tasks = [d for d in domains if d in all_results]
     
-    print(f"📊 Analysing {len(completed_tasks)} completed tasks:")
+    print(f" Analysing {len(completed_tasks)} completed tasks:")
     for i, domain in enumerate(completed_tasks):
         print(f"   {i+1}. {domain}")
     
     # Extract baselines from pre_training_performance (first task performance = baseline)
-    print(f"\n🎯 Extracting baselines from pre-training performance...")
+    print(f"\n Extracting baselines from pre-training performance...")
     baselines = {}
     
     # Use the first task's pre-training performance as the universal baseline
@@ -148,7 +148,7 @@ def main():
         print(f"      SSIM: {universal_baseline['ssim']:.4f}")
         print(f"      PSNR: {universal_baseline['psnr']:.2f}")
     else:
-        print(f"   ⚠️ Could not extract baseline, using fallback values...")
+        print(f"   ️ Could not extract baseline, using fallback values...")
         baselines = {domain: {'ssim': 0.5, 'nmse': 1.0, 'psnr': 20.0} for domain in domains}
     
     # Extract training times if available
@@ -158,16 +158,16 @@ def main():
             training_times[domain] = results['training_time_seconds']
     
     # Calculate metrics
-    print(f"\n📊 Calculating continual learning metrics...")
+    print(f"\n Calculating continual learning metrics...")
     metrics = calculate_continual_learning_metrics(all_results, completed_tasks, baselines, training_times)
     
     # Calculate memory footprint (optional - skip if model loading fails)
-    print(f"\n💾 Calculating memory footprint...")
+    print(f"\n Calculating memory footprint...")
     try:
         memory_footprint = load_final_model_and_calculate_memory(config)
         metrics['memory_footprint_mb'] = memory_footprint
     except Exception as e:
-        print(f"   ⚠️ Could not calculate memory footprint: {e}")
+        print(f"   ️ Could not calculate memory footprint: {e}")
         print(f"   Using estimated value based on model size...")
         # Rough estimate: 4.7M parameters * 4 bytes + Fisher matrices
         estimated_memory = (4.718692 * 4) + (4.718692 * 4 * 9)  # Model + 9 Fisher matrices
@@ -179,11 +179,11 @@ def main():
     
     # Save metrics
     if config['evaluation']['save_results']:
-        print(f"\n💾 Saving metrics to CSV...")
+        print(f"\n Saving metrics to CSV...")
         os.makedirs(results_dir, exist_ok=True)
         save_metrics_to_csv(metrics, completed_tasks, results_dir, "ewc")
     
-    print(f"\n🎉 Analysis completed successfully!")
+    print(f"\n Analysis completed successfully!")
     return metrics
 
 if __name__ == '__main__':

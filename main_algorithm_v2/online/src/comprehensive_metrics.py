@@ -16,8 +16,8 @@ import torch.nn as nn
 import numpy as np
 import psutil
 import os
-from typing import Dict, List, Optional, Tuple, Any
-from collections import defaultdict, deque
+from typing import Dict, List, Optional, Any
+from collections import defaultdict
 from datetime import datetime
 import json
 

@@ -10,10 +10,7 @@ Adapted for online training environment.
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from typing import Dict, List, Optional, Tuple, Any, Union
-from tqdm import tqdm
-import copy
+from typing import Dict, List, Optional, Tuple, Any
 
 # Import offline components (using absolute imports)
 from main_algorithm_v2.offline.src.lora import LoRAConv2d
@@ -46,7 +43,7 @@ class OnlineFisherInformationManager:
         self.important_params = {}  # {task_id: {param_name: param_values}}
         self.task_param_counts = {}  # Track parameter counts per task
         
-        print(f"🧠 OnlineFisherInformationManager initialized with λ_EWC = {lambda_ewc}")
+        print(f" OnlineFisherInformationManager initialized with λ_EWC = {lambda_ewc}")
     
     def load_from_offline_checkpoint(self, checkpoint_path: str) -> bool:
         """
@@ -59,11 +56,11 @@ class OnlineFisherInformationManager:
             True if successfully loaded, False otherwise
         """
         try:
-            print(f"🔄 Loading Fisher matrices from offline checkpoint...")
+            print(f" Loading Fisher matrices from offline checkpoint...")
             checkpoint = torch.load(checkpoint_path, map_location='cpu', weights_only=False)
             
             if 'fisher_manager' not in checkpoint or checkpoint['fisher_manager'] is None:
-                print("❌ No Fisher manager found in checkpoint")
+                print(" No Fisher manager found in checkpoint")
                 return False
             
             fisher_data = checkpoint['fisher_manager']
@@ -71,14 +68,14 @@ class OnlineFisherInformationManager:
             # Load Fisher manager state
             self.load_state_dict(fisher_data)
             
-            print(f"✅ Fisher matrices loaded successfully:")
+            print(f" Fisher matrices loaded successfully:")
             print(f"   Tasks: {list(self.fisher_matrices.keys())}")
             print(f"   λ_EWC: {self.lambda_ewc}")
             
             return True
             
         except Exception as e:
-            print(f"❌ Failed to load Fisher matrices: {e}")
+            print(f" Failed to load Fisher matrices: {e}")
             return False
     
     def get_task_parameters(self, model, task_id: str) -> Dict[str, torch.Tensor]:
@@ -126,7 +123,7 @@ class OnlineFisherInformationManager:
             batch_data: List of (input, target) tuples for Fisher computation
             device: Device to compute on
         """
-        print(f"🔍 Computing online Fisher Information for Task {task_id}...")
+        print(f" Computing online Fisher Information for Task {task_id}...")
         
         # Set model to evaluation mode and activate current task
         model.eval()
@@ -135,7 +132,7 @@ class OnlineFisherInformationManager:
         # Get task-specific parameters
         task_params = self.get_task_parameters(model, task_id)
         if not task_params:
-            print(f"⚠️  No task-specific parameters found for task {task_id}")
+            print(f"️  No task-specific parameters found for task {task_id}")
             return
         
         # Initialize Fisher diagonal accumulators
@@ -181,7 +178,7 @@ class OnlineFisherInformationManager:
         self.fisher_matrices[task_id] = fisher_diagonals
         self.important_params[task_id] = important_params
         
-        print(f"✅ Online Fisher computation complete for Task {task_id}")
+        print(f" Online Fisher computation complete for Task {task_id}")
         print(f"   Processed {num_samples_processed} samples")
     
     def get_ewc_loss(self, model, current_task_id: str, exclude_current_task: bool = True) -> torch.Tensor:
@@ -242,7 +239,7 @@ class OnlineFisherInformationManager:
             current_params = self.get_task_parameters(model, task_id)
             for param_name, param in current_params.items():
                 self.important_params[task_id][param_name] = param.data.clone()
-            print(f"✅ Updated important parameters for Task {task_id}")
+            print(f" Updated important parameters for Task {task_id}")
     
     def state_dict(self) -> Dict[str, Any]:
         """
@@ -346,10 +343,10 @@ class OnlineFisherInformationManager:
         stats = self.get_statistics()
         
         if 'error' in stats:
-            print(f"❌ {stats['error']}")
+            print(f" {stats['error']}")
             return
         
-        print("\n🧠 FISHER INFORMATION STATISTICS:")
+        print("\n FISHER INFORMATION STATISTICS:")
         print("-" * 50)
         print(f"   Tasks with Fisher info: {stats['num_tasks']}")
         print(f"   EWC lambda: {stats['lambda_ewc']}")
@@ -440,6 +437,6 @@ def create_online_ewc_manager(lambda_ewc: float = 1000.0,
     if offline_checkpoint_path:
         success = fisher_manager.load_from_offline_checkpoint(offline_checkpoint_path)
         if not success:
-            print("⚠️  Failed to load offline Fisher matrices, starting with empty manager")
+            print("️  Failed to load offline Fisher matrices, starting with empty manager")
     
     return fisher_manager 

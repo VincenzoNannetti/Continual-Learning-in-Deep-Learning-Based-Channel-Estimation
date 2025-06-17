@@ -35,8 +35,7 @@ Note: The script automatically extracts configuration and normalization statisti
 # script which loads the models and evaluates them on the test set
 
 import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, random_split, Dataset
+from torch.utils.data import random_split, Dataset
 import numpy as np
 import yaml
 import time
@@ -49,7 +48,7 @@ from scipy.signal import convolve2d
 import sys
 sys.path.append('standard_training_2')
 from standard_training_2.dataset import StandardDataset
-from standard_training_2.plotting_utils import plot_evaluation_samples
+from standard_training_2.tests.plotting_utils import plot_evaluation_samples
 from standard_training_2.models.srcnn import SRCNN
 from standard_training_2.models.srcnn_dncnn import CombinedModel_SRCNNDnCNN
 from standard_training_2.models.autoencoder import DenoisingAutoencoder

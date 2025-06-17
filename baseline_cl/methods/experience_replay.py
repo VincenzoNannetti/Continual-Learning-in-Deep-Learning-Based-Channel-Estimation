@@ -145,7 +145,7 @@ class ExperienceReplayTrainer(BaseContinualTrainer):
         # Initialize buffer (will be created when we see first data)
         self.buffer = None
         
-        print(f"🔄 Experience Replay initialized")
+        print(f" Experience Replay initialized")
         print(f"   Buffer size: {buffer_size}")
         print(f"   Replay ratio: {replay_batch_ratio}")
         
@@ -157,7 +157,7 @@ class ExperienceReplayTrainer(BaseContinualTrainer):
             task_name: Name of the new task
             train_loader: Training data loader (used to initialize buffer)
         """
-        print(f"🎯 ER preparing for task {task_name}")
+        print(f" ER preparing for task {task_name}")
         
         self.task_names.append(task_name)
         
@@ -250,10 +250,10 @@ class ExperienceReplayTrainer(BaseContinualTrainer):
             task_name: Name of completed task
             val_loader: Validation data loader for the task
         """
-        print(f"🧠 Adding samples to experience buffer for task {task_name}...")
+        print(f" Adding samples to experience buffer for task {task_name}...")
         
         if self.buffer is None:
-            print("   ⚠️ Buffer not initialized, skipping sample addition")
+            print("   ️ Buffer not initialized, skipping sample addition")
             return
         
         # Add samples from validation set to buffer
@@ -275,7 +275,7 @@ class ExperienceReplayTrainer(BaseContinualTrainer):
         
         # Print buffer statistics
         stats = self.buffer.get_statistics()
-        print(f"   ✅ Buffer update complete")
+        print(f"    Buffer update complete")
         print(f"      Samples added: {samples_added}")
         print(f"      Buffer utilization: {stats['utilization']:.2%}")
         print(f"      Samples per task: {stats['samples_per_task']}")
@@ -359,11 +359,11 @@ class ExperienceReplayTrainer(BaseContinualTrainer):
             self.buffer.samples_per_task = defaultdict(int, state['buffer_samples_per_task'])
             self.buffer.insertion_index = state['buffer_insertion_index']
             
-            print(f"🔄 Experience Replay buffer restored:")
+            print(f" Experience Replay buffer restored:")
             print(f"   Buffer size: {self.buffer.current_size}/{self.buffer.buffer_size}")
             print(f"   Samples per task: {dict(self.buffer.samples_per_task)}")
         
-        print(f"🔄 Experience Replay state loaded:")
+        print(f" Experience Replay state loaded:")
         print(f"   Buffer size: {self.buffer_size}")
         print(f"   Replay ratio: {self.replay_batch_ratio}")
         print(f"   Completed tasks: {self.completed_tasks}")
@@ -379,7 +379,7 @@ class ExperienceReplayTrainer(BaseContinualTrainer):
     
     def print_replay_statistics(self):
         """Print experience replay statistics."""
-        print(f"\n📊 Experience Replay Statistics:")
+        print(f"\n Experience Replay Statistics:")
         print(f"   Buffer size: {self.buffer_size}")
         print(f"   Replay ratio: {self.replay_batch_ratio}")
         print(f"   Tasks completed: {len(self.task_names)}")

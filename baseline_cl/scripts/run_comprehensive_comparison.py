@@ -38,7 +38,7 @@ def run_command(command, description):
 
 def check_dataset_consistency():
     """Check which datasets are available and ensure consistency."""
-    print(f"\n🔍 CHECKING DATASET CONSISTENCY...")
+    print(f"\n CHECKING DATASET CONSISTENCY...")
     
     project_root = Path(__file__).parent.parent.parent
     
@@ -54,21 +54,21 @@ def check_dataset_consistency():
     lora_cached_dir = project_root / "data/preprocessed/tester_data"
     lora_cached_files = list(lora_cached_dir.glob("*_cl_*thin_plate_spline.mat")) if lora_cached_dir.exists() else []
     
-    print(f"\n📁 Dataset Analysis:")
+    print(f"\n Dataset Analysis:")
     print(f"   Baseline datasets: {len(baseline_files)} files")
     print(f"   LoRA raw datasets: {len(lora_files)} files") 
     print(f"   LoRA cached datasets: {len(lora_cached_files)} files")
     
     # Print available datasets
     if baseline_files:
-        print(f"\n📊 Baseline Dataset Names:")
+        print(f"\n Baseline Dataset Names:")
         for f in sorted(baseline_files)[:5]:  # Show first 5
             print(f"   - {f.name}")
         if len(baseline_files) > 5:
             print(f"   ... and {len(baseline_files) - 5} more")
     
     if lora_cached_files:
-        print(f"\n🧠 LoRA Dataset Names:")
+        print(f"\n LoRA Dataset Names:")
         for f in sorted(lora_cached_files)[:5]:  # Show first 5
             print(f"   - {f.name}")
         if len(lora_cached_files) > 5:
@@ -76,13 +76,13 @@ def check_dataset_consistency():
     
     # Determine which dataset format to use for comparison
     if len(lora_cached_files) >= 9 and len(baseline_files) >= 9:
-        print(f"\n✅ Both dataset formats available - using LoRA cached format for consistency")
+        print(f"\n Both dataset formats available - using LoRA cached format for consistency")
         return "lora_cached", lora_cached_files
     elif len(baseline_files) >= 9:
-        print(f"\n⚠️  Using baseline format - will need to retrain LoRA on this format")
+        print(f"\n️  Using baseline format - will need to retrain LoRA on this format")
         return "baseline", baseline_files
     else:
-        print(f"\n❌ Insufficient datasets found for comparison")
+        print(f"\n Insufficient datasets found for comparison")
         return None, []
 
 def create_unified_config():
@@ -116,7 +116,7 @@ def create_unified_config():
             if matching_files:
                 domain_sequence.append(domain)
     
-    print(f"\n📋 Unified Domain Sequence ({len(domain_sequence)} domains):")
+    print(f"\n Unified Domain Sequence ({len(domain_sequence)} domains):")
     for i, domain in enumerate(domain_sequence):
         print(f"   {i}: {domain}")
     
@@ -129,7 +129,7 @@ def create_unified_config():
 def main():
     """Run comprehensive comparison of all continual learning methods."""
     
-    print(f"🔬 COMPREHENSIVE CONTINUAL LEARNING METHOD COMPARISON")
+    print(f" COMPREHENSIVE CONTINUAL LEARNING METHOD COMPARISON")
     print(f"   Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"   Methods: EWC, Experience Replay, LoRA")
     print(f"   Goal: Fair comparison on IDENTICAL datasets")
@@ -140,7 +140,7 @@ def main():
     # Create unified configuration
     unified_config = create_unified_config()
     if unified_config is None:
-        print("❌ Cannot proceed without consistent datasets")
+        print(" Cannot proceed without consistent datasets")
         return False
     
     # Output directories
@@ -155,7 +155,7 @@ def main():
     config_file = f"{results_dir}/unified_config.json"
     with open(config_file, 'w') as f:
         json.dump(unified_config, f, indent=2)
-    print(f"\n💾 Unified configuration saved: {config_file}")
+    print(f"\n Unified configuration saved: {config_file}")
     
     # Change to project root directory
     os.chdir(project_root)
@@ -166,7 +166,7 @@ def main():
     # Step 1: Evaluate EWC on unified datasets
     if unified_config["dataset_format"] == "lora_cached":
         # Need to modify EWC evaluation to use LoRA datasets
-        print(f"\n⚠️  EWC needs to be retrained on LoRA dataset format for fair comparison")
+        print(f"\n️  EWC needs to be retrained on LoRA dataset format for fair comparison")
         print(f"   Current EWC models were trained on different datasets")
         print(f"   Skipping EWC evaluation for now...")
     else:
@@ -176,7 +176,7 @@ def main():
     
     # Step 2: Evaluate Experience Replay on unified datasets  
     if unified_config["dataset_format"] == "lora_cached":
-        print(f"\n⚠️  Experience Replay needs to be retrained on LoRA dataset format for fair comparison")
+        print(f"\n️  Experience Replay needs to be retrained on LoRA dataset format for fair comparison")
         print(f"   Current Experience Replay models were trained on different datasets")
         print(f"   Skipping Experience Replay evaluation for now...")
     else:
@@ -204,7 +204,7 @@ def main():
             except Exception as e:
                 print(f"   Warning: Could not copy LoRA results: {e}")
     else:
-        print(f"❌ LoRA checkpoint not found: {lora_checkpoint}")
+        print(f" LoRA checkpoint not found: {lora_checkpoint}")
         print(f"   Please train LoRA model first")
     
     # Step 4: Create unified comparison plots
@@ -219,25 +219,25 @@ def main():
     print(f"Completed steps: {success_count}/{total_steps}")
     
     if success_count >= 2:  # At least LoRA + plots
-        print(f"✅ Comparison analysis available!")
-        print(f"📁 Results saved to: {results_dir}")
-        print(f"📊 Plots saved to: {plots_dir}")
+        print(f" Comparison analysis available!")
+        print(f" Results saved to: {results_dir}")
+        print(f" Plots saved to: {plots_dir}")
         
         # Analysis
-        print(f"\n🔍 DATASET CONSISTENCY ANALYSIS:")
+        print(f"\n DATASET CONSISTENCY ANALYSIS:")
         print(f"   Format used: {unified_config['dataset_format']}")
         print(f"   Domains: {unified_config['num_domains']}")
         
         if unified_config["dataset_format"] == "lora_cached":
-            print(f"\n⚠️  IMPORTANT FINDINGS:")
-            print(f"   📊 LoRA was trained/evaluated on different dataset format than baselines")
-            print(f"   🔄 For fair comparison, ALL methods need to use the same datasets")
-            print(f"   💡 Recommendation: Retrain baseline methods on LoRA dataset format")
-            print(f"   📋 OR: Retrain LoRA on baseline dataset format")
+            print(f"\n️  IMPORTANT FINDINGS:")
+            print(f"    LoRA was trained/evaluated on different dataset format than baselines")
+            print(f"    For fair comparison, ALL methods need to use the same datasets")
+            print(f"    Recommendation: Retrain baseline methods on LoRA dataset format")
+            print(f"    OR: Retrain LoRA on baseline dataset format")
         
         return True
     else:
-        print(f"⚠️  Partial results available")
+        print(f"️  Partial results available")
         print(f"   For complete comparison, ensure all models are trained on same datasets")
         return False
 

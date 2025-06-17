@@ -1,11 +1,9 @@
 import torch
 from collections import deque
 from typing import Tuple, List, Dict
-import scipy.io
 import numpy as np
 from sklearn.cluster import KMeans
 import os
-from standard_training_2.interpolate import interpolation
 
 # Fix memory leak on Windows with MKL
 os.environ['OMP_NUM_THREADS'] = '2'
@@ -301,7 +299,7 @@ def create_stratified_replay_buffer(predictions: torch.Tensor, targets: torch.Te
                 nmse = mse / target_power
                 stored_nmse.append(nmse.item())
         
-        print(f"\n  📊 Final buffer statistics:")
+        print(f"\n   Final buffer statistics:")
         print(f"    NMSE coverage: {np.min(stored_nmse):.6f} to {np.max(stored_nmse):.6f}")
         print(f"    NMSE diversity (std): {np.std(stored_nmse):.6f}")
         print(f"    Memory usage: ~{len(replay_buffer) * 2 * predictions.shape[2] * predictions.shape[3] * 4 / (1024**2):.1f} MB")
@@ -347,4 +345,4 @@ if __name__ == "__main__":
     new_buffer.load_state_dict(state)
     print(f"New buffer size after loading state: {len(new_buffer)}")
     
-    print("✅ Basic ReplayBuffer functionality verified")
+    print(" Basic ReplayBuffer functionality verified")

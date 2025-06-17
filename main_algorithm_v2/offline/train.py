@@ -30,9 +30,9 @@ sys.path.insert(0, str(project_root))
 from src.config import ExperimentConfig, load_config
 from src.model import UNet_SRCNN_LoRA
 from src.data import get_dataloaders, get_norm_stats_from_checkpoint
-from src.utils import get_device, save_checkpoint, get_checkpoint_filename, create_scheduler, save_lora_checkpoint, set_seed
-from src.ewc import FisherInformationManager, EWCLoss, create_ewc_manager
-from replay_buffer import ReplayBuffer, calculate_model_difficulty_metrics, perform_difficulty_clustering, create_stratified_replay_buffer
+from src.utils import get_device, create_scheduler, set_seed
+from src.ewc import FisherInformationManager, EWCLoss
+from replay_buffer import calculate_model_difficulty_metrics, perform_difficulty_clustering, create_stratified_replay_buffer
 
 def denormalise(tensor: torch.Tensor, mean: torch.Tensor, std: torch.Tensor) -> torch.Tensor:
     """Denormalise a tensor using mean and std."""
@@ -205,7 +205,7 @@ def calculate_metrics(outputs_tensor: torch.Tensor, targets_tensor: torch.Tensor
     
     # Debug: Check for negative or unexpected NMSE
     if nmse_val < 0 or nmse_val > 10:
-        print(f"⚠️ DEBUG: Unusual NMSE value detected: {nmse_val}")
+        print(f"️ DEBUG: Unusual NMSE value detected: {nmse_val}")
         print(f"   MSE: {np.mean((outputs_np - targets_np) ** 2)}")
         print(f"   Signal Power: {np.mean(targets_np ** 2)}")
         print(f"   Output stats: min={np.min(outputs_np):.6f}, max={np.max(outputs_np):.6f}, mean={np.mean(outputs_np):.6f}")
@@ -281,31 +281,31 @@ def evaluate_continual_learning_step(model, config: ExperimentConfig, device: to
     Returns:
         Dictionary with performance on each completed task
     """
-    print(f"\n📊 CL Evaluation Step {current_task_step + 1}: Testing on {len(completed_tasks)} completed tasks...")
+    print(f"\n CL Evaluation Step {current_task_step + 1}: Testing on {len(completed_tasks)} completed tasks...")
     
     step_results = {}
     
     # Debug: Track the active task before evaluation
     current_active_task = model.active_task if hasattr(model, 'active_task') else None
-    print(f"   🔍 DEBUG: Current active task before evaluation: {current_active_task}")
+    print(f"    DEBUG: Current active task before evaluation: {current_active_task}")
     
     for task_id in completed_tasks:
         try:
-            print(f"   📌 Evaluating task {task_id}...")
+            print(f"    Evaluating task {task_id}...")
             task_metrics = evaluate_single_domain(model, task_id, config, device)
             step_results[task_id] = task_metrics
             
             # Debug: Print metrics immediately after evaluation
-            print(f"   ✅ Task {task_id} metrics: NMSE={task_metrics['nmse']:.8f}, SSIM={task_metrics['ssim']:.4f}, PSNR={task_metrics['psnr']:.2f}")
+            print(f"    Task {task_id} metrics: NMSE={task_metrics['nmse']:.8f}, SSIM={task_metrics['ssim']:.4f}, PSNR={task_metrics['psnr']:.2f}")
             
         except Exception as e:
-            print(f"  ❌ Error evaluating task {task_id}: {e}")
+            print(f"   Error evaluating task {task_id}: {e}")
             import traceback
             traceback.print_exc()
             continue
     
     # Debug: Print summary of step results
-    print(f"\n   📊 Step {current_task_step + 1} Summary:")
+    print(f"\n    Step {current_task_step + 1} Summary:")
     print(f"   Tasks evaluated: {list(step_results.keys())}")
     for task_id, metrics in step_results.items():
         print(f"     Task {task_id}: NMSE={metrics['nmse']:.8f}")
@@ -323,13 +323,13 @@ def calculate_continual_learning_metrics(performance_matrix: dict, task_sequence
     Returns:
         Dictionary containing BWT, FWT, and other CL metrics
     """
-    print("\n🧮 Calculating Continual Learning Metrics...")
+    print("\n Calculating Continual Learning Metrics...")
     
     metrics_to_analyze = ['ssim', 'nmse', 'psnr']
     cl_metrics = {}
     
     for metric_name in metrics_to_analyze:
-        print(f"\n  📈 Analyzing {metric_name.upper()}...")
+        print(f"\n   Analyzing {metric_name.upper()}...")
         
         # Extract performance matrix for this metric
         perf_matrix = {}
@@ -358,21 +358,21 @@ def verify_bwt_fwt_calculations(cl_metrics: dict, performance_matrix: dict, task
         task_sequence: Task sequence
     """
     print("\n" + "="*80)
-    print("🔍 VERIFICATION OF BWT/FWT CALCULATIONS")
+    print(" VERIFICATION OF BWT/FWT CALCULATIONS")
     print("="*80)
     
     # Focus on NMSE as primary metric
     if 'nmse' not in cl_metrics:
-        print("⚠️ NMSE metrics not found in cl_metrics")
+        print("️ NMSE metrics not found in cl_metrics")
         return
     
     nmse_metrics = cl_metrics['nmse']
-    print("\n📊 NMSE METRIC ANALYSIS (lower is better):")
+    print("\n NMSE METRIC ANALYSIS (lower is better):")
     print(f"   Average BWT: {nmse_metrics['bwt']['average']:.6f}")
     print(f"   Average FWT: {nmse_metrics['fwt']['average']:.6f}")
     
     # Verify BWT calculation manually
-    print("\n🔍 MANUAL BWT VERIFICATION:")
+    print("\n MANUAL BWT VERIFICATION:")
     print("   BWT = (1/(T-1)) * Σ(R_T,i - R_i,i) for i=1 to T-1")
     print("   where R_T,i = performance on task i after learning all T tasks")
     print("   and R_i,i = performance on task i right after learning it")
@@ -407,15 +407,15 @@ def verify_bwt_fwt_calculations(cl_metrics: dict, performance_matrix: dict, task
                 bwt_count += 1
                 
                 if diff > 0.001:  # Threshold for significant forgetting
-                    status = "⚠️ Forgetting"
+                    status = "️ Forgetting"
                 elif diff < -0.001:  # Threshold for improvement
-                    status = "✅ Improved"
+                    status = " Improved"
                 else:
-                    status = "➖ Stable"
+                    status = " Stable"
                 
                 print(f"   Task {task_id:<6} | {initial_perf:<15.6f} | {final_perf:<15.6f} | {diff:<15.6f} | {status:<20}")
             else:
-                print(f"   Task {task_id:<6} | {'Missing data':<15} | {'Missing data':<15} | {'-':<15} | {'❌ Error':<20}")
+                print(f"   Task {task_id:<6} | {'Missing data':<15} | {'Missing data':<15} | {'-':<15} | {' Error':<20}")
         
         if bwt_count > 0:
             manual_avg_bwt = manual_bwt_sum / bwt_count
@@ -423,12 +423,12 @@ def verify_bwt_fwt_calculations(cl_metrics: dict, performance_matrix: dict, task
             print(f"   Calculated BWT: {nmse_metrics['bwt']['average']:.6f}")
             
             if abs(manual_avg_bwt - nmse_metrics['bwt']['average']) < 0.0001:
-                print("   ✅ BWT calculation VERIFIED!")
+                print("    BWT calculation VERIFIED!")
             else:
-                print("   ❌ BWT calculation MISMATCH!")
+                print("    BWT calculation MISMATCH!")
     
     # Analyze forgetting patterns
-    print("\n📊 FORGETTING PATTERN ANALYSIS:")
+    print("\n FORGETTING PATTERN ANALYSIS:")
     if 'per_task' in nmse_metrics['bwt']:
         forgetting_tasks = []
         improving_tasks = []
@@ -443,22 +443,22 @@ def verify_bwt_fwt_calculations(cl_metrics: dict, performance_matrix: dict, task
                 stable_tasks.append((task_id, bwt_val))
         
         if forgetting_tasks:
-            print(f"   🔴 Tasks with forgetting ({len(forgetting_tasks)}):")
+            print(f"    Tasks with forgetting ({len(forgetting_tasks)}):")
             for task_id, bwt in sorted(forgetting_tasks, key=lambda x: x[1], reverse=True):
                 print(f"      Task {task_id}: +{bwt:.6f} NMSE (worse)")
         
         if improving_tasks:
-            print(f"   🟢 Tasks with improvement ({len(improving_tasks)}):")
+            print(f"Tasks with improvement ({len(improving_tasks)}):")
             for task_id, bwt in sorted(improving_tasks, key=lambda x: x[1]):
                 print(f"      Task {task_id}: {bwt:.6f} NMSE (better)")
         
         if stable_tasks:
-            print(f"   🟡 Stable tasks ({len(stable_tasks)}):")
+            print(f"Stable tasks ({len(stable_tasks)}):")
             for task_id, bwt in stable_tasks:
                 print(f"      Task {task_id}: {bwt:.6f} NMSE")
     
     # Expected behavior for LoRA
-    print("\n🎯 EXPECTED BEHAVIOR FOR LoRA:")
+    print("\n EXPECTED BEHAVIOR FOR LoRA:")
     print("   • BWT should be close to 0 due to parameter isolation")
     print("   • Small positive BWT might indicate:")
     print("     - Shared backbone degradation")
@@ -468,15 +468,15 @@ def verify_bwt_fwt_calculations(cl_metrics: dict, performance_matrix: dict, task
     
     # Summary interpretation
     avg_bwt = nmse_metrics['bwt']['average']
-    print(f"\n📝 SUMMARY:")
+    print(f"\n SUMMARY:")
     if abs(avg_bwt) < 0.001:
-        print("   ✅ Excellent: Near-zero BWT indicates proper parameter isolation")
+        print("    Excellent: Near-zero BWT indicates proper parameter isolation")
     elif avg_bwt > 0.01:
-        print("   ⚠️ Warning: Significant forgetting detected - check implementation")
+        print("   ️ Warning: Significant forgetting detected - check implementation")
     elif avg_bwt < -0.01:
-        print("   🤔 Unexpected: Significant improvement - verify evaluation consistency")
+        print("    Unexpected: Significant improvement - verify evaluation consistency")
     else:
-        print("   ✅ Good: Minor BWT within expected range")
+        print("    Good: Minor BWT within expected range")
     
     print("="*80)
 
@@ -490,7 +490,7 @@ def _calculate_metric_specific_cl_stats(perf_matrix: dict, task_sequence: list, 
     }
     
     # Debug: Print performance matrix
-    print(f"\n📊 DEBUG: Performance Matrix for {metric_name.upper()}:")
+    print(f"\n DEBUG: Performance Matrix for {metric_name.upper()}:")
     print(f"{'Step':<6} | " + " | ".join([f"Task {t:<4}" for t in task_sequence]))
     print("-" * (8 + 11 * len(task_sequence)))
     
@@ -517,7 +517,7 @@ def _calculate_metric_specific_cl_stats(perf_matrix: dict, task_sequence: list, 
     if num_tasks > 1:
         final_step = num_tasks - 1  # Last step (0-indexed)
         
-        print(f"📊 DEBUG: BWT Calculation Details for {metric_name.upper()}:")
+        print(f" DEBUG: BWT Calculation Details for {metric_name.upper()}:")
         print(f"{'Task':<6} | {'Initial (R_ii)':<14} | {'Final (R_Ti)':<14} | {'BWT (R_Ti-R_ii)':<16} | {'Interpretation':<20}")
         print("-" * 80)
         
@@ -569,7 +569,7 @@ def _calculate_metric_specific_cl_stats(perf_matrix: dict, task_sequence: list, 
         'values': bwt_values
     }
     
-    print(f"\n📊 Average BWT for {metric_name.upper()}: {avg_bwt:.6f}")
+    print(f"\n Average BWT for {metric_name.upper()}: {avg_bwt:.6f}")
     if metric_name == 'nmse':
         print(f"   Interpretation: {'Forgetting detected' if avg_bwt > 0 else 'No forgetting / Improvement' if avg_bwt <= 0 else 'No change'}")
     
@@ -581,7 +581,7 @@ def _calculate_metric_specific_cl_stats(perf_matrix: dict, task_sequence: list, 
     
     # For FWT, we need a baseline. We'll use the performance on the first task as reference
     # WARNING: This is not standard FWT - it's comparing to first task performance
-    print(f"\n⚠️  WARNING: FWT calculation is using first task as baseline, not true isolated learning baseline")
+    print(f"\n️  WARNING: FWT calculation is using first task as baseline, not true isolated learning baseline")
     
     if num_tasks > 1 and 0 in perf_matrix:
         first_task_perf = list(perf_matrix[0].values())[0] if perf_matrix[0] else None
@@ -668,14 +668,14 @@ def evaluate_all_domains_direct(model, config: ExperimentConfig, device: torch.d
     Evaluate the model on all specified domains directly.
     Returns the results dictionary with all metrics.
     """
-    print(f"\n🔍 Running Multi-Domain Evaluation on {len(domain_ids)} domains...")
+    print(f"\n Running Multi-Domain Evaluation on {len(domain_ids)} domains...")
     
     all_domain_results = {}
     aggregate_metrics = {'ssim': [], 'nmse': [], 'psnr': []}
     
     for domain_id in domain_ids:
         if domain_id not in [str(d) for d in config.data.sequence]:
-            print(f"  ⚠️  Warning: Domain {domain_id} not in model's training sequence")
+            print(f" Warning: Domain {domain_id} not in model's training sequence")
             continue
             
         try:
@@ -688,12 +688,12 @@ def evaluate_all_domains_direct(model, config: ExperimentConfig, device: torch.d
                     aggregate_metrics[metric_name].append(value)
                 
         except Exception as e:
-            print(f"  ❌ Error evaluating domain {domain_id}: {e}")
+            print(f"   Error evaluating domain {domain_id}: {e}")
             continue
     
     # Calculate and log aggregate statistics
     if all_domain_results:
-        print(f"\n📊 AGGREGATE RESULTS ACROSS {len(all_domain_results)} DOMAINS:")
+        print(f"\n AGGREGATE RESULTS ACROSS {len(all_domain_results)} DOMAINS:")
         
         aggregate_stats = {}
         for metric_name, values in aggregate_metrics.items():
@@ -736,7 +736,7 @@ def evaluate_all_domains_direct(model, config: ExperimentConfig, device: torch.d
         'domain_ids_evaluated': list(all_domain_results.keys())
     }
     
-    print(f"✅ Multi-domain evaluation complete! Results for {len(all_domain_results)} domains.")
+    print(f" Multi-domain evaluation complete! Results for {len(all_domain_results)} domains.")
     
     return results_data
 
@@ -900,7 +900,7 @@ def save_continual_learning_csvs(cl_metrics: dict, performance_matrix: dict,
         output_dir: Output directory for CSV files
     """
     if cl_metrics is None:
-        print("⚠️ No continual learning metrics to save")
+        print("️ No continual learning metrics to save")
         return
     
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -933,7 +933,7 @@ def save_continual_learning_csvs(cl_metrics: dict, performance_matrix: dict,
     summary_df = pd.DataFrame(summary_data)
     summary_file = os.path.join(output_dir, f"lora_ewc_summary_{timestamp}.csv")
     summary_df.to_csv(summary_file, index=False)
-    print(f"📊 Saved EWC summary CSV: {summary_file}")
+    print(f" Saved EWC summary CSV: {summary_file}")
     
          # 2. PERFORMANCE MATRIX CSV (compatible with plot_ewc_results.py)
     matrix_file = None
@@ -961,7 +961,7 @@ def save_continual_learning_csvs(cl_metrics: dict, performance_matrix: dict,
             matrix_df = pd.DataFrame(matrix_data)
             matrix_file = os.path.join(output_dir, f"lora_ewc_performance_matrix_{timestamp}.csv")
             matrix_df.to_csv(matrix_file, index=False)
-            print(f"📊 Saved performance matrix CSV: {matrix_file}")
+            print(f" Saved performance matrix CSV: {matrix_file}")
     
          # 3. PER-TASK FORGETTING CSV (compatible with plot_ewc_results.py)
     forgetting_file = None
@@ -985,7 +985,7 @@ def save_continual_learning_csvs(cl_metrics: dict, performance_matrix: dict,
             forgetting_df = pd.DataFrame(forgetting_data)
             forgetting_file = os.path.join(output_dir, f"lora_ewc_per_task_forgetting_{timestamp}.csv")
             forgetting_df.to_csv(forgetting_file, index=False)
-            print(f"📊 Saved per-task forgetting CSV: {forgetting_file}")
+            print(f" Saved per-task forgetting CSV: {forgetting_file}")
     
     # 4. FINAL EVALUATION CSV (compatible with plot_final_performance.py)
     eval_file = None
@@ -1013,7 +1013,7 @@ def save_continual_learning_csvs(cl_metrics: dict, performance_matrix: dict,
             eval_df = pd.DataFrame(eval_data)
             eval_file = os.path.join(output_dir, f"lora_ewc_final_evaluation_{timestamp}.csv")
             eval_df.to_csv(eval_file, index=False)
-            print(f"📊 Saved final evaluation CSV: {eval_file}")
+            print(f" Saved final evaluation CSV: {eval_file}")
     
     # 5. CONTINUAL LEARNING METRICS CSV (for cross-method comparison)
     cl_summary_data = {
@@ -1039,14 +1039,14 @@ def save_continual_learning_csvs(cl_metrics: dict, performance_matrix: dict,
     cl_summary_df = pd.DataFrame(cl_summary_data)
     cl_summary_file = os.path.join(output_dir, f"lora_ewc_continual_learning_summary_{timestamp}.csv")
     cl_summary_df.to_csv(cl_summary_file, index=False)
-    print(f"📊 Saved continual learning summary CSV: {cl_summary_file}")
+    print(f" Saved continual learning summary CSV: {cl_summary_file}")
     
     # Print summary for user
-    print(f"\n📊 CSV EXPORT SUMMARY:")
-    print(f"   📁 Output directory: {output_dir}")
-    print(f"   📄 Files created: 5 CSV files for comprehensive plotting")
-    print(f"   🎯 Compatible with your plot_ewc_results.py and plot_final_performance.py")
-    print(f"   📈 Includes: BWT, FWT, performance matrix, per-domain results, forgetting analysis")
+    print(f"\n CSV EXPORT SUMMARY:")
+    print(f"    Output directory: {output_dir}")
+    print(f"    Files created: 5 CSV files for comprehensive plotting")
+    print(f"    Compatible with your plot_ewc_results.py and plot_final_performance.py")
+    print(f"    Includes: BWT, FWT, performance matrix, per-domain results, forgetting analysis")
     
     return summary_file, matrix_file, eval_file, forgetting_file, cl_summary_file
 
@@ -1065,7 +1065,7 @@ def calculate_model_memory_footprint(model, fisher_manager=None) -> float:
     
     total_memory_mb = model_params + fisher_params
     
-    print(f"\n💾 Memory Footprint Analysis:")
+    print(f"\n Memory Footprint Analysis:")
     print(f"   Model parameters: {model_params:.2f} MB")
     print(f"   Fisher matrices: {fisher_params:.2f} MB") 
     print(f"   Total: {total_memory_mb:.2f} MB")
@@ -1127,7 +1127,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
     fisher_manager = FisherInformationManager(lambda_ewc=lambda_ewc)
     ewc_loss_fn = EWCLoss(fisher_manager) if (ewc_enabled and lambda_ewc > 0) else None
     
-    print("🧠 Initializing EWC Fisher Information Manager...")
+    print(" Initializing EWC Fisher Information Manager...")
     print(f"   λ_EWC = {lambda_ewc}")
     print(f"   EWC enabled = {ewc_enabled}")
     if ewc_enabled and lambda_ewc > 0:
@@ -1168,9 +1168,9 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
     completed_tasks = []     # List of task IDs that have been trained
     task_sequence = [str(task_id) for task_id in config.data.sequence]
     
-    print(f"🧠 Continual Learning Metrics Tracking Enabled")
-    print(f"   📝 Will track BWT, FWT, and performance evolution")
-    print(f"   📊 Task sequence: {task_sequence}")
+    print(f" Continual Learning Metrics Tracking Enabled")
+    print(f"    Will track BWT, FWT, and performance evolution")
+    print(f"    Task sequence: {task_sequence}")
 
     for task_id_int in config.data.sequence:
         task_id = str(task_id_int)
@@ -1307,7 +1307,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
                     'save_count': checkpoint_save_count
                 }
                 torch.save(best_checkpoint, best_checkpoint_path)
-                print(f"💾 NEW BEST for Domain {task_id}: {val_loss:.6f} (Epoch {epoch+1}) [Save #{checkpoint_save_count}]")
+                print(f" NEW BEST for Domain {task_id}: {val_loss:.6f} (Epoch {epoch+1}) [Save #{checkpoint_save_count}]")
             
             # Log metrics to W&B
             if wandb_run:
@@ -1340,7 +1340,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
         current_task_step = len(completed_tasks) - 1  # 0-indexed step
         
         # Evaluate on all completed tasks to track performance evolution
-        print(f"\n🎯 Task {task_id} completed! Running CL evaluation...")
+        print(f"\n Task {task_id} completed! Running CL evaluation...")
         step_performance = evaluate_continual_learning_step(
             model, config, device, completed_tasks, current_task_step
         )
@@ -1365,7 +1365,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
             
             wandb_run.log(cl_log_dict)
         
-        print(f"✅ CL evaluation step {current_task_step + 1} completed!")
+        print(f" CL evaluation step {current_task_step + 1} completed!")
 
         # Populate replay buffer after training this task (when model knows the domain)
         replay_buffer = populate_replay_buffer(model, train_loader, task_id, device)
@@ -1377,7 +1377,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
             compute_fisher = config.training.ewc.compute_fisher_after_task
         
         if fisher_manager is not None and compute_fisher:
-            print(f"\n🧠 Computing Fisher Information for Task {task_id}...")
+            print(f"\n Computing Fisher Information for Task {task_id}...")
             try:
                 # Use validation loader for Fisher computation
                 num_fisher_samples = None
@@ -1387,7 +1387,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
                 fisher_manager.compute_fisher_information(
                     model, task_id, val_loader, device, num_samples=num_fisher_samples
                 )
-                print(f"✅ Fisher Information computed for Task {task_id}")
+                print(f" Fisher Information computed for Task {task_id}")
                 
                 # Log Fisher statistics to W&B if available
                 if wandb_run:
@@ -1402,7 +1402,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
                             f'task_{task_id}_fisher_min': task_fisher_stats['min_fisher']
                         })
             except Exception as e:
-                print(f"⚠️ Warning: Failed to compute Fisher Information for Task {task_id}: {e}")
+                print(f"️ Warning: Failed to compute Fisher Information for Task {task_id}: {e}")
 
         # Clear CUDA cache between tasks to avoid memory fragmentation
         if torch.cuda.is_available():
@@ -1428,9 +1428,9 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
     # === CALCULATE FINAL CONTINUAL LEARNING METRICS ===
     cl_metrics = None
     if len(completed_tasks) > 1 and performance_matrix:
-        print(f"\n🧮 Computing Final Continual Learning Metrics...")
-        print(f"   📊 Performance matrix has {len(performance_matrix)} steps")
-        print(f"   🎯 Completed {len(completed_tasks)} tasks: {completed_tasks}")
+        print(f"\n Computing Final Continual Learning Metrics...")
+        print(f"    Performance matrix has {len(performance_matrix)} steps")
+        print(f"    Completed {len(completed_tasks)} tasks: {completed_tasks}")
         
         try:
             # Calculate BWT, FWT, and other CL metrics
@@ -1442,17 +1442,17 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
             # Print summary results
             if 'summary' in cl_metrics:
                 summary = cl_metrics['summary']
-                print(f"\n🏆 CONTINUAL LEARNING RESULTS SUMMARY:")
-                print(f"   📈 Overall BWT: {summary['overall_bwt']:.4f}")
-                print(f"   📈 Overall FWT: {summary['overall_fwt']:.4f}")
-                print(f"   📈 Overall Final Performance: {summary['overall_final_performance']:.4f}")
-                print(f"   📊 Tasks completed: {summary['num_tasks']}")
+                print(f"\n CONTINUAL LEARNING RESULTS SUMMARY:")
+                print(f"    Overall BWT: {summary['overall_bwt']:.4f}")
+                print(f"    Overall FWT: {summary['overall_fwt']:.4f}")
+                print(f"    Overall Final Performance: {summary['overall_final_performance']:.4f}")
+                print(f"    Tasks completed: {summary['num_tasks']}")
             
             # Print detailed results for each metric
             for metric_name in ['ssim', 'nmse', 'psnr']:
                 if metric_name in cl_metrics:
                     metric_results = cl_metrics[metric_name]
-                    print(f"\n   📊 {metric_name.upper()} Results:")
+                    print(f"\n    {metric_name.upper()} Results:")
                     print(f"      BWT: {metric_results['bwt']['average']:.4f}")
                     print(f"      FWT: {metric_results['fwt']['average']:.4f}")
                     print(f"      Final Performance: {metric_results['average_final_performance']:.4f}")
@@ -1488,28 +1488,28 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
                             cl_summary_log[f'cl_{metric_name}_fwt_task_{task_id}'] = fwt_val
                 
                 wandb_run.log(cl_summary_log)
-                print(f"✅ CL metrics logged to W&B")
+                print(f" CL metrics logged to W&B")
         
         except Exception as e:
-            print(f"⚠️ Error calculating continual learning metrics: {e}")
+            print(f"️ Error calculating continual learning metrics: {e}")
             cl_metrics = None
     else:
-        print(f"⚠️ Insufficient data for CL metrics (need >1 task): {len(completed_tasks)} tasks completed")
+        print(f"️ Insufficient data for CL metrics (need >1 task): {len(completed_tasks)} tasks completed")
     
     # Save final checkpoint with all replay buffers included
     if best_task_val_losses:
-        print(f"\n💾 Saving final checkpoint with best adapters + all replay buffers...")
+        print(f"\n Saving final checkpoint with best adapters + all replay buffers...")
         final_checkpoint_path = os.path.join(config.logging.checkpoint_dir, "FINAL_WITH_REPLAY.pth")
         best_checkpoint_path = os.path.join(config.logging.checkpoint_dir, "BEST.pth")
         os.makedirs(config.logging.checkpoint_dir, exist_ok=True)
         
         # Load the best model state (which contains best adapters for each domain)
         if os.path.exists(best_checkpoint_path):
-            print(f"   🔄 Loading best model state from: BEST.pth")
+            print(f"    Loading best model state from: BEST.pth")
             best_checkpoint = torch.load(best_checkpoint_path, map_location=device)
             best_model_state = best_checkpoint['model_state_dict']
         else:
-            print(f"   ⚠️  BEST.pth not found, using current model state")
+            print(f"   ️  BEST.pth not found, using current model state")
             best_model_state = model.state_dict()
         
         final_checkpoint = {
@@ -1532,24 +1532,24 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
             'save_count': checkpoint_save_count + 1
         }
         torch.save(final_checkpoint, final_checkpoint_path)
-        print(f"✅ Final checkpoint saved to: {final_checkpoint_path}")
-        print(f"   🏆 Uses BEST LoRA adapters for each domain (not final training state)")
-        print(f"   📊 Included replay buffers for {len(replay_buffers)} tasks:")
+        print(f" Final checkpoint saved to: {final_checkpoint_path}")
+        print(f"    Uses BEST LoRA adapters for each domain (not final training state)")
+        print(f"    Included replay buffers for {len(replay_buffers)} tasks:")
         for task_id, buffer in replay_buffers.items():
             print(f"      Task {task_id}: {len(buffer)} samples")
         
         # Print Fisher Information summary
         if fisher_manager is not None:
-            print(f"   🧠 Fisher Information matrices computed for {len(fisher_manager.fisher_matrices)} tasks")
+            print(f"    Fisher Information matrices computed for {len(fisher_manager.fisher_matrices)} tasks")
             fisher_manager.print_statistics()
     
     # Summary of best model per domain
     if best_task_val_losses:
-        print(f"\n🏆 BEST MODEL SUMMARY:")
-        print(f"   📍 Best checkpoint: {os.path.join(config.logging.checkpoint_dir, 'BEST.pth')}")
-        print(f"   📍 Final checkpoint: {os.path.join(config.logging.checkpoint_dir, 'FINAL_WITH_REPLAY.pth')}")
-        print(f"   💾 Total saves: {checkpoint_save_count + 1}")
-        print(f"   📊 Best validation losses per domain:")
+        print(f"\n BEST MODEL SUMMARY:")
+        print(f"    Best checkpoint: {os.path.join(config.logging.checkpoint_dir, 'BEST.pth')}")
+        print(f"    Final checkpoint: {os.path.join(config.logging.checkpoint_dir, 'FINAL_WITH_REPLAY.pth')}")
+        print(f"    Total saves: {checkpoint_save_count + 1}")
+        print(f"    Best validation losses per domain:")
         for domain, val_loss in best_task_val_losses.items():
             print(f"      Domain {domain}: {val_loss:.6f}")
         
@@ -1604,9 +1604,9 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
                 os.makedirs(os.path.dirname(eval_results_file), exist_ok=True)
                 with open(eval_results_file, 'w') as f:
                     json.dump(eval_results, f, indent=2)
-                print(f"📁 Evaluation results saved to: {eval_results_file}")
+                print(f" Evaluation results saved to: {eval_results_file}")
             except Exception as e:
-                print(f"⚠️  Warning: Could not save results to file: {e}")
+                print(f"️  Warning: Could not save results to file: {e}")
         
         # Log to W&B if available
         if wandb_run and eval_results:
@@ -1621,17 +1621,17 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
                         for stat_name, stat_value in stats.items():
                             wandb_run.summary[f"aggregate_{metric_name}_{stat_name}"] = stat_value
         
-        print("✅ Direct multi-domain evaluation completed successfully!")
+        print(" Direct multi-domain evaluation completed successfully!")
         
     except Exception as e:
-        print(f"⚠️ Error in direct multi-domain evaluation: {e}")
+        print(f"️ Error in direct multi-domain evaluation: {e}")
         eval_results = None
     
     # === CALCULATE TRAINING STATISTICS ===
     training_end_time = datetime.now()
     total_training_time = (training_end_time - training_start_time).total_seconds()
     
-    print(f"\n⏱️ TRAINING TIME ANALYSIS:")
+    print(f"\n️ TRAINING TIME ANALYSIS:")
     print(f"   Started: {training_start_time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"   Finished: {training_end_time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"   Total time: {total_training_time/3600:.2f} hours ({total_training_time/60:.1f} minutes)")
@@ -1643,7 +1643,7 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
     # === EXPORT CSV FILES FOR PLOTTING ===
     if cl_metrics is not None and eval_results is not None:
         try:
-            print(f"\n📊 Exporting CSV files for comprehensive plotting...")
+            print(f"\n Exporting CSV files for comprehensive plotting...")
             csv_output_dir = os.path.join(config.logging.checkpoint_dir, "csv_results")
             
             save_continual_learning_csvs(
@@ -1657,15 +1657,15 @@ def main(config_path: str, wandb_run_id: str = None, wandb_project: str = None, 
                 output_dir=csv_output_dir
             )
             
-            print(f"✅ CSV export completed! Use these files with your plotting scripts:")
-            print(f"   📁 Location: {csv_output_dir}")
-            print(f"   🎯 Plot with: plot_ewc_results.py --results_dir {csv_output_dir}")
-            print(f"   📈 Or with: plot_final_performance.py --results_dir {csv_output_dir}")
+            print(f" CSV export completed! Use these files with your plotting scripts:")
+            print(f"    Location: {csv_output_dir}")
+            print(f"    Plot with: plot_ewc_results.py --results_dir {csv_output_dir}")
+            print(f"    Or with: plot_final_performance.py --results_dir {csv_output_dir}")
             
         except Exception as e:
-            print(f"⚠️ Error exporting CSV files: {e}")
+            print(f"️ Error exporting CSV files: {e}")
     else:
-        print(f"⚠️ Cannot export CSV files: Missing continual learning metrics or evaluation results")
+        print(f"️ Cannot export CSV files: Missing continual learning metrics or evaluation results")
     
     # Finish W&B run
     if wandb_run:

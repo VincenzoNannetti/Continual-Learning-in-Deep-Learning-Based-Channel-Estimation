@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Enhanced Dataset Comparison Script
 
@@ -249,12 +248,12 @@ Examples:
     print("\n--- Generating Comprehensive Report ---")
     comparison_df = create_comparison_report(all_metrics, args.output_dir)
     
-    print(f"\n✅ Analysis complete! Results saved to: {args.output_dir}")
+    print(f"\n Analysis complete! Results saved to: {args.output_dir}")
     print("\nGenerated files:")
-    print("  📊 Individual comparison plots: *_comprehensive.svg")
-    print("  📈 Summary plot: comparison_summary.svg") 
-    print("  📋 Detailed metrics: dataset_comparison_metrics.csv")
-    print("  📝 Console output above shows key findings")
+    print("   Individual comparison plots: *_comprehensive.svg")
+    print("   Summary plot: comparison_summary.svg") 
+    print("   Detailed metrics: dataset_comparison_metrics.csv")
+    print("   Console output above shows key findings")
     
     return 0
 

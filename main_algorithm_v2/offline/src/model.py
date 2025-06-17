@@ -335,13 +335,13 @@ class UNet_SRCNN_LoRA(nn.Module):
                 # if 'final_conv' in current_path or 'conv3' in current_path:
                 #     # These are typically output layers with only 2 channels
                 #     if out_channels <= 2:
-                #         print(f"⚠️  Skipping LoRA for {current_path}: output layer with {out_channels} channels")
+                #         print(f"️  Skipping LoRA for {current_path}: output layer with {out_channels} channels")
                 #         skip_layer = True
                 
                 # # Additional constraint: skip if rank would be problematic
                 # # For now, assume we want at least min_dk >= 4 for meaningful LoRA
                 # if min_dk < 4 and not skip_layer:
-                #     print(f"⚠️  Skipping LoRA for {current_path}: min(d,k)={min_dk} too small")
+                #     print(f"️  Skipping LoRA for {current_path}: min(d,k)={min_dk} too small")
                 #     skip_layer = True
                 skip_layer = False
                 if not skip_layer:
@@ -358,9 +358,9 @@ class UNet_SRCNN_LoRA(nn.Module):
                         # Just replace with the LoRA-Conv layer
                         setattr(module, name, lora_conv)
                     
-                    print(f"✅ Added LoRA to {current_path}: {out_channels}x{in_channels}x{k_h}x{k_w} (min_dk={min_dk})")
+                    print(f" Added LoRA to {current_path}: {out_channels}x{in_channels}x{k_h}x{k_w} (min_dk={min_dk})")
                 else:
-                    print(f"🔄 Keeping standard Conv2d for {current_path}")
+                    print(f" Keeping standard Conv2d for {current_path}")
             else:
                 # Recurse into submodules
                 self._inject_adapters(child_module, current_path)

@@ -1,7 +1,6 @@
 import yaml
 import subprocess
 from pathlib import Path
-import shutil
 import json
 from datetime import datetime
 import pandas as pd
@@ -48,10 +47,10 @@ def create_ablation_configs(base_config):
     regular_checkpoint = "main_algorithm_v2/offline/checkpoints/regular/FINAL_MODEL.pth"
     if os.path.exists(regular_checkpoint):
         configs['no_lora']['offline_checkpoint_path'] = regular_checkpoint
-        print(f"   📝 No-LoRA ablation will use regular checkpoint: {regular_checkpoint}")
+        print(f"    No-LoRA ablation will use regular checkpoint: {regular_checkpoint}")
     else:
-        print(f"   ⚠️  No regular checkpoint found at {regular_checkpoint}")
-        print(f"   📝 No-LoRA ablation will be skipped unless regular checkpoint is available")
+        print(f"   ️  No regular checkpoint found at {regular_checkpoint}")
+        print(f"    No-LoRA ablation will be skipped unless regular checkpoint is available")
         configs['no_lora']['_skip'] = True  # Mark for skipping
     
     # No EWC and No Buffer (combined ablation)
@@ -104,11 +103,11 @@ def run_experiment(config_path, experiment_name, num_samples=1000):
         result = subprocess.run(cmd, capture_output=True, text=True, check=True, 
                                encoding='utf-8', errors='replace', env=env)
         
-        print(f"✅ Experiment {experiment_name} completed successfully")
+        print(f" Experiment {experiment_name} completed successfully")
         return True
         
     except subprocess.CalledProcessError as e:
-        print(f"❌ Experiment {experiment_name} failed:")
+        print(f" Experiment {experiment_name} failed:")
         print(f"STDOUT: {e.stdout}")
         print(f"STDERR: {e.stderr}")
         return False
@@ -341,10 +340,10 @@ def plot_ablation_comparison(results_dict, save_dir):
                 plt.savefig(ablation_dir / 'domain_comparison.png', dpi=300, bbox_inches='tight')
                 plt.close()
     
-    print(f"\n🎯 Ablation study plots saved to: {ablation_dir}")
+    print(f"\n Ablation study plots saved to: {ablation_dir}")
     
     # Print comprehensive summary table
-    print(f"\n📊 COMPREHENSIVE ABLATION STUDY SUMMARY:")
+    print(f"\n COMPREHENSIVE ABLATION STUDY SUMMARY:")
     print("=" * 80)
     print(f"{'Configuration':<25} {'Avg NMSE':<12} {'Training':<10} {'Success%':<9} {'Improve%':<9}")
     print("-" * 80)
@@ -368,21 +367,21 @@ def plot_ablation_comparison(results_dict, save_dir):
 
 def main():
     """Run ablation studies."""
-    print("🧪 STARTING COMPREHENSIVE ABLATION STUDIES")
+    print(" STARTING COMPREHENSIVE ABLATION STUDIES")
     print("=" * 60)
     
     # Load base configuration
     base_config_path = "main_algorithm_v2/online/config/online_config.yaml"
     
     if not os.path.exists(base_config_path):
-        print(f"❌ Base config not found: {base_config_path}")
+        print(f" Base config not found: {base_config_path}")
         print("Please ensure the config file exists and try again.")
         return
     
     try:
         base_config = load_config(base_config_path)
     except Exception as e:
-        print(f"❌ Error loading base config: {e}")
+        print(f" Error loading base config: {e}")
         return
     
     # Create ablation configurations
@@ -400,10 +399,10 @@ def main():
     results = {}
     num_ablation_samples = 800  # Increased for more reliable results
     
-    print(f"\n🎯 Running {len(configs)} ablation experiments with {num_ablation_samples} samples each...")
+    print(f"\n Running {len(configs)} ablation experiments with {num_ablation_samples} samples each...")
     
     for name, config in configs.items():
-        print(f"\n📋 Preparing experiment: {name}")
+        print(f"\n Preparing experiment: {name}")
         
         # Remove internal flags before saving
         config_clean = {k: v for k, v in config.items() if not k.startswith('_')}
@@ -420,15 +419,15 @@ def main():
             # Collect results
             results[name] = collect_results(config_clean['experiment_name'])
             if results[name] is not None:
-                print(f"   ✅ Results collected: {len(results[name])} samples")
+                print(f"    Results collected: {len(results[name])} samples")
             else:
-                print(f"   ⚠️ No results found for {name}")
+                print(f"   ️ No results found for {name}")
         else:
-            print(f"   ❌ Experiment failed: {name}")
+            print(f"    Experiment failed: {name}")
             results[name] = None
     
     # Create comparison plots
-    print(f"\n📈 Creating comprehensive comparison plots...")
+    print(f"\n Creating comprehensive comparison plots...")
     plot_ablation_comparison(results, Path("main_algorithm_v2/online/eval"))
     
     # Save summary results
@@ -452,9 +451,9 @@ def main():
     with open(summary_file, 'w') as f:
         json.dump(summary_data, f, indent=2)
     
-    print(f"\n✅ Comprehensive ablation studies completed!")
-    print(f"📁 Results available in: main_algorithm_v2/online/eval/ablation_comparison/")
-    print(f"📄 Summary saved to: {summary_file}")
+    print(f"\n Comprehensive ablation studies completed!")
+    print(f" Results available in: main_algorithm_v2/online/eval/ablation_comparison/")
+    print(f" Summary saved to: {summary_file}")
 
 if __name__ == "__main__":
     main() 

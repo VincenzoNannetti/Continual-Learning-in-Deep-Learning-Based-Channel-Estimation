@@ -22,10 +22,8 @@ import subprocess
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 from pathlib import Path
 import numpy as np
-from datetime import datetime
 
 # Domain mapping from numeric IDs to letters
 DOMAIN_ID_TO_LETTER = {
@@ -991,17 +989,17 @@ def generate_trigger_comparison_table(current_trigger):
                         }
                     
                     comparison_data[trigger] = trigger_results
-                    print(f"✅ Found results for {trigger} trigger")
+                    print(f" Found results for {trigger} trigger")
                     
                 except Exception as e:
-                    print(f"❌ Error loading {trigger} results: {e}")
+                    print(f" Error loading {trigger} results: {e}")
             else:
-                print(f"⚠️  No CSV results found for {trigger} trigger")
+                print(f"️  No CSV results found for {trigger} trigger")
         else:
-            print(f"⚠️  No results directory found for {trigger} trigger")
+            print(f"️  No results directory found for {trigger} trigger")
     
     if len(comparison_data) >= 2:
-        print(f"\n📊 GENERATING COMPARISON TABLE")
+        print(f"\n GENERATING COMPARISON TABLE")
         print("Run all trigger types to get complete comparison!")
         
         # Create CSV for easy analysis
@@ -1030,7 +1028,7 @@ def generate_trigger_comparison_table(current_trigger):
         comparison_df.to_csv(table_path, index=False)
         
         # Display summary table with letter mapping
-        print(f"\n📋 MEAN NMSE COMPARISON TABLE:")
+        print(f"\n MEAN NMSE COMPARISON TABLE:")
         print("-" * 60)
         header = f"{'Domain':<8}"
         for trigger in sorted(comparison_data.keys()):
@@ -1053,11 +1051,11 @@ def generate_trigger_comparison_table(current_trigger):
             print(row)
         
         print("-" * 60)
-        print(f"\n💾 Detailed comparison saved to: {table_path}")
-        print("📈 Import this CSV into Excel/Python for further analysis!")
+        print(f"\n Detailed comparison saved to: {table_path}")
+        print(" Import this CSV into Excel/Python for further analysis!")
         
         # Show which trigger is best per domain
-        print(f"\n🏆 BEST TRIGGER PER DOMAIN:")
+        print(f"\n BEST TRIGGER PER DOMAIN:")
         for domain_id in domains:
             best_trigger = None
             best_nmse = float('inf')
@@ -1074,7 +1072,7 @@ def generate_trigger_comparison_table(current_trigger):
                 print(f"   Domain {domain_letter}: {best_trigger.capitalize()} ({best_nmse:.6f} NMSE)")
     
     else:
-        print(f"\n⚠️  Only {len(comparison_data)} trigger type(s) found.")
+        print(f"\n️  Only {len(comparison_data)} trigger type(s) found.")
         print("Run multiple trigger types to enable comparison:")
         print("   python ... --trigger drift --baseline_only")
         print("   python ... --trigger hybrid --baseline_only")  
@@ -1096,17 +1094,17 @@ def diagnose_domain_distribution(experiment_name):
         return None
     
     latest_csv = max(csv_files, key=lambda x: x.stat().st_mtime)
-    print(f"🔍 DIAGNOSING DATA DISTRIBUTION FROM: {latest_csv}")
+    print(f" DIAGNOSING DATA DISTRIBUTION FROM: {latest_csv}")
     
     # Load results
     df = pd.read_csv(latest_csv)
     
-    print(f"\n📊 OVERALL DATA SUMMARY:")
+    print(f"\n OVERALL DATA SUMMARY:")
     print(f"   Total samples: {len(df)}")
     print(f"   Sample range: {df['sample_id'].min()} to {df['sample_id'].max()}")
     print(f"   Unique domains: {sorted(df['domain_id'].unique())}")
     
-    print(f"\n📋 DOMAIN DISTRIBUTION:")
+    print(f"\n DOMAIN DISTRIBUTION:")
     print("-" * 80)
     print(f"{'Domain':<8} {'Count':<8} {'First Sample':<12} {'Last Sample':<12} {'Sample Range':<15}")
     print("-" * 80)
@@ -1127,20 +1125,20 @@ def diagnose_domain_distribution(experiment_name):
     print("-" * 80)
     
     # Check for overlaps (this should NOT happen with sequential_blocks)
-    print(f"\n🔄 CHECKING FOR OVERLAPS (should be NONE):")
+    print(f"\n CHECKING FOR OVERLAPS (should be NONE):")
     overlaps_found = False
     
     for sample_id in range(0, df['sample_id'].max() + 1, 500):  # Check every 500 samples
         domains_at_sample = df[df['sample_id'] == sample_id]['domain_id'].unique()
         if len(domains_at_sample) > 1:
-            print(f"   ⚠️ Sample {sample_id}: Multiple domains {domains_at_sample}")
+            print(f"   ️ Sample {sample_id}: Multiple domains {domains_at_sample}")
             overlaps_found = True
     
     if not overlaps_found:
-        print("   ✅ No overlaps found - domains are properly sequential")
+        print("    No overlaps found - domains are properly sequential")
     
     # Show expected vs actual distribution
-    print(f"\n📏 EXPECTED vs ACTUAL (with block_size=2000):")
+    print(f"\n EXPECTED vs ACTUAL (with block_size=2000):")
     expected_blocks = len(df) // 2000 if len(df) >= 2000 else 1
     
     for i, (letter, domain_id) in enumerate(domain_letter_pairs):
@@ -1154,7 +1152,7 @@ def diagnose_domain_distribution(experiment_name):
         expected = f"{expected_start}-{expected_end}"
         actual = f"{actual_start}-{actual_end}"
         
-        match = "✅" if (actual_start == expected_start and actual_end == expected_end) else "❌"
+        match = "" if (actual_start == expected_start and actual_end == expected_end) else ""
         print(f"   Domain {letter}: Expected {expected}, Actual {actual} {match}")
     
     return df
@@ -1274,13 +1272,13 @@ Examples:
                 single_plot_dir = Path(f"main_algorithm_v2/online/eval/domain_shift_analysis/single_domain_{args.single_domain}_{args.trigger}")
                 plot_single_domain_performance(single_analysis, single_df, single_plot_dir, args.single_domain, args.trigger)
                 
-                print(f"\n✅ Single domain streaming analysis completed!")
-                print(f"📊 Comprehensive plots saved to: {single_plot_dir}")
-                print("📈 Key files:")
+                print(f"\n Single domain streaming analysis completed!")
+                print(f" Comprehensive plots saved to: {single_plot_dir}")
+                print(" Key files:")
                 print(f"   • single_domain_{domain_letter}_{args.trigger}_comprehensive.png - Full analysis dashboard")
                 print(f"   • single_domain_{domain_letter}_{args.trigger}_clean.png - Clean NMSE vs samples plot")
         else:
-            print("❌ Single domain experiment failed!")
+            print(" Single domain experiment failed!")
         
         return  # Exit after single domain analysis
     
@@ -1378,13 +1376,13 @@ Examples:
                     print(f"\nAdaptation Effectiveness: {effectiveness:.6f} NMSE improvement during shift")
                     
                     if effectiveness > 0.01:
-                        print("  ✅ EXCELLENT: Strong adaptation to domain shift")
+                        print("   EXCELLENT: Strong adaptation to domain shift")
                     elif effectiveness > 0.005:
-                        print("  👍 GOOD: Moderate adaptation to domain shift")
+                        print("   GOOD: Moderate adaptation to domain shift")
                     elif effectiveness > 0:
-                        print("  ⚠️  WEAK: Limited adaptation to domain shift")
+                        print("  ️  WEAK: Limited adaptation to domain shift")
                     else:
-                        print("  ❌ POOR: No adaptation or performance degraded")
+                        print("   POOR: No adaptation or performance degraded")
                 
                 # Create domain shift plots
                 shift_plot_dir = Path(f"main_algorithm_v2/online/eval/domain_shift_analysis/shift_{args.primary_domain}_{args.shift_domain}_{args.trigger}")
@@ -1416,11 +1414,11 @@ Examples:
             print(f"  Performance degradation:  {performance_degradation:.6f} NMSE")
             
             if performance_degradation > 0.02:
-                print("  📊 ANALYSIS: Significant performance drop during shift detected")
+                print("   ANALYSIS: Significant performance drop during shift detected")
             elif performance_degradation > 0.01:
-                print("  📊 ANALYSIS: Moderate performance drop during shift")
+                print("   ANALYSIS: Moderate performance drop during shift")
             else:
-                print("  📊 ANALYSIS: Minimal performance impact from shift")
+                print("   ANALYSIS: Minimal performance impact from shift")
     
     # Final Summary
     print(f"\n{'='*80}")
@@ -1428,14 +1426,14 @@ Examples:
     print(f"{'='*80}")
     
     if 'baseline' in results:
-        print("✅ Baseline evaluation completed")
-        print(f"   📊 Results: main_algorithm_v2/online/eval/domain_shift_analysis/baseline_{args.trigger}/")
+        print(" Baseline evaluation completed")
+        print(f"    Results: main_algorithm_v2/online/eval/domain_shift_analysis/baseline_{args.trigger}/")
     
     if 'domain_shift' in results:
-        print("✅ Domain shift evaluation completed")
+        print(" Domain shift evaluation completed")
         primary_letter = DOMAIN_ID_TO_LETTER.get(args.primary_domain, f'D{args.primary_domain}')
         shift_letter = DOMAIN_ID_TO_LETTER.get(args.shift_domain, f'D{args.shift_domain}')
-        print(f"   📊 Results: main_algorithm_v2/online/eval/domain_shift_analysis/shift_{primary_letter}_{shift_letter}_{args.trigger}/")
+        print(f"    Results: main_algorithm_v2/online/eval/domain_shift_analysis/shift_{primary_letter}_{shift_letter}_{args.trigger}/")
     
     print(f"\n[SUCCESS] Dynamic domain shift evaluation completed!")
     print("\nKey insights from this evaluation:")

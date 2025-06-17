@@ -7,13 +7,11 @@ provides unique learning signals to the LoRA adapters.
 """
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from typing import Dict, Optional, Tuple, List, Union
+from typing import Dict, Optional, Tuple, List
 from collections import deque
 import time
-import copy
 
 
 class GradientDiversityBuffer:

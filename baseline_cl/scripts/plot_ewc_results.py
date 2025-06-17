@@ -65,7 +65,7 @@ def load_ewc_metrics(results_dir: str) -> dict:
         latest_forgetting = max(forgetting_files, key=lambda x: x.stat().st_mtime)
         forgetting_df = pd.read_csv(latest_forgetting)
     
-    print(f"📁 Loaded EWC metrics from: {latest_summary.name}")
+    print(f" Loaded EWC metrics from: {latest_summary.name}")
     
     return {
         'summary': summary_df.iloc[0].to_dict(),
@@ -228,7 +228,7 @@ def create_continual_learning_summary(metrics: dict, output_dir: str):
     plt.savefig(output_path, format='svg')
     plt.close()
     
-    print(f"📊 Saved EWC analysis to: {output_path}")
+    print(f" Saved EWC analysis to: {output_path}")
 
 def create_performance_matrix_heatmap(metrics: dict, output_dir: str):
     """Create heatmap of the performance matrix."""
@@ -272,7 +272,7 @@ def create_performance_matrix_heatmap(metrics: dict, output_dir: str):
     plt.savefig(output_path, format='svg')
     plt.close()
     
-    print(f"📊 Saved performance matrix to: {output_path}")
+    print(f" Saved performance matrix to: {output_path}")
 
 def create_training_timeline(metrics: dict, output_dir: str):
     """Create timeline showing training progression."""
@@ -323,7 +323,7 @@ def create_training_timeline(metrics: dict, output_dir: str):
     plt.savefig(output_path, format='svg')
     plt.close()
     
-    print(f"📊 Saved training timeline to: {output_path}")
+    print(f" Saved training timeline to: {output_path}")
 
 def generate_latex_table(metrics: dict, output_dir: str):
     """Generate LaTeX table for academic papers."""
@@ -355,7 +355,7 @@ Training Time & {summary['Total_Training_Time_Seconds']/60:.0f} min & Reasonable
     with open(table_path, 'w') as f:
         f.write(latex_content)
     
-    print(f"📝 Saved LaTeX table to: {table_path}")
+    print(f" Saved LaTeX table to: {table_path}")
     
     # Also print to console
     print(f"\n{'='*60}")
@@ -378,7 +378,7 @@ def main():
     # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
     
-    print(f"🎨 Creating EWC Continual Learning Visualizations")
+    print(f" Creating EWC Continual Learning Visualizations")
     print(f"   Results directory: {args.results_dir}")
     print(f"   Output directory: {args.output_dir}")
     
@@ -386,7 +386,7 @@ def main():
     try:
         metrics = load_ewc_metrics(args.results_dir)
     except FileNotFoundError as e:
-        print(f"❌ Error: {e}")
+        print(f" Error: {e}")
         return
     
     # Create visualizations
@@ -395,7 +395,7 @@ def main():
     create_training_timeline(metrics, args.output_dir)
     generate_latex_table(metrics, args.output_dir)
     
-    print(f"\n🎉 All EWC visualizations created successfully!")
+    print(f"\n All EWC visualizations created successfully!")
     print(f"   Check: {args.output_dir}")
 
 if __name__ == '__main__':

@@ -38,7 +38,7 @@ class FisherInformationManager:
         self.important_params = {}  # {task_id: {param_name: param_values}}
         self.task_param_counts = {}  # Track parameter counts per task
         
-        print(f"🧠 FisherInformationManager initialized with λ_EWC = {lambda_ewc}")
+        print(f" FisherInformationManager initialized with λ_EWC = {lambda_ewc}")
     
     def get_task_parameters(self, model, task_id: str) -> Dict[str, torch.Tensor]:
         """
@@ -85,7 +85,7 @@ class FisherInformationManager:
             device: Device to compute on
             num_samples: Limit number of samples (None = use all)
         """
-        print(f"\n🔍 Computing Fisher Information for Task {task_id}...")
+        print(f"\n Computing Fisher Information for Task {task_id}...")
         
         # Set model to evaluation mode and activate current task
         model.eval()
@@ -94,7 +94,7 @@ class FisherInformationManager:
         # Get task-specific parameters
         task_params = self.get_task_parameters(model, task_id)
         if not task_params:
-            print(f"⚠️  No task-specific parameters found for task {task_id}")
+            print(f"️  No task-specific parameters found for task {task_id}")
             return
         
         print(f"   Found {len(task_params)} task-specific parameters:")
@@ -158,7 +158,7 @@ class FisherInformationManager:
                 if param.grad is not None:
                     fisher_diagonals[param_name] += param.grad.data ** 2
                 else:
-                    print(f"⚠️  No gradient for parameter {param_name}")
+                    print(f"️  No gradient for parameter {param_name}")
             
             num_samples_processed += inputs.size(0)
         
@@ -175,7 +175,7 @@ class FisherInformationManager:
         total_fisher_params = sum(f.numel() for f in fisher_diagonals.values())
         avg_fisher_value = torch.mean(torch.cat([f.flatten() for f in fisher_diagonals.values()])).item()
         
-        print(f"✅ Fisher computation complete for Task {task_id}:")
+        print(f" Fisher computation complete for Task {task_id}:")
         print(f"   Processed {num_samples_processed} samples")
         print(f"   Total Fisher parameters: {total_fisher_params:,}")
         print(f"   Average Fisher value: {avg_fisher_value:.6f}")
@@ -284,7 +284,7 @@ class FisherInformationManager:
         """Print comprehensive Fisher information statistics."""
         stats = self.get_statistics()
         
-        print(f"\n🧠 FISHER INFORMATION STATISTICS:")
+        print(f"\n FISHER INFORMATION STATISTICS:")
         print("-" * 50)
         print(f"   Tasks with Fisher info: {stats['num_tasks']}")
         print(f"   EWC lambda: {stats['lambda_ewc']}")

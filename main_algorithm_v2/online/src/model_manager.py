@@ -4,21 +4,10 @@ Manages LoRA adapters, batch normalization statistics, and replay buffers per do
 """
 
 import torch
-import torch.nn as nn
 import os
-import sys
 from typing import Dict, Any, Optional
 import time
-from pathlib import Path
-
-# Import offline model and utilities
-from main_algorithm_v2.offline.src.model import UNet_SRCNN_LoRA
-from main_algorithm_v2.offline.src.config import ExperimentConfig
-from main_algorithm_v2.offline.src.utils import get_device
 from main_algorithm_v2.offline.replay_buffer import ReplayBuffer
-from main_algorithm_v2.offline.src.lora import LoRAConv2d
-
-# Import online EWC components
 from .ewc import OnlineFisherInformationManager, OnlineEWCLoss, create_online_ewc_manager
 
 class OnlineModelManager:

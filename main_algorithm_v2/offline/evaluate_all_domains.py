@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Multi-domain evaluation script for LoRA continual learning.
 This script evaluates a trained model on ALL domains and logs metrics to W&B.
@@ -6,7 +5,6 @@ This script evaluates a trained model on ALL domains and logs metrics to W&B.
 
 import argparse
 import torch
-import torch.nn as nn
 import numpy as np
 import os
 import sys
@@ -124,21 +122,21 @@ def evaluate_all_domains(checkpoint_path: str, domain_ids: List[str],
     try:
         model = load_lora_model_for_evaluation(checkpoint_path, device)
         config = model.config
-        print(f"✅ Model loaded successfully from {checkpoint_path}")
-        print(f"📋 Model configured for domains: {config.data.sequence}")
+        print(f" Model loaded successfully from {checkpoint_path}")
+        print(f" Model configured for domains: {config.data.sequence}")
     except Exception as e:
-        print(f"❌ Error loading model: {e}")
+        print(f" Error loading model: {e}")
         raise
     
     # Evaluate each domain
     all_domain_results = {}
     aggregate_metrics = {'ssim': [], 'nmse': [], 'psnr': []}
     
-    print(f"\n🔍 Evaluating {len(domain_ids)} domains...")
+    print(f"\n Evaluating {len(domain_ids)} domains...")
     
     for domain_id in domain_ids:
         if domain_id not in [str(d) for d in config.data.sequence]:
-            print(f"⚠️  Warning: Domain {domain_id} not in model's training sequence")
+            print(f"️  Warning: Domain {domain_id} not in model's training sequence")
             continue
             
         try:
@@ -160,12 +158,12 @@ def evaluate_all_domains(checkpoint_path: str, domain_ids: List[str],
                 wandb_run.log(log_dict)
                 
         except Exception as e:
-            print(f"❌ Error evaluating domain {domain_id}: {e}")
+            print(f" Error evaluating domain {domain_id}: {e}")
             continue
     
     # Calculate and log aggregate statistics
     if all_domain_results:
-        print(f"\n📊 AGGREGATE RESULTS ACROSS {len(all_domain_results)} DOMAINS:")
+        print(f"\n AGGREGATE RESULTS ACROSS {len(all_domain_results)} DOMAINS:")
         
         aggregate_stats = {}
         for metric_name, values in aggregate_metrics.items():
@@ -235,9 +233,9 @@ def evaluate_all_domains(checkpoint_path: str, domain_ids: List[str],
         try:
             with open(save_to_file, 'w') as f:
                 json.dump(results_data, f, indent=2)
-            print(f"📁 Results saved to: {save_to_file}")
+            print(f" Results saved to: {save_to_file}")
         except Exception as e:
-            print(f"⚠️  Warning: Could not save results to file: {e}")
+            print(f"️  Warning: Could not save results to file: {e}")
     
     return all_domain_results
 
@@ -256,13 +254,13 @@ def main():
     
     args = parser.parse_args()
     
-    print("🔬 MULTI-DOMAIN LORA EVALUATION")
+    print(" MULTI-DOMAIN LORA EVALUATION")
     print("=" * 60)
-    print(f"📁 Checkpoint: {args.checkpoint}")
-    print(f"🎯 Domains: {args.domains}")
-    print(f"📊 W&B Logging: {'Disabled' if args.no_wandb else 'Enabled'}")
+    print(f" Checkpoint: {args.checkpoint}")
+    print(f" Domains: {args.domains}")
+    print(f" W&B Logging: {'Disabled' if args.no_wandb else 'Enabled'}")
     if args.save_results:
-        print(f"💾 Save Results: {args.save_results}")
+        print(f" Save Results: {args.save_results}")
     print("=" * 60)
     
     # Initialize W&B if enabled
@@ -290,9 +288,9 @@ def main():
                         "evaluation_type": "multi_domain"
                     }
                 )
-            print(f"✅ W&B initialized: {wandb_run.name}")
+            print(f" W&B initialized: {wandb_run.name}")
         except Exception as e:
-            print(f"⚠️  W&B initialization failed: {e}")
+            print(f"️  W&B initialization failed: {e}")
             wandb_run = None
     
     # Run multi-domain evaluation
@@ -305,11 +303,11 @@ def main():
             save_to_file=args.save_results
         )
         
-        print(f"\n✅ Evaluation complete! Results for {len(results)} domains.")
+        print(f"\n Evaluation complete! Results for {len(results)} domains.")
         
         if wandb_run:
             # Ensure summary is synced before finishing
-            print(f"📊 Syncing {len(wandb_run.summary)} metrics to W&B summary...")
+            print(f" Syncing {len(wandb_run.summary)} metrics to W&B summary...")
             
             # Force summary update and sync before finishing
             wandb_run.summary.update({
@@ -324,7 +322,7 @@ def main():
             wandb_run.finish()
             
     except Exception as e:
-        print(f"\n❌ Evaluation failed: {e}")
+        print(f"\n Evaluation failed: {e}")
         if wandb_run:
             wandb_run.finish()
         raise
