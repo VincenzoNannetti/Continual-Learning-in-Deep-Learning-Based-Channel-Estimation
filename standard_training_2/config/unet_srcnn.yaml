@@ -1,0 +1,117 @@
+# --- UNet+SRCNN Combined Model Configuration for Standard Training 2.0 ---
+# Description: Configuration for training the combined UNet+SRCNN model
+
+experiment_name: unet_srcnn_standard_training_2_subset_data
+
+framework:
+  seed: 42
+
+model:
+  name: unet_srcnn
+  params:
+    # UNet specific parameters (passed as unet_args to UNetCombinedModel)
+    in_channels: 2
+    base_features: 16
+    use_batch_norm: false
+    depth: 2                    # Number of encoder/decoder layers
+    activation: 'leakyrelu'     # Activation function type
+    leaky_slope: 0.01           # LeakyReLU slope
+    verbose: false              # Print architecture info during initialization
+    
+    # SRCNN specific parameters
+    srcnn_channels: [64, 32]  # Will be overridden by sweep
+    srcnn_kernels: [9, 1, 5]  # Will be overridden by sweep
+    
+    # Combined model specific parameters
+    order: "unet_then_srcnn"      # Order of execution: "unet_then_srcnn" or "srcnn_then_unet"
+    pretrained_unet: null         # Path to pretrained UNet .pth file (optional)
+    pretrained_srcnn: null        # Path to pretrained SRCNN .pth file (optional)
+    freeze_unet: false            # Whether to freeze UNet weights during training
+    freeze_srcnn: false           # Whether to freeze SRCNN weights during training
+
+data:
+  dataset_type: standard
+  data_dir: ./data/raw/ray_tracing/
+  preprocessed_dir: ./data/preprocessed/
+  data_name: domain_high_snr_med_linear
+  snr: 20  # SNR value for noise addition
+  validation_split: 0.15
+  test_split: 0.15
+
+  sequence: [0, 3,5,7]
+  tasks_params:
+    0:
+      data_name: domain_high_snr_med_linear
+      snr: 20
+    1:
+      data_name: domain_high_snr_slow_linear
+      snr: 20
+    2:
+      data_name: domain_high_snr_fast_linear
+      snr: 20
+    3:
+      data_name: domain_low_snr_slow_linear
+      snr: 3
+    4:
+      data_name: domain_low_snr_med_linear
+      snr: 3
+    5:
+      data_name: domain_low_snr_fast_linear
+      snr: 3
+    6:
+      data_name: domain_med_snr_slow_linear
+      snr: 10
+    7:
+      data_name: domain_med_snr_med_linear
+      snr: 10
+    8:
+      data_name: domain_med_snr_fast_linear
+      snr: 10
+  
+  # Interpolation settings (currently not used by StandardDataset, but kept for potential future use)
+  interpolation_method: rbf
+  interpolation_kernel: thin_plate_spline
+  
+  # Training parameters
+  num_workers: 0 # Set to 0 for Windows or for simpler debugging
+  pin_memory: True
+  persistent_workers: False # Set to False if num_workers is 0
+
+training:
+  epochs: 100 # Increased epochs as early stopping will manage actual duration
+  batch_size: 32  # Start conservatively, can increase if memory allows
+  loss_function: mse
+  optimiser: adam
+  learning_rate: 1e-4
+  weight_decay: 0
+  betas: [0.9, 0.999]
+  eps: 1e-8
+
+  scheduler:
+    type: ReduceLROnPlateau
+    params:
+      mode: min
+      factor: 0.1
+      patience: 10
+      min_lr: 1e-7
+      verbose: True
+
+  early_stopping:
+    patience: 20
+    min_delta: 0.00001
+
+evaluation:
+  metrics: [nmse, psnr, mse, ssim]
+  save_results_dir: ./standard_training_2/results/
+  save_plot_path: ./standard_training_2/plots/unet_srcnn_evaluation.png
+  plot_examples: 3
+  optuna_wandb_num_plots: 3
+
+logging:
+  checkpoint_dir: ./standard_training_2/checkpoints/unet_srcnn/
+  wandb_enabled: False
+
+hardware:
+  device: auto
+  use_amp: True
+  compile_model: False 

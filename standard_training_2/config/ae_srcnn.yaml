@@ -1,0 +1,72 @@
+# --- Autoencoder+SRCNN Combined Model Configuration for Standard Training 2.0 ---
+
+experiment_name: ae_srcnn_standard_training_2
+
+framework:
+  seed: 42
+
+model:
+  name: combined_ae_srcnn
+  params:
+    autoencoder_type: residual  # Options: basic, residual
+    # Pretrained model loading (optional)
+    pretrained_autoencoder: null 
+    pretrained_srcnn: null 
+    # Freezing options
+    freeze_autoencoder: False
+    freeze_srcnn: False
+
+data:
+  dataset_type: standard
+  data_dir: ./data/raw/ray_tracing/
+  preprocessed_dir: ./data/preprocessed/ # Standardised path
+  # Interpolation settings (currently not used by StandardDataset, but kept for potential future use)
+  interpolation_method: rbf
+  interpolation_kernel: thin_plate_spline
+  # Dataset parameters
+  data_name: domain_high_snr_med_linear
+  validation_split: 0.15
+  test_split: 0.15
+  # Training parameters
+  num_workers: 0 # Set to 0 for Windows or for simpler debugging
+  pin_memory: True
+  persistent_workers: False # Set to False if num_workers is 0
+
+training:
+  epochs: 100
+  batch_size: 32 # Adjusted for consistency, can be tuned
+  loss_function: mse
+  optimiser: adam
+  learning_rate: 1e-4
+  weight_decay: 0
+  betas: [0.9, 0.999]
+  eps: 1e-8
+
+  scheduler:
+    type: ReduceLROnPlateau # Standardised structure
+    params:
+      mode: min
+      factor: 0.1
+      patience: 10 # Matched to other configs
+      min_lr: 1e-7 # Matched to other configs
+      verbose: True
+
+  early_stopping: # Standardised structure
+    patience: 20 # Matched to other configs
+    min_delta: 0.00001 # Matched to other configs
+
+evaluation:
+  metrics: [nmse, psnr, mse, ssim]
+  save_results_dir: ./standard_training_2/results/ # Standardised path
+  save_plot_path: ./standard_training_2/plots/ae_srcnn_evaluation.png
+  plot_examples: 3
+  optuna_wandb_num_plots: 3
+
+logging:
+  checkpoint_dir: ./standard_training_2/checkpoints/ae_srcnn/ # Standardised path
+  wandb_enabled: False # Simplified, assuming basic boolean flag like others
+
+hardware:
+  device: auto
+  use_amp: True
+  compile_model: False 

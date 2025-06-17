@@ -8,6 +8,8 @@ Description: Environment Class for the ray tracing model.
 import numpy as np
 import pyvista as pv
 import warnings
+import os
+import datetime
 from .vector_utils import ensure_vector3d
 from .scatterer.scatterer import Scatterer
 from .antenna import Antenna
@@ -18,11 +20,12 @@ import numpy.linalg as LA
 import data_generation.ray_tracing.classes.ue_movements as ue_movements
 from shapely.geometry import box, Point, Polygon
 from shapely.ops import unary_union
+import collections # Added for defaultdict
 
 
 class Environment:
-    def __init__(self, dimensions, movement_type="random_walk"):
-        self.dimensions         = dimensions              # (x, y, z) dimensions of the space
+    def __init__(self, config, movement_type="random_walk"):
+        self.dimensions         = ensure_vector3d(config.get('environment_dimensions', [200, 100, 100]))
         self.scatterers         = []                      # list of scatterers in the environment
         self.rx_antennas        = []                      # list of rx antennas in the environment
         self.tx_antennas        = []                      # list of tx antennas in the environment
@@ -31,6 +34,67 @@ class Environment:
         self.rng                = np.random.default_rng() # random number generator
         self.movement_type      = movement_type           # Global movement type for scatterers
         self.ue_movement_config = None                    # Added to store UE movement config from main script
+        self.environment_type   = config.get('environment_type', 'UMa')
+
+        # Spatial grid for building culling
+        self.building_grid_cell_size = config.get('building_grid_cell_size', 20.0) # e.g., 20m cell size
+        self.building_grid = collections.defaultdict(list)
+        self.grid_num_cells_x = 0
+        self.grid_num_cells_y = 0
+        self._initialize_building_grid_parameters()
+
+    def _initialize_building_grid_parameters(self):
+        if self.building_grid_cell_size <= 0:
+            # Disable grid if cell size is invalid
+            self.grid_num_cells_x = 0
+            self.grid_num_cells_y = 0
+            return
+
+        self.grid_num_cells_x = int(np.ceil(self.dimensions[0] / self.building_grid_cell_size))
+        self.grid_num_cells_y = int(np.ceil(self.dimensions[1] / self.building_grid_cell_size))
+        self.building_grid.clear() # Ensure it's empty before repopulating if called again
+        # print(f"Initialized building grid: {self.grid_num_cells_x}x{self.grid_num_cells_y} cells, cell size: {self.building_grid_cell_size}m")
+
+
+    def _get_grid_cells_for_aabb(self, min_bounds_xy, max_bounds_xy):
+        """Get all grid cell indices (ix, iy) that an AABB overlaps."""
+        cells = set()
+        if self.grid_num_cells_x == 0 or self.grid_num_cells_y == 0: # Grid disabled
+            return cells
+
+        start_ix = max(0, int(min_bounds_xy[0] / self.building_grid_cell_size))
+        end_ix   = min(self.grid_num_cells_x - 1, int(max_bounds_xy[0] / self.building_grid_cell_size))
+        start_iy = max(0, int(min_bounds_xy[1] / self.building_grid_cell_size))
+        end_iy   = min(self.grid_num_cells_y - 1, int(max_bounds_xy[1] / self.building_grid_cell_size))
+
+        for ix in range(start_ix, end_ix + 1):
+            for iy in range(start_iy, end_iy + 1):
+                cells.add((ix, iy))
+        return cells
+
+    def _add_building_to_grid(self, building_obj):
+        if self.grid_num_cells_x == 0 or self.grid_num_cells_y == 0: # Grid disabled
+            return
+
+        min_b, max_b = building_obj.get_bounds()
+        cells = self._get_grid_cells_for_aabb(min_b[:2], max_b[:2])
+        for cell_coords in cells:
+            if building_obj not in self.building_grid[cell_coords]: # Avoid duplicates
+                self.building_grid[cell_coords].append(building_obj)
+        # print(f"Added building {building_obj.id} to {len(cells)} grid cells. Example cell: {list(cells)[0] if cells else 'N/A'}, building count in cell: {len(self.building_grid[list(cells)[0]]) if cells else 'N/A'}")
+
+
+    def _rebuild_building_grid(self):
+        """Rebuilds the entire spatial grid for buildings. Call if buildings move or are added/removed."""
+        self._initialize_building_grid_parameters() # Re-init params and clears grid
+        if self.grid_num_cells_x == 0 or self.grid_num_cells_y == 0: # Grid disabled
+            # print("Building grid is disabled or dimensions are zero. Skipping rebuild.")
+            return
+
+        for building_obj in self.buildings:
+            self._add_building_to_grid(building_obj)
+        # print(f"Rebuilt building grid. Total cells with buildings: {len(self.building_grid)}")
+
 
     def place_tx(self, name, position, gain_dbi):
         """Place a transmitter antenna in the environment"""
@@ -215,6 +279,7 @@ class Environment:
         )
         
         self.buildings.append(building)
+        self._add_building_to_grid(building) # Add to spatial grid
         return building
 
     def check_building_intersection(self, ray_origin, ray_direction, max_distance=float('inf'), exclude_building_id: Optional[str] = None):
@@ -238,23 +303,57 @@ class Environment:
         closest_building = None
         closest_normal   = None
         
-        # Ensure ray_origin and ray_direction are numpy arrays for consistency
         _ray_origin    = np.array(ensure_vector3d(ray_origin),    dtype=float)
         _ray_direction = np.array(ensure_vector3d(ray_direction), dtype=float)
         
-        # Normalise ray direction if it's not already (Building.intersects_ray expects normalised)
         norm_direction = np.linalg.norm(_ray_direction)
         if norm_direction > 1e-9:
-            _ray_direction = _ray_direction / norm_direction
+            _ray_direction_normalized = _ray_direction / norm_direction
         else:
-            return False, None, None, None # Cannot intersect if direction is zero
+            return False, None, None, None
 
-        for building_obj in self.buildings:  
-            # Skip the excluded building
+        candidate_buildings = []
+        if self.grid_num_cells_x > 0 and self.grid_num_cells_y > 0: # Grid is enabled
+            ray_end_point = _ray_origin + _ray_direction_normalized * max_distance
+            
+            # Determine AABB of the ray segment for grid cell lookup
+            ray_min_xy = np.minimum(_ray_origin[:2], ray_end_point[:2])
+            ray_max_xy = np.maximum(_ray_origin[:2], ray_end_point[:2])
+            
+            grid_cells_to_check = self._get_grid_cells_for_aabb(ray_min_xy, ray_max_xy)
+            
+            # More accurate: DDA or Bresenham to find cells ray actually passes through
+            # For simplicity, using AABB of ray for now. This might over-select cells for diagonal rays.
+            # A more precise method would trace the ray through the grid.
+            # Example of a simple DDA-like cell traversal (can be improved):
+            # This part needs a proper line-grid traversal algorithm for accuracy.
+            # For now, let's stick to AABB of ray segment, it's a common broad-phase.
+            
+            seen_buildings = set()
+            if not grid_cells_to_check: # Ray AABB is outside grid or grid empty
+                # This case should ideally not happen if ray is within env_dims.
+                # Fallback to checking all buildings if ray doesn't map to any cell,
+                # or if grid is small / ray is large.
+                # print(f"Warning: Ray AABB {ray_min_xy} to {ray_max_xy} did not map to any grid cells. Falling back to all buildings.")
+                candidate_buildings = self.buildings
+            else:
+                for cell_coords in grid_cells_to_check:
+                    for building_obj in self.building_grid.get(cell_coords, []):
+                        if building_obj not in seen_buildings:
+                            candidate_buildings.append(building_obj)
+                            seen_buildings.add(building_obj)
+                if not candidate_buildings: # No buildings in the ray's path cells
+                    return False, None, None, None
+            # print(f"Ray check: origin={_ray_origin[:2]}, end={ray_end_point[:2]}. Cells checked: {len(grid_cells_to_check)}. Candidate buildings: {len(candidate_buildings)} out of {len(self.buildings)}")
+        else: # Grid is disabled, check all buildings
+            candidate_buildings = self.buildings
+
+
+        for building_obj in candidate_buildings:  # Iterate over potentially smaller list
             if exclude_building_id and building_obj.id == exclude_building_id:
                 continue
 
-            intersects, distance, normal = building_obj.intersects_ray(_ray_origin, _ray_direction)
+            intersects, distance, normal = building_obj.intersects_ray(_ray_origin, _ray_direction_normalized) # Pass normalized
             if intersects and distance is not None and distance < closest_distance and distance <= max_distance:
                 closest_distance = distance
                 closest_building = building_obj
@@ -876,10 +975,10 @@ class Environment:
                          name=name)
 
     def path_blocked(self, p1: np.ndarray, p2: np.ndarray, exclude_bldg_id: Optional[str] = None) -> bool:
-        """Check if the path between p1 and p2 is blocked by a building."""
-        _p1  = np.asarray(p1, dtype=float)
-        _p2  = np.asarray(p2, dtype=float)
-        vec  = _p2 - _p1
+        """Check if the path between p1 and p2 is blocked by a building.
+        Assumes p1 and p2 are already NumPy arrays.
+        """
+        vec  = p2 - p1 
         dist = np.linalg.norm(vec)
 
         if dist < 1e-6:
@@ -888,7 +987,7 @@ class Environment:
         direction = vec / dist
         # Check slightly less than full distance to avoid issues with endpoint being on a surface
         is_blocked, _intersect_dist, _building, _normal = self.check_building_intersection(
-            _p1, direction, max_distance=dist - 1e-6, exclude_building_id=exclude_bldg_id
+            p1, direction, max_distance=dist - 1e-6, exclude_building_id=exclude_bldg_id
         )
         return is_blocked
 
@@ -920,7 +1019,7 @@ class Environment:
         main_street_y   = self.dimensions[1] / 2
         main_road_start = [0, main_street_y, 0.01]
         main_road_end   = [self.dimensions[0], main_street_y, 0.01]
-        main_road_mesh  = self._create_road_mesh(main_road_start, main_road_end, road_width)
+        main_road_mesh  = self.create_road_mesh(main_road_start, main_road_end, road_width)
         if main_road_mesh:
             plotter.add_mesh(main_road_mesh, color='dimgray', name='main_street', ambient=0.3, diffuse=0.7)
 
@@ -1009,7 +1108,35 @@ class Environment:
             plotter.add_mesh(antenna_base, color='blue', name=f'RX_base_{rx.name}', metallic=0.8, roughness=0.2)
             plotter.add_mesh(antenna_top, color='blue', name=f'RX_Top_{rx.name}', metallic=0.8, roughness=0.2)
             plotter.add_point_labels([pos[0],pos[1],pos[2]+1.0], [rx.name], point_size=0, font_size=12, text_color='blue', shape_opacity=0)
-
+        
+        # Plot ray paths
+        if show_rays and tx_positions and rx_positions:
+            # Add LOS ray between TX and RX
+            for tx_pos_single in tx_positions:
+                for rx_pos_single in rx_positions:
+                    self.add_path(plotter, tx_pos_single, rx_pos_single, 
+                                   colour='yellow', name='los_ray', line_width=3,
+                                   show_blockage_visuals=show_blockage_visuals)
+            
+            if tx_positions and rx_positions: 
+                tx_pos_for_rays = tx_positions[0]
+                rx_pos_for_rays = rx_positions[0]
+            
+                # Window Reflection Rays (always check for these, regardless of scatterers)
+                if self.buildings:
+                    valid_window_reflections = self.get_valid_window_reflections(tx_pos_for_rays, rx_pos_for_rays)
+                    num_window_rays_to_draw = min(len(valid_window_reflections), max_rays)
+                    window_ray_step = max(1, len(valid_window_reflections) // num_window_rays_to_draw if num_window_rays_to_draw > 0 else len(valid_window_reflections) + 1)
+                    for i in range(0, len(valid_window_reflections), window_ray_step):
+                        reflection_data = valid_window_reflections[i]
+                        p_ref = reflection_data["pos"]
+                        self.add_path(plotter, tx_pos_for_rays, p_ref, 
+                                       colour='purple', name=f'ray_tx_win_{i}', line_width=1.5, opacity=0.7,
+                                       show_blockage_visuals=show_blockage_visuals)
+                        self.add_path(plotter, p_ref, rx_pos_for_rays, 
+                                       colour='deeppink', name=f'ray_win_rx_{i}', line_width=1.5, opacity=0.7,
+                                       show_blockage_visuals=show_blockage_visuals)
+        
         # Plot scatterers
         if self.scatterers:
             scatterer_positions = np.array([s.get_pos() for s in self.scatterers])
@@ -1018,15 +1145,8 @@ class Environment:
                 render_points_as_spheres=True, name='scatterers'
             )
             
-            # Plot ray paths
+            # Plot scatterer ray paths
             if show_rays and tx_positions and rx_positions:
-                # Add LOS ray between TX and RX
-                for tx_pos_single in tx_positions:
-                    for rx_pos_single in rx_positions:
-                        self._add_path(plotter, tx_pos_single, rx_pos_single, 
-                                       colour='yellow', name='los_ray', line_width=3,
-                                       show_blockage_visuals=show_blockage_visuals)
-                
                 if tx_positions and rx_positions: 
                     tx_pos_for_rays = tx_positions[0]
                     rx_pos_for_rays = rx_positions[0]
@@ -1038,26 +1158,11 @@ class Environment:
                         for i in range(0, len(scatterer_positions), step):
                             s_pos = scatterer_positions[i]
                             alpha = max(0.1, 1.0 - i / len(scatterer_positions))
-                            self._add_path(plotter, tx_pos_for_rays, s_pos, 
+                            self.add_path(plotter, tx_pos_for_rays, s_pos, 
                                            colour='orange', name=f'ray_tx_sc_{i}', line_width=1, opacity=alpha,
                                            show_blockage_visuals=show_blockage_visuals)
-                            self._add_path(plotter, s_pos, rx_pos_for_rays, 
+                            self.add_path(plotter, s_pos, rx_pos_for_rays, 
                                            colour='cyan', name=f'ray_sc_rx_{i}', line_width=1, opacity=alpha,
-                                           show_blockage_visuals=show_blockage_visuals)
-
-                    # Window Reflection Rays
-                    if self.buildings:
-                        valid_window_reflections = self.get_valid_window_reflections(tx_pos_for_rays, rx_pos_for_rays)
-                        num_window_rays_to_draw = min(len(valid_window_reflections), max_rays)
-                        window_ray_step = max(1, len(valid_window_reflections) // num_window_rays_to_draw if num_window_rays_to_draw > 0 else len(valid_window_reflections) + 1)
-                        for i in range(0, len(valid_window_reflections), window_ray_step):
-                            reflection_data = valid_window_reflections[i]
-                            p_ref = reflection_data["pos"]
-                            self._add_path(plotter, tx_pos_for_rays, p_ref, 
-                                           colour='purple', name=f'ray_tx_win_{i}', line_width=1.5, opacity=0.7,
-                                           show_blockage_visuals=show_blockage_visuals)
-                            self._add_path(plotter, p_ref, rx_pos_for_rays, 
-                                           colour='deeppink', name=f'ray_win_rx_{i}', line_width=1.5, opacity=0.7,
                                            show_blockage_visuals=show_blockage_visuals)
             
             # Show movement paths if requested
@@ -1347,17 +1452,111 @@ class Environment:
             plotter.render()
         plotter.add_key_event('c', toggle_cluster_radii)
         instruction_text += ", 'c' to toggle cluster radii"
-        plotter.add_text(instruction_text, font_size=10, position='upper_left')
+        
+        # Add screenshot functionality
+        def take_screenshot():
+            # Create screenshots directory if it doesn't exist
+            screenshot_dir = "C:\\Users\\vrnan\\OneDrive - Imperial College London\\Year 4\\ELEC70017 - Individual Project\\Project\\data_generation\\utils\\figures\\environment"
+            os.makedirs(screenshot_dir, exist_ok=True)
+            
+            # Generate timestamp for unique filename
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"environment_screenshot_{timestamp}.png"
+            filepath = os.path.join(screenshot_dir, filename)
+            
+            # Store original visibility states
+            hidden_elements = []
+            
+            # Hide text elements by removing them temporarily
+            text_widgets = []
+            if hasattr(plotter, 'textActor') and plotter.textActor:
+                text_widgets.append(('textActor', plotter.textActor.GetVisibility()))
+                plotter.textActor.SetVisibility(False)
+            
+            # Hide corner annotation (instruction text)
+            if hasattr(plotter.renderer, 'GetTextActors'):
+                for actor in plotter.renderer.GetTextActors():
+                    if actor:
+                        hidden_elements.append((actor, actor.GetVisibility()))
+                        actor.SetVisibility(False)
+            
+            # Hide grid if visible
+            grid_was_visible = False
+            if hasattr(plotter, 'grid_actor') and plotter.grid_actor:
+                grid_was_visible = plotter.grid_actor.GetVisibility()
+                plotter.grid_actor.SetVisibility(False)
+            
+            # Hide camera orientation widget/gimbal
+            widget_was_enabled = False
+            if hasattr(plotter, 'camera_widget') and plotter.camera_widget:
+                widget_was_enabled = plotter.camera_widget.GetEnabled()
+                plotter.camera_widget.SetEnabled(False)
+            
+            # Note: Keeping point labels visible for screenshots as requested
+            
+            # Remove all text from renderer temporarily (but keep point labels)
+            renderer_texts = []
+            if hasattr(plotter.renderer, 'GetActors2D'):
+                actors_2d = plotter.renderer.GetActors2D()
+                actors_2d.InitTraversal()
+                actor = actors_2d.GetNextItem()
+                while actor:
+                    if hasattr(actor, 'GetMapper') and actor.GetMapper():
+                        mapper_type = type(actor.GetMapper()).__name__
+                        # Hide text but not point labels/antenna names
+                        if 'Text' in mapper_type and not hasattr(actor, '_is_point_label'):
+                            renderer_texts.append((actor, actor.GetVisibility()))
+                            actor.SetVisibility(False)
+                    actor = actors_2d.GetNextItem()
+            
+            # Force render to update the scene
+            plotter.render()
+            
+            # Take the screenshot
+            try:
+                plotter.screenshot(filepath, transparent_background=False, return_img=False)
+                print(f"Screenshot saved to: {filepath}")
+            except Exception as e:
+                print(f"Failed to save screenshot: {e}")
+            
+            # Restore all hidden elements
+            for actor, original_visibility in hidden_elements:
+                if actor:
+                    actor.SetVisibility(original_visibility)
+            
+            for actor, original_visibility in renderer_texts:
+                if actor:
+                    actor.SetVisibility(original_visibility)
+            
+            for widget_name, original_visibility in text_widgets:
+                widget = getattr(plotter, widget_name, None)
+                if widget:
+                    widget.SetVisibility(original_visibility)
+            
+            # Restore grid visibility
+            if hasattr(plotter, 'grid_actor') and plotter.grid_actor:
+                plotter.grid_actor.SetVisibility(grid_was_visible)
+            
+            # Restore camera orientation widget
+            if hasattr(plotter, 'camera_widget') and plotter.camera_widget:
+                plotter.camera_widget.SetEnabled(widget_was_enabled)
+            
+            # Force render to restore the scene
+            plotter.render()
+        
+        plotter.add_key_event('s', take_screenshot)
+        # Removed instruction text and environment info text as requested
+        # plotter.add_text(instruction_text, font_size=10, position='upper_left')
 
-        # Add environment information
-        env_info = (
-            f"Environment: {self.dimensions[0]}m × {self.dimensions[1]}m × {self.dimensions[2]}m\n"
-            f"Scatterer Movement: {self.movement_type}\n"
-            f"UE Movement: {self.rx_antennas[0].movement_type if self.rx_antennas else 'N/A'} (Speed: {round(self.rx_antennas[0].speed, 3) if self.rx_antennas else 'N/A'} m/s)\n"
-            f"Scatterers: {len(self.scatterers)}, Clusters: {len(self.clusters)}\n"
-            f"Buildings: {len(self.buildings)}"
-        )
-        plotter.add_text(env_info, font_size=10, position='lower_left')
+        # Add environment information - commented out as requested
+        # env_info = (
+        #     f"Environment: {self.dimensions[0]}m × {self.dimensions[1]}m × {self.dimensions[2]}m\n"
+        #     f"Scatterer Movement: {self.movement_type}\n"
+        #     f"UE Movement: {self.rx_antennas[0].movement_type if self.rx_antennas else 'N/A'} (Speed: {round(self.rx_antennas[0].speed, 3) if self.rx_antennas else 'N/A'} m/s)\n"
+        #     f"Scatterers: {len(self.scatterers)}, Clusters: {len(self.clusters)}\n"
+        #     f"Buildings: {len(self.buildings)}"
+        # )
+        # plotter.add_text(env_info, font_size=10, position='lower_left')
         plotter.enable_trackball_style()
         plotter.add_camera_orientation_widget()
         plotter.show()

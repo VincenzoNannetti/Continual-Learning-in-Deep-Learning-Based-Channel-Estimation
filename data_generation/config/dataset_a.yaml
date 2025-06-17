@@ -1,28 +1,36 @@
 blocks: 5                       # Number of OFDM blocks per sample
-carrier_frequency: 2490         # Carrier frequency (MHz)
+symbols_per_block: 14           # Number of OFDM symbols per block tpyical is 14
+carrier_frequency: 2500         # Carrier frequency (MHz)
 subcarrier_spacing: 60000       # Subcarrier spacing (Hz)
 rms_delay_spread_ns: 45   
 use_aggregate_scattering: true     
 far_field_margin: 6e-2  
+shadow_fading_std_db: 4.0      # LOS shadow fading (6.0 for NLOS)
+domain_name: "domain_low_snr_fast_linear_ocl"   # lds = less dense scattering, ds = dense scattering, cl = continual learning
 
 environment:
-  environment_type: "UMa"             
+  use_constant_environment: True
+  environment_type: "UMi"             
   environment_dimensions: [200,100,100]
   road_width: 20
   pavement_width: 3.5
   buildings_per_side: 10
   floor_height: 3.0
 
+  snr: [3, 3]
+
 antennas:
   tx_antenna:
     gain: 15
     target_height: 25.0
   rx_antenna:
-    gain: 0
+    gain: 15
     target_height: 1.5
     movement:
       type: "linear"
-      speed: [100,200]
+      speed: [10, 15]
+      
+      # Movement-specific parameters for different movement types
       linear_params:
         direction: [1, 0, 0] 
 
@@ -31,9 +39,13 @@ antennas:
         distance: 20         
 
       circular_params:
-        center_offset: [10, 0] 
-        radius: 1              
-        clockwise: true        
+        center_offset: [1, 0]    # Direction to center (will be normalised), UE starts on circumference
+        radius: 2                # Circle radius in metres - UE will move in 2m radius circle  
+        clockwise: true
+        safety_margin: 0.5       # Additional clearance from buildings (metres)
+        adaptive_radius: true    # Allow radius reduction if path is unsafe
+        min_radius: 0.5          # Minimum allowed radius when adapting
+        prefer_open_areas: true  # Prefer placement in open street areas
 
       zigzag_params:
         main_direction: [1, 0, 0] 
@@ -41,14 +53,19 @@ antennas:
         angle_deg: 45             
         num_legs: 6               
 
+      random_waypoint_params:
+        pause_duration_range: [2.0, 5.0]
+        waypoint_bounds: "pavement"
+
 clusters:
-  num_aerial_clusters_rng:    [2, 4]
-  num_ground_clusters_rng:    [5, 12]
-  num_scatterers_per_cluster: 50
-  movement_type:              "flocking"
-  speed_range:                [0,0]
-  density:                    0.5
-  reflection_amplitude:       null
+  num_aerial_clusters_rng:     [2, 4]
+  num_ground_clusters_rng:     [5, 12]
+  num_scatterers_per_cluster:  50
+  density:                     1                  # scaled again before generating 
+  ground_cluster_height_range: [1, 3]             # height range in m 
+  movement_type:               "flocking"
+  speed_range:                 [0.5,2.0]
+  reflection_amplitude:        null
   
   # Movement-specific parameters for different movement types
   movement_params:
@@ -67,4 +84,4 @@ clusters:
 
 
 # Output Settings
-output_dir: "./data/raw/ray_tracing/dataset_a" 
+output_dir: "./data/raw/ray_tracing/" 

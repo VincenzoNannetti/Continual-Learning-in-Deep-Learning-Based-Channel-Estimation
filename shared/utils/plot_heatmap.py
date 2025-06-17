@@ -159,7 +159,7 @@ def plot_heatmap(
         im = ax.pcolormesh(x_coords, y_coords, data_to_plot, cmap=cmap, 
                           shading='flat', vmin=vmin, vmax=vmax)
         ax.set_title(title)
-        ax.set_xlabel('OFDM Symbol Index')
+        ax.set_xlabel('OFDM Block Index')
         ax.set_ylabel('Subcarrier Index')
         ax.set_xlim(0, n_sym)
         ax.set_ylim(0, n_sc)
@@ -194,7 +194,7 @@ def plot_heatmap(
             # Plot interpolation error if we have perfect reference
             if can_show_error:
                 interp_error = np.abs(np.asarray(interp) - np.asarray(perfect))
-                create_heatmap(ax3, interp_error, get_error_title('interp'), is_error=True)
+                create_heatmap(ax3, interp_error, "Interpolation Error", is_error=True)
             else:
                 ax3.text(0.5, 0.5, 'Error calculation requires perfect reference',
                         ha='center', va='center', transform=ax3.transAxes)

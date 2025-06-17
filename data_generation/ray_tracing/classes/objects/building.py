@@ -60,9 +60,6 @@ class Building:
         ray_origin = np.array(ensure_vector3d(ray_origin), dtype=float)
         ray_direction = np.array(ensure_vector3d(ray_direction), dtype=float)
         
-        # Normalize ray direction
-        ray_direction = ray_direction / np.linalg.norm(ray_direction)
-        
         t_min = -np.inf
         t_max = np.inf
         normal = np.zeros(3)

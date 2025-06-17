@@ -70,15 +70,29 @@ class DataConfig(BaseModel):
     test_split: float
 
 class SchedulerParams(BaseModel):
-    mode: str
-    factor: float
-    patience: int
-    min_lr: float
-    verbose: bool
+    # Make all scheduler params optional to support different scheduler types
+    # ReduceLROnPlateau params
+    mode: Optional[str] = None
+    factor: Optional[float] = None
+    patience: Optional[int] = None
+    min_lr: Optional[float] = None
+    
+    # CosineAnnealingLR params  
+    T_max: Optional[int] = None
+    eta_min: Optional[float] = None
+    
+    # Common params
+    verbose: Optional[bool] = None
 
 class SchedulerConfig(BaseModel):
     type: str
     params: SchedulerParams
+
+class EWCConfig(BaseModel):
+    enabled: bool = False
+    lambda_ewc: float = 1000.0
+    fisher_samples: Optional[int] = None
+    compute_fisher_after_task: bool = True
 
 class TrainingConfig(BaseModel):
     epochs_per_task: int
@@ -90,7 +104,13 @@ class TrainingConfig(BaseModel):
     task_weight_decays: Dict[int, float]
     betas: List[float]
     early_stopping_patience: int
-    scheduler: SchedulerConfig
+    scheduler: Optional[SchedulerConfig] = None
+    ewc: Optional[EWCConfig] = None
+    
+    # Task-specific overrides
+    task_learning_rates: Optional[Dict[int, float]] = None
+    task_epochs: Optional[Dict[int, int]] = None
+    task_scheduler_params: Optional[Dict[int, Dict[str, Any]]] = None
 
 class EvaluationConfig(BaseModel):
     metrics: List[str]

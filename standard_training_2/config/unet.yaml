@@ -1,0 +1,79 @@
+# --- UNet Configuration for Standard Training 2.0 ---
+# Description: Lightweight configuration for training and testing
+
+experiment_name: standard_training_2_0
+
+framework:
+  seed: 42
+
+model:
+  name: unet
+  params:
+    in_channels: 2
+    base_features: 96
+    use_batch_norm: false
+    depth: 2                    # Number of encoder/decoder layers (2 = original, 3-5 = deeper)
+    activation: 'relu'     # 'relu', 'leakyrelu', 'gelu', 'swish'/'silu'
+    leaky_slope: 0.01           # Negative slope for LeakyReLU
+    verbose: false              # Print architecture info during initialization
+
+data:
+  dataset_type: standard
+  data_dir: ./data/raw/ray_tracing/
+  preprocessed_dir: ./data/preprocessed/
+  data_name: domain_high_snr_med_linear  # Change this to your dataset filename
+  snr: 20  # SNR value for noise addition
+  validation_split: 0.15
+  test_split: 0.15
+  
+  # Interpolation settings (currently not used by StandardDataset, but kept for potential future use)
+  interpolation_method: rbf
+  interpolation_kernel: thin_plate_spline
+  
+  # Training parameters
+  num_workers: 0 # Set to 0 for Windows or for simpler debugging
+  pin_memory: True
+  persistent_workers: False # Set to False if num_workers is 0
+
+training:
+  epochs: 100 # Increased epochs as early stopping will manage actual duration
+  batch_size: 768
+  loss_function: mse
+  optimiser: adam
+  learning_rate: 0.0005263574812337616
+  weight_decay: 0.00000532529042286752 # AdamW is an alternative if you want more advanced weight decay
+  betas: [0.9, 0.999]
+  eps: 1e-8
+
+  scheduler:
+    type: ReduceLROnPlateau # Options: ReduceLROnPlateau, StepLR, etc.
+    params:
+      # For ReduceLROnPlateau
+      mode: min
+      factor: 0.24994354125864351
+      patience: 14 # Number of epochs with no improvement after which learning rate will be reduced.
+      min_lr: 1e-7
+      verbose: True
+      # For StepLR (example, if type was StepLR)
+      # step_size: 30
+      # gamma: 0.1 
+
+  early_stopping:
+    patience: 10 # Number of epochs to wait for improvement before stopping
+    min_delta: 0.00001 # Minimum change in val_loss to be considered an improvement
+
+evaluation:
+  metrics: [nmse, psnr, mse]
+  save_results_dir: ./standard_training_2/results/
+  save_plot_path: ./standard_training_2/plots/evaluation_sample.png # Base name for evaluation plots
+  plot_examples: 3  # Number of evaluation plot examples to generate
+  optuna_wandb_num_plots: 3  # Number of evaluation plots for Optuna trials
+
+logging:
+  checkpoint_dir: ./standard_training_2/checkpoints/
+  wandb_enabled: False
+
+hardware:
+  device: auto
+  use_amp: True        # Set to True to enable Automatic Mixed Precision (requires CUDA)
+  compile_model: False # PyTorch 2.0 model compilation (experimental)

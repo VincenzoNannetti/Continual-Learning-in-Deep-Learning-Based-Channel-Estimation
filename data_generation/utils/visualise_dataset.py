@@ -21,6 +21,10 @@ Parameters & Options:
     --save_figs:      Save the figures instead of showing them interactively.
     --fig_dir:        Directory to save figures if --save_figs is used (default: ./visualisations).
     --plot_stats:     Generate statistical plots for the dataset (distributions, correlations, etc.).
+    --show_interpolation: Show interpolated channel matrices.
+    --sample_idx:     Specific sample index to visualize. Overrides --random_select.
+    --interpolation_method: Interpolation method to use (default: rbf).
+    --sampling_rate_symbols: Sampling rate of the time blocks in Hz (e.g., 1 / block_duration). A block consists of 14 OFDM symbols. Example default is for 14 symbols of 71.4us each. Needed for Doppler spectrum.
 
 Example:
     python -m data_generation.utils.visualise_dataset --filepath ./data/raw/dataset_a/dataset_a_4blocks_100samples.mat --num_samples 3 --overlay_mask --save_figs
@@ -48,7 +52,8 @@ except ImportError:
 try:
     from .plot_data_statistics import (
         plot_distribution, plot_correlation, plot_noise_distribution,
-        plot_pdp, setup_ieee_style
+        plot_pdp, setup_ieee_style,
+        plot_doppler_spectrum
     )
 except ImportError:
     print("Could not import from .plot_data_statistics, attempting direct import.")
@@ -56,7 +61,8 @@ except ImportError:
         # Try to import directly if relative import fails
         from plot_data_statistics import (
             plot_distribution, plot_correlation, plot_noise_distribution,
-            plot_pdp, setup_ieee_style
+            plot_pdp, setup_ieee_style,
+            plot_doppler_spectrum
         )
     except ImportError:
         print("WARNING: plot_data_statistics.py not found. Statistical plotting will be disabled.")
@@ -80,42 +86,38 @@ def main():
     parser.add_argument("--num_samples", type=int, default=1,
                         help="Number of samples to visualise from the dataset (default: 1).")
     parser.add_argument("--plot_perfect", action="store_true",
-                        help="Plot the perfect channel matrices. If neither --plot_perfect nor --plot_noisy is set, both are plotted side-by-side.")
+                        help="Plot the perfect channel matrices.")
     parser.add_argument("--plot_noisy", action="store_true",
-                        help="Plot the noisy (received) channel matrices. If neither --plot_perfect nor --plot_noisy is set, both are plotted side-by-side.")
+                        help="Plot the noisy (received) channel matrices.")
     parser.add_argument("--overlay_mask", action="store_true",
                         help="Overlay the pilot mask on the plots.")
     parser.add_argument("--random_select", action="store_true",
-                        help="Randomly select samples. If False, selects the first --num_samples (default: False).")
+                        help="Randomly select samples. If False, selects the first --num_samples.")
     parser.add_argument("--save_figs", action="store_true",
                         help="Save the figures instead of showing them interactively.")
     parser.add_argument("--fig_dir", type=str, default="./visualisations",
-                        help="Directory to save figures if --save_figs is used (default: ./visualisations).")
+                        help="Directory to save figures if --save_figs is used.")
     parser.add_argument("--plot_stats", action="store_true",
-                        help="Generate statistical plots for the dataset (distributions, correlations, etc.).")
+                        help="Generate statistical plots for the dataset.")
+    # Add new arguments for interpolation
+    parser.add_argument("--show_interpolation", action="store_true",
+                        help="Show interpolated channel matrices.")
+    parser.add_argument("--sample_idx", type=int,
+                        help="Specific sample index to visualize. Overrides --random_select and --num_samples.")
+    parser.add_argument("--sample_indices", type=str,
+                        help="Comma-separated list of sample indices to visualize (e.g., '0,5,10'). Overrides other selection methods.")
+    parser.add_argument("--interpolation_method", type=str, default="rbf",
+                        choices=["rbf", "spline"],
+                        help="Interpolation method to use (default: rbf).")
+    parser.add_argument("--sampling_rate_symbols", type=float, default=1.0 / (16.67e-6 * 14), 
+                        help="Sampling rate of the time blocks in Hz (e.g., 1 / block_duration). A block consists of 14 OFDM symbols. Example default is for 14 symbols of 71.4us each. Needed for Doppler spectrum.")
 
     args = parser.parse_args()
 
-    # Determine what to plot based on flags
-    plot_both_default = not args.plot_perfect and not args.plot_noisy
-    plot_perfect_flag = args.plot_perfect or plot_both_default
-    plot_noisy_flag = args.plot_noisy or plot_both_default
-
-    if not plot_perfect_flag and not plot_noisy_flag and not args.plot_stats:
-        print("Nothing to plot. Use --plot_perfect, --plot_noisy, or --plot_stats.")
-        return
-
-    if not os.path.exists(args.filepath):
-        print(f"Error: File not found at {args.filepath}")
-        return
-
-    if args.save_figs:
-        os.makedirs(args.fig_dir, exist_ok=True)
-
+    # Load the data
     try:
         data = scipy.io.loadmat(args.filepath)
         print(f"Successfully loaded {args.filepath}")
-        # print("Available keys in .mat file:", list(data.keys()))
     except Exception as e:
         print(f"Error loading .mat file: {e}")
         return
@@ -135,19 +137,41 @@ def main():
     else:
         print("Error: Neither 'perfect_matrices' nor 'received_matrices' found in the .mat file.")
         return
-    
-    if args.num_samples > total_available_samples:
-        print(f"Warning: Requested {args.num_samples} samples, but only {total_available_samples} are available. Plotting all available samples.")
-        args.num_samples = total_available_samples
 
-    if args.num_samples == 0:
-        print("Number of samples to plot is zero. Exiting.")
-        return
-
-    if args.random_select:
-        sample_indices = np.random.choice(total_available_samples, args.num_samples, replace=False)
+    # Handle sample selection
+    if args.sample_indices is not None:
+        # Parse comma-separated list of indices
+        try:
+            sample_indices = [int(idx.strip()) for idx in args.sample_indices.split(',')]
+            # Validate all indices
+            for idx in sample_indices:
+                if idx >= total_available_samples:
+                    print(f"Error: Sample index {idx} exceeds available samples {total_available_samples}")
+                    return
+            args.num_samples = len(sample_indices)
+            print(f"Plotting {len(sample_indices)} specific samples: {sample_indices}")
+        except ValueError as e:
+            print(f"Error parsing sample indices '{args.sample_indices}': {e}")
+            print("Please provide comma-separated integers (e.g., '0,5,10')")
+            return
+    elif args.sample_idx is not None:
+        if args.sample_idx >= total_available_samples:
+            print(f"Error: Requested sample index {args.sample_idx} exceeds available samples {total_available_samples}")
+            return
+        sample_indices = [args.sample_idx]
+        args.num_samples = 1
+        print(f"Plotting single sample: {args.sample_idx}")
     else:
-        sample_indices = np.arange(args.num_samples)
+        if args.num_samples > total_available_samples:
+            print(f"Warning: Requested {args.num_samples} samples, but only {total_available_samples} are available.")
+            args.num_samples = total_available_samples
+
+        if args.random_select:
+            sample_indices = np.random.choice(total_available_samples, args.num_samples, replace=False)
+            print(f"Randomly selected samples: {sample_indices}")
+        else:
+            sample_indices = np.arange(args.num_samples)
+            print(f"Plotting first {args.num_samples} samples: {list(sample_indices)}")
 
     # Setup IEEE style if plotting statistics
     if args.plot_stats:
@@ -193,6 +217,20 @@ def main():
                 webbrowser.open(magnitude_plot_path)
             except Exception as e:
                 print(f"Warning: Could not open plot file: {e}")
+
+        # Phase Distribution
+        plot_distribution(np.angle(perfect_matrices_data), np.angle(received_matrices_data),
+                        'Perfect Channel', 'Noisy Channel',
+                        'Phase (Radians)', stats_dir,
+                        f'phase_distributions_{dataset_name}.svg')
+
+        if not args.save_figs and temp_dir:
+            import webbrowser # Ensure webbrowser is imported here if not already
+            try:
+                phase_plot_path = os.path.join(stats_dir, f'phase_distributions_{dataset_name}.svg')
+                webbrowser.open(phase_plot_path)
+            except Exception as e:
+                print(f"Warning: Could not open phase plot file: {e}")
                 
         # Power Delay Profile (PDP)
         try:
@@ -226,76 +264,147 @@ def main():
             # Open the plot if not saving
             if not args.save_figs and temp_dir:
                 try:
-                    noise_plot_path = os.path.join(stats_dir, 'noise_distribution.svg')
+                    noise_plot_path = os.path.join(stats_dir, 'noise_characteristics_distribution.svg')
                     webbrowser.open(noise_plot_path)
                 except Exception as e:
                     print(f"Warning: Could not open noise distribution plot: {e}")
         except Exception as e:
             print(f"Warning: Could not generate noise distribution plot: {e}")
+
+        # Doppler Spectrum
+        if args.sampling_rate_symbols > 0:
+            try:
+                plot_doppler_spectrum(perfect_matrices_data, 
+                                        args.sampling_rate_symbols, 
+                                        stats_dir, 
+                                        filename_suffix="_Perfect")
+                if not args.save_figs and temp_dir:
+                    try:
+                        doppler_perfect_path = os.path.join(stats_dir, 'average_doppler_spectrum_Perfect.svg')
+                        webbrowser.open(doppler_perfect_path)
+                    except Exception as e:
+                        print(f"Warning: Could not open Doppler (Perfect) plot: {e}")
+
+                plot_doppler_spectrum(received_matrices_data, 
+                                        args.sampling_rate_symbols, 
+                                        stats_dir, 
+                                        filename_suffix="_Noisy")
+                if not args.save_figs and temp_dir:
+                    try:
+                        doppler_noisy_path = os.path.join(stats_dir, 'average_doppler_spectrum_Noisy.svg')
+                        webbrowser.open(doppler_noisy_path)
+                    except Exception as e:
+                        print(f"Warning: Could not open Doppler (Noisy) plot: {e}")
+            except Exception as e:
+                print(f"Warning: Could not generate Doppler spectrum plots: {e}")
+        else:
+            print("Skipping Doppler spectrum plots as --sampling_rate_symbols is not provided or is zero.")
             
         print("Statistical plots generated.")
 
-    # Plot individual samples
+    # Process each sample
     for i, sample_idx in enumerate(sample_indices):
-        print(f"Processing sample {i+1}/{args.num_samples} (index {sample_idx} from dataset)...")
+        print(f"\nProcessing sample {sample_idx}")
         
-        current_pilot_mask = None
-        if args.overlay_mask and pilot_masks_data is not None and sample_idx < pilot_masks_data.shape[0]:
+        # Default pilot mask to 1's in every 4th column if not provided
+        if pilot_masks_data is None:
+            n_sc, n_sym = received_matrices_data[sample_idx].shape
+            current_pilot_mask = np.zeros((n_sc, n_sym), dtype=bool)
+            current_pilot_mask[::12, ::7] = True
+        else:
             current_pilot_mask = pilot_masks_data[sample_idx]
-        elif args.overlay_mask:
-            print(f"Warning: Pilot mask not available for sample {sample_idx} or 'pilot_mask' key missing.")
 
-        sample_perfect = perfect_matrices_data[sample_idx] if perfect_matrices_data is not None and sample_idx < perfect_matrices_data.shape[0] else None
-        sample_noisy = received_matrices_data[sample_idx] if received_matrices_data is not None and sample_idx < received_matrices_data.shape[0] else None
+        sample_perfect = perfect_matrices_data[sample_idx] if perfect_matrices_data is not None else None
+        sample_noisy   = received_matrices_data[sample_idx] if received_matrices_data is not None else None
 
+        # Handle interpolation if requested
+        if args.show_interpolation and sample_noisy is not None:
+            try:
+                from shared.utils.interpolation import interpolation
+                # Prepare data for interpolation - handle complex numbers properly
+                # Split complex data into real and imaginary parts
+                noisy_real = np.real(sample_noisy)
+                noisy_imag = np.imag(sample_noisy)
+                
+                # Stack real and imaginary parts along a new dimension
+                # Shape should be (n_samples, n_sc, n_sym, 2) for real/imag
+                noisy_reshaped = np.stack([noisy_real, noisy_imag], axis=-1)
+                noisy_reshaped = noisy_reshaped[np.newaxis, ...]  # Add batch dimension
+                
+                # Ensure mask has correct shape (n_samples, n_sc, n_sym)
+                mask_reshaped = current_pilot_mask[np.newaxis, ...]  # Add batch dimension
+                
+                print(f"Input shapes - Noisy: {noisy_reshaped.shape}, Mask: {mask_reshaped.shape}")
+                
+                # Perform interpolation
+                interpolated = interpolation(noisy_reshaped, mask_reshaped, args.interpolation_method)
+                
+                # Reconstruct complex number from real and imaginary parts
+                interpolated_complex = interpolated[0, ..., 0] + 1j * interpolated[0, ..., 1]
+                
+                # Plot interpolation comparison
+                from .plot_heatmaps import plot_interpolation_comparison
+                plot_interpolation_comparison(
+                    interpolated=interpolated_complex,
+                    perfect=sample_perfect,
+                    noisy=sample_noisy,
+                    pilot_mask=current_pilot_mask,
+                    save_path=args.fig_dir if args.save_figs else None,
+                    filename=f"sample_{sample_idx}_interpolation.svg",  # Explicitly specify .svg extension
+                    show=not args.save_figs
+                )
+                
+                if args.save_figs:
+                    print(f"Saved interpolation plot to {os.path.join(args.fig_dir, f'sample_{sample_idx}_interpolation.svg')}")
+                
+                continue  # Skip other plotting if interpolation is shown
+            except Exception as e:
+                print(f"Error during interpolation: {e}")
+                import traceback
+                traceback.print_exc()  # Print full error traceback for debugging
+
+        # Original plotting logic continues here...
         sample_info_str = f"Sample {sample_idx}"
         base_figname = f"sample_{sample_idx}"
 
-        if plot_perfect_flag and plot_noisy_flag:
-            # Plot side-by-side using the dedicated function
-            if sample_perfect is None and sample_noisy is None:
-                print(f"Neither perfect nor noisy data available for sample {sample_idx}. Skipping.")
-                continue
+        if not args.plot_perfect and not args.plot_noisy:
+            # Plot both side by side
             plot_perfect_vs_noisy_heatmap(sample_perfect, sample_noisy, sample_info_str,
                                           pilot_mask=current_pilot_mask,
                                           savefig=args.save_figs, 
-                                          figname=f"{base_figname}_perfect_vs_noisy.png",
+                                          figname=f"{base_figname}_perfect_vs_noisy.svg",
                                           fig_dir=args.fig_dir, 
                                           show_fig=not args.save_figs)
-        elif plot_perfect_flag:
-            if sample_perfect is not None:
+        else:
+            # Plot individual matrices as requested
+            if args.plot_perfect and sample_perfect is not None:
                 fig, ax = plt.subplots(1, 1, figsize=(6, 4))
-                plot_single_heatmap(sample_perfect, ax, title=f"Perfect Channel: {sample_info_str}",
+                plot_single_heatmap(sample_perfect, ax, f"Perfect Channel: {sample_info_str}",
                                     pilot_mask=current_pilot_mask)
                 plt.tight_layout()
                 if args.save_figs:
-                    fpath = os.path.join(args.fig_dir, f"{base_figname}_perfect.png")
+                    fpath = os.path.join(args.fig_dir, f"{base_figname}_perfect.svg")
                     plt.savefig(fpath)
                     print(f"Saved figure to {fpath}")
                 if not args.save_figs:
                     plt.show()
                 else:
                     plt.close(fig)
-            else:
-                print(f"Perfect matrix not available for sample {sample_idx}.")
 
-        elif plot_noisy_flag:
-            if sample_noisy is not None:
+            if args.plot_noisy and sample_noisy is not None:
                 fig, ax = plt.subplots(1, 1, figsize=(6, 4))
-                plot_single_heatmap(sample_noisy, ax, title=f"Noisy Channel: {sample_info_str}",
+                plot_single_heatmap(sample_noisy, ax, f"Noisy Channel: {sample_info_str}",
                                     pilot_mask=current_pilot_mask)
                 plt.tight_layout()
                 if args.save_figs:
-                    fpath = os.path.join(args.fig_dir, f"{base_figname}_noisy.png")
+                    fpath = os.path.join(args.fig_dir, f"{base_figname}_noisy.svg")
                     plt.savefig(fpath)
                     print(f"Saved figure to {fpath}")
                 if not args.save_figs:
                     plt.show()
                 else:
                     plt.close(fig)
-            else:
-                print(f"Noisy matrix not available for sample {sample_idx}.")
-    
+
     if args.save_figs:
         if args.plot_stats:
             print(f"Finished processing. Heatmaps saved in {args.fig_dir}, statistics plots saved in {stats_dir}")

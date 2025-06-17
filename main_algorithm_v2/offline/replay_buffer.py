@@ -75,6 +75,26 @@ class ReplayBuffer:
             if len(self.buffer) >= self.buffer_size:
                 break # Stop if buffer size is reached during loading
 
+    def get_random_batch(self, batch_size: int) -> List[Tuple[torch.Tensor, torch.Tensor]]:
+        """
+        Get a random batch of samples from the buffer.
+        
+        Args:
+            batch_size: Number of samples to return
+            
+        Returns:
+            List of (input_data, target_data) tuples
+        """
+        if len(self.buffer) == 0:
+            return []
+        
+        # If requested batch size is larger than buffer, return all samples
+        actual_batch_size = min(batch_size, len(self.buffer))
+        
+        # Randomly sample without replacement
+        import random
+        return random.sample(list(self.buffer), actual_batch_size)
+
     def __len__(self) -> int:
         """
         Returns the current number of samples in the buffer.
@@ -164,19 +184,20 @@ def perform_difficulty_clustering(difficulty_data: np.ndarray, n_clusters: int =
 
 def create_stratified_replay_buffer(predictions: torch.Tensor, targets: torch.Tensor, 
                                    cluster_labels: np.ndarray, difficulty_data: np.ndarray,
-                                   buffer_size: int = 350) -> ReplayBuffer:
+                                   buffer_size: int = 350, inputs: torch.Tensor = None) -> ReplayBuffer:
     """
     Create a replay buffer with stratified sampling based on cluster labels.
     
     Args:
-        predictions: Predictions tensor of shape (N, C, H, W)
+        predictions: Predictions tensor of shape (N, C, H, W) (used for clustering only)
         targets: Target tensor of shape (N, C, H, W)
         cluster_labels: Cluster assignment for each sample
         difficulty_data: NMSE values for each sample
         buffer_size: Target buffer size
+        inputs: Original input tensor of shape (N, C, H, W) (what gets stored in buffer)
         
     Returns:
-        ReplayBuffer with optimally selected samples
+        ReplayBuffer with optimally selected samples (inputs, targets)
     """
     print(f"Creating stratified replay buffer with {buffer_size} samples...")
     
@@ -250,8 +271,12 @@ def create_stratified_replay_buffer(predictions: torch.Tensor, targets: torch.Te
         
         # Add selected samples to buffer
         for idx in selected_indices:
-            # Storing predictions and targets in the buffer
-            replay_buffer.add((predictions[idx], targets[idx]))
+            # Store original inputs and targets (predictions only used for clustering)
+            if inputs is not None:
+                replay_buffer.add((inputs[idx], targets[idx]))
+            else:
+                # Fallback: store predictions if inputs not provided (for backward compatibility)
+                replay_buffer.add((predictions[idx], targets[idx]))
             total_selected += 1
         
         selected_nmse_range = cluster_nmse[np.argsort(cluster_nmse)][::step][:target_samples] if len(selected_indices) > 0 else cluster_nmse

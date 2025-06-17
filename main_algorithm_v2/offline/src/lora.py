@@ -7,7 +7,39 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
+import logging
+
+logger = logging.getLogger(__name__)
+
+def _compute_effective_rank(conv: nn.Conv2d, requested_r: int,
+                            min_rank: int = 1, warn: bool = True) -> Optional[int]:
+    """
+    Compute the effective LoRA rank for a Conv2d layer, respecting mathematical constraints.
+    
+    Args:
+        conv: The Conv2d layer to analyze
+        requested_r: The originally requested rank
+        min_rank: Minimum rank to allow (default: 1)
+        warn: Whether to emit warnings for adjustments
+        
+    Returns:
+        Effective rank to use, or None if layer should be skipped
+    """
+    in_dim = conv.in_channels * conv.kernel_size[0] * conv.kernel_size[1]
+    out_dim = conv.out_channels
+    max_valid = min(out_dim, in_dim)
+
+    if max_valid < min_rank:
+        if warn:
+            logger.info(f"[LoRA] Skipping {conv}: max_valid_rank={max_valid} < {min_rank}")
+        return None  # signal to skip layer
+
+    eff_r = max(min_rank, min(requested_r, max_valid))
+    if eff_r != requested_r and warn:
+        logger.warning(f"[LoRA] {conv}: r reduced {requested_r} → {eff_r} (max={max_valid})")
+    return eff_r
+
 
 class TaskAdapter(nn.Module):
     """
@@ -36,23 +68,31 @@ class LoRAConv2d(nn.Module):
         lora_scaling (Dict[str, float]): Dictionary to store scaling factor for each task.
         active_task_id (Optional[str]): The key of the currently active adapter.
     """
-    def __init__(self, conv_layer: nn.Conv2d, lora_dropout: float = 0.0):
+    def __init__(self, conv_layer: nn.Conv2d, lora_dropout: float = 0.0, 
+                 min_rank: int = 1, quiet: bool = False):
         """
         Initialises the LoRAConv2d layer.
 
         Args:
             conv_layer (nn.Conv2d): The original nn.Conv2d layer to be adapted.
             lora_dropout (float): The dropout rate to be used in the LoRA path.
+            min_rank (int): Minimum rank to allow for LoRA adapters (default: 1).
+            quiet (bool): If True, suppress rank adjustment warnings.
         """
         super().__init__()
         self.conv = conv_layer
         self.conv.weight.requires_grad = False # Freeze original weights
+        if self.conv.bias is not None:
+            self.conv.bias.requires_grad = False # Freeze original bias too
 
         self.task_adapters = nn.ModuleDict()
+        self.min_rank = min_rank
+        self.quiet = quiet
 
         self.lora_dropout = nn.Dropout(lora_dropout)
         self.lora_scaling = {}
         self.active_task_id = None
+        self.merged_task_ids = set()  # Track which tasks have been merged
 
     def add_task_adapters(self, task_id: str, r: int, lora_alpha: int):
         """
@@ -60,30 +100,46 @@ class LoRAConv2d(nn.Module):
 
         Args:
             task_id (str): A unique identifier for the task.
-            r (int): The rank of the LoRA adapter.
+            r (int): The requested rank of the LoRA adapter.
             lora_alpha (int): The scaling factor for the LoRA adapter.
         """
         if task_id in self.task_adapters:
             # Adapters for this task already exist
             return
 
-        # Create A and B parameters
+        # Compute effective rank respecting mathematical constraints
+        effective_r = _compute_effective_rank(self.conv, r, self.min_rank, warn=not self.quiet)
+        
+        if effective_r is None:
+            # Layer should be skipped - store a placeholder to avoid breaking later code
+            self.task_adapters[task_id] = None
+            self.lora_scaling[task_id] = 0.0
+            return
+
+        # Create A and B parameters on the same device as the backbone
+        device = self.conv.weight.device
         param_A = nn.Parameter(
-            torch.zeros(r, self.conv.in_channels * self.conv.kernel_size[0] * self.conv.kernel_size[1])
+            torch.zeros(effective_r, self.conv.in_channels * self.conv.kernel_size[0] * self.conv.kernel_size[1], device=device)
         )
         param_B = nn.Parameter(
-            torch.zeros(self.conv.out_channels, r)
+            torch.zeros(self.conv.out_channels, effective_r, device=device)
         )
         
-        # Initialise weights
-        nn.init.kaiming_uniform_(param_A, a=math.sqrt(5))
+        # Initialise weights following LoRA paper: A ~ N(0, 0.01), B = 0
+        nn.init.normal_(param_A, mean=0.0, std=0.01)
         nn.init.zeros_(param_B)
 
         # Create and register the task adapter
         self.task_adapters[task_id] = TaskAdapter(param_A, param_B)
 
-        self.lora_scaling[task_id] = lora_alpha / r
-        print(f"Added LoRA adapters for task '{task_id}' with r={r} to layer {self.conv}")
+        self.lora_scaling[task_id] = lora_alpha / effective_r
+        
+        # Log success with effective rank info
+        if not self.quiet:
+            if effective_r == r:
+                logger.info(f"[LoRA] Added adapters for task '{task_id}' with r={effective_r} to {self.conv}")
+            else:
+                logger.info(f"[LoRA] Added adapters for task '{task_id}' with r={effective_r} (requested {r}) to {self.conv}")
 
     def set_active_task(self, task_id: Optional[str]):
         """
@@ -111,26 +167,36 @@ class LoRAConv2d(nn.Module):
             # This can happen if we are evaluating a task that has no adapter
             return self.conv(x)
 
-        # Get LoRA weights from task adapter on correct device
+        # Get LoRA weights from task adapter (already on correct device)
         adapter = self.task_adapters[task_id]
-        lora_A = adapter.A.to(x.device)  # (r, in_channels*k*k)
-        lora_B = adapter.B.to(x.device)  # (out_channels, r)
+        
+        # Handle skipped layers (placeholder adapters)
+        if adapter is None:
+            return self.conv(x)
+            
+        lora_A = adapter.A  # (r, in_channels*k*k)
+        lora_B = adapter.B  # (out_channels, r)
         scaling = self.lora_scaling[task_id]
         
-        # Compute LoRA weight update: B @ A
-        # Reshape to match conv weight dimensions
-        lora_weight = (lora_B @ lora_A).view(self.conv.weight.shape) * scaling  # (out_channels, in_channels, k, k)
+        # Compute backbone output (frozen path - no dropout)
+        backbone_output = self.conv(x)
         
-        # Apply convolution with modified weights: W₀ + ΔW
-        return F.conv2d(
-            x,
-            self.conv.weight + lora_weight,
-            self.conv.bias,
+        # Compute LoRA adaptation with dropout applied only to LoRA path
+        dropped_x = self.lora_dropout(x)
+        lora_weight = (lora_B @ lora_A).view(self.conv.weight.shape) * scaling  # (out_channels, in_channels, k, k)
+        lora_weight = lora_weight.to(dtype=x.dtype, device=x.device)  # Fix AMP dtype and device mismatch
+        lora_output = F.conv2d(
+            dropped_x,
+            lora_weight,
+            None,  # No bias for LoRA path
             self.conv.stride,
             self.conv.padding,
             self.conv.dilation,
             self.conv.groups
         )
+        
+        # Combine backbone and LoRA outputs
+        return backbone_output + lora_output
 
     def train(self, mode: bool = True):
         """
@@ -140,6 +206,77 @@ class LoRAConv2d(nn.Module):
         super().train(mode)
         self.conv.train(False) # Keep backbone conv in eval mode
         return self
+
+    def merge_weights(self, task_id: str = None):
+        """
+        Merge LoRA weights into the base convolution weights for zero-latency inference.
+        Warning: This modifies the original conv weights permanently until unmerge is called.
+        
+        Args:
+            task_id: Task to merge. If None, uses active_task_id.
+        """
+        if task_id is None:
+            task_id = self.active_task_id
+            
+        if task_id is None or task_id not in self.task_adapters:
+            return
+            
+        if task_id in self.merged_task_ids:
+            logger.warning(f"Task '{task_id}' weights already merged. Use unmerge() first.")
+            return
+            
+        adapter = self.task_adapters[task_id]
+        
+        # Handle skipped layers
+        if adapter is None:
+            return
+            
+        lora_A = adapter.A
+        lora_B = adapter.B
+        scaling = self.lora_scaling[task_id]
+        
+        # Compute LoRA weight update and add to original weights
+        lora_weight = (lora_B @ lora_A).view(self.conv.weight.shape) * scaling
+        self.conv.weight.data += lora_weight
+        self.merged_task_ids.add(task_id)
+        
+        if not self.quiet:
+            logger.info(f"Merged LoRA weights for task '{task_id}' into base conv layer")
+    
+    def unmerge_weights(self, task_id: str = None):
+        """
+        Remove previously merged LoRA weights from the base convolution weights.
+        
+        Args:
+            task_id: Task to unmerge. If None, uses active_task_id.
+        """
+        if task_id is None:
+            task_id = self.active_task_id
+            
+        if task_id is None or task_id not in self.task_adapters:
+            return
+            
+        if task_id not in self.merged_task_ids:
+            logger.warning(f"Task '{task_id}' weights not currently merged.")
+            return
+            
+        adapter = self.task_adapters[task_id]
+        
+        # Handle skipped layers
+        if adapter is None:
+            return
+            
+        lora_A = adapter.A
+        lora_B = adapter.B
+        scaling = self.lora_scaling[task_id]
+        
+        # Compute LoRA weight update and subtract from original weights
+        lora_weight = (lora_B @ lora_A).view(self.conv.weight.shape) * scaling
+        self.conv.weight.data -= lora_weight
+        self.merged_task_ids.discard(task_id)
+        
+        if not self.quiet:
+            logger.info(f"Unmerged LoRA weights for task '{task_id}' from base conv layer")
 
     def extra_repr(self) -> str:
         return f'active_task_id={self.active_task_id}, tasks={[key for key in self.task_adapters.keys()]}' 

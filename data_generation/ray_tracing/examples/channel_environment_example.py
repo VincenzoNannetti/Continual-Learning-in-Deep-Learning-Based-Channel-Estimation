@@ -4,31 +4,22 @@ Author: Vincenzo Nannetti
 Date: 15/07/2024
 Description: Example demonstrating the integration of Environment and Channel classes using a config file.
 Usage:
-    List presets:
-        python -m data_generation.ray_tracing.examples.channel_environment_example --list-presets
-    Run with preset:
-        python -m data_generation.ray_tracing.examples.channel_environment_example --config data_generation/config/dataset_a.yaml --preset UMa
-    Run with config:
-        python -m data_generation.ray_tracing.examples.channel_environment_example --config data_generation/config/dataset_a.yaml
-    Run with default:
-        python -m data_generation.ray_tracing.examples.channel_environment_example
-    Run with config and preset:
-        python -m data_generation.ray_tracing.examples.channel_environment_example --config data_generation/config/dataset_a.yaml --preset UMa
-    Run with just a preset (no custom config):
-        python -m data_generation.ray_tracing.examples.channel_environment_example --preset-only UMa
+    python -m data_generation.ray_tracing.examples.channel_environment_example --config C:\\Users\\vrnan\\OneDrive - Imperial College London\\Year 4\\ELEC70017 - Individual Project\\Project\\data_generation\\config\\dataset_a.yaml
+    
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 import yaml
 import random
 import time
 import argparse
 from pathlib import Path
+import matplotlib.pyplot as plt # Added import for plt.subplots and plt.show
 
 from data_generation.ray_tracing.classes.environment  import Environment
 from data_generation.ray_tracing.classes.channel      import Channel
 from data_generation.ray_tracing.classes.vector_utils import ensure_vector3d
+from data_generation.utils.plot_heatmaps import plot_perfect_vs_noisy_heatmap, plot_single_heatmap
 
 
 def load_config(config_path):
@@ -59,10 +50,20 @@ def create_default_environment(config):
     antennas_cfg    = config.get('antennas', {})
     ue_movement_cfg = antennas_cfg.get('rx_antenna', {}).get('movement', {})
 
+    FIXED_SEED = 42 # A constant seed value
+    original_random_state    = None
+    original_np_random_state = None
+    use_const_env            = env_cfg.get('use_constant_environment', False)
+
+    if use_const_env:
+        original_random_state    = random.getstate()
+        original_np_random_state = np.random.get_state()
+        random.seed(FIXED_SEED)
+        np.random.seed(FIXED_SEED)
+
     # Environment
-    env_dimensions          = ensure_vector3d(env_cfg.get('environment_dimensions', [200, 100, 100]))
     scatterer_movement_type = clusters_cfg.get('movement_type', 'random_walk')
-    env                     = Environment(dimensions=env_dimensions, movement_type=scatterer_movement_type)
+    env                     = Environment(config=env_cfg, movement_type=scatterer_movement_type)
 
     # Road parameters
     road_y         = 50                                    # Y-coordinate of the road centre line
@@ -177,9 +178,7 @@ def create_default_environment(config):
     h_bs_target = antennas_cfg.get('target_height', 25.0)  # Typical for UMa (e.g., 3GPP TR 38.901 UMa)
     # Select building for BS placement based on proximity to target height
     if not rooftops:
-        print("Warning: No buildings available for BS placement. Placing BS at a default fallback location.")
-        # Fallback BS position: e.g., mid-point of one side of the road at target height.
-        tx_antenna_pos = ensure_vector3d([env_dimensions[0] * 0.25, road_y, h_bs_target]) 
+        raise ValueError("Warning: No buildings available for BS placement. Not sure why this happened")
     else:
         best_bldg      = min(rooftops, key=lambda b: abs(b["z_roof"] - h_bs_target))
         bx,  by        = best_bldg["x"], best_bldg["y"]
@@ -191,11 +190,17 @@ def create_default_environment(config):
         tx_antenna_pos = mast_base + np.array([0.0, 0.0, ANTENNA_ELEV]) 
     tx_antenna         = env.place_tx("BS1", tx_antenna_pos, gain_dbi=tx_gain)
     
+    # If constant environment was used, restore RNG states before Rx and cluster setup
+    if use_const_env and original_random_state is not None and original_np_random_state is not None:
+        print("Restoring RNG states for Rx and cluster randomisation.")
+        random.setstate(original_random_state)
+        np.random.set_state(original_np_random_state)
+
     # UE Placement: Randomly within the street canyon
     min_x_street_ue = 10.0 
     max_x_street_ue = x_offset 
     ue_x            = random.uniform(min_x_street_ue, max_x_street_ue)
-    # Y-coordinate: within the street canyon (anywhere within road or pavements)
+    # Y-coordinate: within the street canyon (anywhere within road or pavements) - maybe need to add it so they are far from the buildings 
     ue_y             = random.uniform(road_y - setback, road_y + setback)
     ue_z             = antennas_cfg.get('target_height', 1.5)               # Standard UE height (defined in the spec to be this as well)
 
@@ -211,15 +216,15 @@ def create_default_environment(config):
     }
 
     rx_antenna = env.place_rx("UE1", ensure_vector3d([ue_x, ue_y, ue_z]), gain_dbi=rx_gain, movement_config=ue_movement_cfg, pavement_bounds=pavement_bounds)
-
     speed_range_cfg = ue_movement_cfg.get('speed', [0.5, 2])
     if isinstance(speed_range_cfg, list) and len(speed_range_cfg) == 2:
         scatterer_speed_for_clusters = speed_range_cfg 
     else: 
         scatterer_speed_for_clusters = [0, speed_range_cfg] 
 
-    cluster_density_cfg    = clusters_cfg.get('density', 0.5)
-    num_scatterers_default = int(50 * cluster_density_cfg) 
+    cluster_density_cfg          = clusters_cfg.get('density', 0.5)
+    number_scatteres_per_cluster = clusters_cfg.get('number_scatteres_per_cluster', 50)
+    num_scatterers_default       = int(number_scatteres_per_cluster * cluster_density_cfg) 
     
     # Cluster shared parameters from config
     use_agg_scattering_cfg = config.get('use_aggregate_scattering', True)
@@ -269,7 +274,7 @@ def create_default_environment(config):
             num_scatterers                  = num_sc,
             radius                          = ground_radius,
             cluster_category                = "ground",
-            height_range                    = random.uniform(1.0, 3.0),
+            height_range                    = random.uniform(clusters_cfg.get('ground_cluster_height_range', [1, 3])[0], clusters_cfg.get('ground_cluster_height_range', [1, 3])[1]),
             scatterer_speed_range           = scatterer_speed_for_clusters,
             use_aggregate_scattering        = use_agg_scattering_cfg,
             environment_type_for_scatterer  = environment_type_cfg,
@@ -315,7 +320,7 @@ def run_simulation(config_path=None, preset_name=None, preset_only=False):
             
     env, config_to_use = create_default_environment(config_to_use) 
     # Common part of simulation (Channel, OFDM, etc.) 
-    snr = round(np.random.uniform(config_to_use.get('snr', [15,15])[0], config_to_use.get('snr', [15,15])[1]),3)
+    snr = round(np.random.uniform(config_to_use.get('environment', {}).get('snr', [15,15])[0], config_to_use.get('environment', {}).get('snr', [15,15])[1]),3)
     
     # Create channel using parameters from config
     channel = Channel(
@@ -324,8 +329,8 @@ def run_simulation(config_path=None, preset_name=None, preset_only=False):
         rx_antenna           = env.rx_antennas[0],
         center_frequency     = config_to_use.get('carrier_frequency', 2490) * 1e6, 
         snr                  = snr,
-        rms_delay_spread_ns  = config_to_use.get('rms_delay_spread_ns', 100),
-        shadow_fading_std_db = config_to_use.get('shadow_fading_std_db', 4.0),
+        symbols_per_block    = config_to_use.get('symbols_per_block', 14),
+        shadow_fading_std_db = config_to_use.get('shadow_fading_std_db', 0.0)
     )
    
     # Time the channel simulation
@@ -355,45 +360,67 @@ def run_simulation(config_path=None, preset_name=None, preset_only=False):
     perfect_ch = channel.get_channel_matrix()
     noisy_ch   = channel.get_channel_matrix_noisy()
     
-    # Plot magnitude
-    plt.figure(figsize=(10, 6))
-    plt.subplot(121)
-    title_text = f'Perfect Channel Magnitude ({config_to_use.get("environment_type", "UMa")})'
+    # Plot magnitude using plot_perfect_vs_noisy_heatmap
+    title_magnitude_prefix = f'Channel Magnitude ({config_to_use.get("environment", {}).get("environment_type", "UMa")})'
     if preset_name:
-        title_text += f' [{preset_name}]'
-    plt.title(title_text)
-    plt.pcolormesh(np.abs(perfect_ch), cmap='viridis')
-    plt.colorbar(label='Magnitude')
-    plt.xlabel('Symbol'); plt.ylabel('Subcarrier')
-    
-    plt.subplot(122)
-    plt.title(f'Noisy Channel Magnitude (SNR={snr}dB)')
-    plt.pcolormesh(np.abs(noisy_ch), cmap='viridis')
-    plt.colorbar(label='Magnitude')
-    plt.xlabel('Symbol'); plt.ylabel('Subcarrier')
-    plt.tight_layout(); plt.show()
-    
-    symbol_duration = 1.0 / subcarrier_spacing
-    total_simulation_time = num_symbols * symbol_duration
-    print(f"Total simulated physical time: {total_simulation_time:.4f} seconds")
+        title_magnitude_prefix += f' [{preset_name}]'
+    # Add SNR to the title string, as sample_info_str is used for the overall figure suptitle
+    sample_info_for_magnitude = f"{title_magnitude_prefix} (SNR={snr}dB)"
 
-    # Plot phase
-    plt.figure(figsize=(10, 6))
-    plt.subplot(121)
-    title_text = f'Perfect Channel Phase ({config_to_use.get("environment_type", "UMa")})'
+    plot_perfect_vs_noisy_heatmap(
+        perfect_matrix=perfect_ch,
+        noisy_matrix=noisy_ch,
+        sample_info_str=sample_info_for_magnitude
+    )
+
+    symbol_duration = 1.0 / subcarrier_spacing
+    # total_simulation_time = num_symbols * symbol_duration * 1e6 # This line is already present below
+    # print(f"Total simulated physical time: {total_simulation_time:.4f} seconds") # This line is already present below
+
+    # Plot phase using plot_single_heatmap (will create two separate figures)
+    # Need to import matplotlib.pyplot for figure creation if plot_single_heatmap doesn't handle it.
+    # However, plot_single_heatmap itself uses plt.style.context and plt.colorbar, implying it expects to be part of a plt workflow.
+    # For simplicity, let's assume plot_single_heatmap handles figure creation or we create them here.
+
+    # Perfect Channel Phase
+    title_perfect_phase = f'Perfect Channel Phase ({config_to_use.get("environment", {}).get("environment_type", "UMa")})'
     if preset_name:
-        title_text += f' [{preset_name}]'
-    plt.title(title_text)
-    phase_plot = plt.pcolormesh(np.angle(perfect_ch), cmap='twilight')
-    plt.colorbar(phase_plot, label='Phase (rad)')
-    plt.xlabel('Symbol'); plt.ylabel('Subcarrier')
+        title_perfect_phase += f' [{preset_name}]'
+
+    # Create a figure and axis for the perfect phase plot
+    fig_perfect_phase, ax_perfect_phase = plt.subplots(figsize=(6, 5)) # Using plt directly
+    plot_single_heatmap(
+        matrix_data=np.angle(perfect_ch), # matrix_data is the first arg
+        ax=ax_perfect_phase, # Pass the created axis
+        title=title_perfect_phase,
+        # pilot_mask=None, # Optional
+        cmap='twilight',
+        # vmin/vmax are optional
+    )
     
-    plt.subplot(122)
-    plt.title(f'Noisy Channel Phase (SNR={snr}dB)')
-    phase_plot = plt.pcolormesh(np.angle(noisy_ch), cmap='twilight')
-    plt.colorbar(phase_plot, label='Phase (rad)')
-    plt.xlabel('Symbol'); plt.ylabel('Subcarrier')
-    plt.tight_layout(); plt.show()
+    # cbar_label is not a direct param of plot_single_heatmap, it's handled internally by it.
+    if True: # Assuming we always want to show this plot when the function is called
+        plt.show()
+
+
+    # Noisy Channel Phase
+    title_noisy_phase = f'Noisy Channel Phase (SNR={snr}dB)'
+
+    # Create a figure and axis for the noisy phase plot
+    fig_noisy_phase, ax_noisy_phase = plt.subplots(figsize=(6, 5)) # Using plt directly
+    plot_single_heatmap(
+        matrix_data=np.angle(noisy_ch), # matrix_data is the first arg
+        ax=ax_noisy_phase, # Pass the created axis
+        title=title_noisy_phase,
+        # pilot_mask=None, # Optional
+        cmap='twilight',
+        # vmin/vmax are optional
+    )
+    if True: # Assuming we always want to show this plot
+        plt.show()
+
+    total_simulation_time = num_symbols * symbol_duration  # Moved here or ensure it's correctly placed
+    print(f"Total simulated physical time: {total_simulation_time:.4f} seconds") # Moved here or ensure it's correctly placed
     
     return env, channel, perfect_ch, noisy_ch, total_simulation_time
 
@@ -413,6 +440,8 @@ def main():
                         help='Print detailed debug information about window reflections')
     
     args = parser.parse_args()
+
+    visualise = True
     
     # List presets if requested
     if args.list_presets:
@@ -442,87 +471,89 @@ def main():
     )
    
     # Debug window reflections if requested
-    if args.debug_reflections:
-        print("\n--- Window Reflection Debug Info ---")
-        tx_pos = np.array(env.tx_antennas[0].get_pos())
-        rx_pos = np.array(env.rx_antennas[0].get_pos())
+    # if args.debug_reflections:
+    #     print("\n--- Window Reflection Debug Info ---")
+    #     tx_pos = np.array(env.tx_antennas[0].get_pos())
+    #     rx_pos = np.array(env.rx_antennas[0].get_pos())
         
-        # Count total windows
-        window_count = 0
-        for b in env.buildings:
-            window_count += len(b.get_windows())
-        print(f"Total buildings: {len(env.buildings)}")
-        print(f"Total windows: {window_count}")
+    #     # Count total windows
+    #     window_count = 0
+    #     for b in env.buildings:
+    #         window_count += len(b.get_windows())
+    #     print(f"Total buildings: {len(env.buildings)}")
+    #     print(f"Total windows: {window_count}")
         
-        # Get and analyse valid reflections
-        valid_reflections = env.get_valid_window_reflections(tx_pos, rx_pos)
-        print(f"Valid window reflections found: {len(valid_reflections)}")
+    #     # Get and analyse valid reflections
+    #     valid_reflections = env.get_valid_window_reflections(tx_pos, rx_pos)
+    #     print(f"Valid window reflections found: {len(valid_reflections)}")
         
-        # If no valid reflections then see why 
-        if len(valid_reflections) == 0 and window_count > 0:
-            print("\nWhy no reflections were found:")
-            for b_idx, b in enumerate(env.buildings):
-                for w_idx, w in enumerate(b.get_windows()):
-                    # Get window properties
-                    window_normal = w.get_normal()
-                    window_center = w.get_center()
+    #     # If no valid reflections then see why 
+    #     if len(valid_reflections) == 0 and window_count > 0:
+    #         print("\nWhy no reflections were found:")
+    #         for b_idx, b in enumerate(env.buildings):
+    #             for w_idx, w in enumerate(b.get_windows()):
+    #                 # Get window properties
+    #                 window_normal = w.get_normal()
+    #                 window_center = w.get_center()
                     
-                    # 1. Check incident angle against threshold
-                    vec_tx_win = window_center - tx_pos
-                    if np.linalg.norm(vec_tx_win) < 1e-6:
-                        print(f"  Building {b_idx}, Window {w_idx}: TX coincides with window center")
-                        continue
+    #                 # 1. Check incident angle against threshold
+    #                 vec_tx_win = window_center - tx_pos
+    #                 if np.linalg.norm(vec_tx_win) < 1e-6:
+    #                     print(f"  Building {b_idx}, Window {w_idx}: TX coincides with window center")
+    #                     continue
                         
-                    d_in          = vec_tx_win / np.linalg.norm(vec_tx_win)
-                    cos_theta     = np.abs(np.dot(d_in, window_normal))
-                    angle         = np.arccos(cos_theta)
-                    angle_deg     = np.degrees(angle)
-                    max_angle_deg = np.degrees(w.reflection_angle_threshold)
+    #                 d_in          = vec_tx_win / np.linalg.norm(vec_tx_win)
+    #                 cos_theta     = np.abs(np.dot(d_in, window_normal))
+    #                 angle         = np.arccos(cos_theta)
+    #                 angle_deg     = np.degrees(angle)
+    #                 max_angle_deg = np.degrees(w.reflection_angle_threshold)
                     
-                    if angle > w.reflection_angle_threshold:
-                        print(f"  Building {b_idx}, Window {w_idx}: Angle too large ({angle_deg:.1f}° > {max_angle_deg:.1f}°)")
-                        continue
+    #                 if angle > w.reflection_angle_threshold:
+    #                     print(f"  Building {b_idx}, Window {w_idx}: Angle too large ({angle_deg:.1f}° > {max_angle_deg:.1f}°)")
+    #                     continue
                         
-                    # 2 Try mirror method and check if reflection point is on window
-                    n        = window_normal / np.linalg.norm(window_normal)
-                    p0       = window_center
-                    tx_m     = tx_pos - 2 * np.dot(tx_pos - p0, n) * n
-                    dir_line = rx_pos - tx_m
-                    denom    = np.dot(dir_line, n)
+    #                 # 2 Try mirror method and check if reflection point is on window
+    #                 n        = window_normal / np.linalg.norm(window_normal)
+    #                 p0       = window_center
+    #                 tx_m     = tx_pos - 2 * np.dot(tx_pos - p0, n) * n
+    #                 dir_line = rx_pos - tx_m
+    #                 denom    = np.dot(dir_line, n)
                     
-                    if abs(denom) < 1e-9:
-                        print(f"  Building {b_idx}, Window {w_idx}: Ray parallel to window plane")
-                        continue
+    #                 if abs(denom) < 1e-9:
+    #                     print(f"  Building {b_idx}, Window {w_idx}: Ray parallel to window plane")
+    #                     continue
                         
-                    t = np.dot(p0 - tx_m, n) / denom
-                    if not (0.0 < t < 1.0):
-                        print(f"  Building {b_idx}, Window {w_idx}: Reflection outside TX-RX path")
-                        continue
+    #                 t = np.dot(p0 - tx_m, n) / denom
+    #                 if not (0.0 < t < 1.0):
+    #                     print(f"  Building {b_idx}, Window {w_idx}: Reflection outside TX-RX path")
+    #                     continue
                         
-                    p_ref = tx_m + t * dir_line
+    #                 p_ref = tx_m + t * dir_line
         
-                    if not w.contains_point(p_ref):
-                        print(f"  Building {b_idx}, Window {w_idx}: Reflection point not on window pane")
-                        continue
+    #                 if not w.contains_point(p_ref):
+    #                     print(f"  Building {b_idx}, Window {w_idx}: Reflection point not on window pane")
+    #                     continue
 
-                    # 3. Check for blockages
-                    vec_tx_pref  = p_ref - tx_pos
-                    dist_tx_pref = np.linalg.norm(vec_tx_pref)
-                    d_in         = vec_tx_pref / dist_tx_pref
+    #                 # 3. Check for blockages
+    #                 vec_tx_pref  = p_ref - tx_pos
+    #                 dist_tx_pref = np.linalg.norm(vec_tx_pref)
+    #                 d_in         = vec_tx_pref / dist_tx_pref
                     
-                    if env.check_building_intersection(tx_pos, d_in, max_distance=dist_tx_pref-1e-6, exclude_building_id=b.id)[0]:
-                        print(f"  Building {b_idx}, Window {w_idx}: Path TX->window blocked by another building")
-                        continue
+    #                 if env.check_building_intersection(tx_pos, d_in, max_distance=dist_tx_pref-1e-6, exclude_building_id=b.id)[0]:
+    #                     print(f"  Building {b_idx}, Window {w_idx}: Path TX->window blocked by another building")
+    #                     continue
                         
-                    vec_pref_rx  = rx_pos - p_ref
-                    dist_pref_rx = np.linalg.norm(vec_pref_rx)
-                    dir_pref_rx  = vec_pref_rx / dist_pref_rx
+    #                 vec_pref_rx  = rx_pos - p_ref
+    #                 dist_pref_rx = np.linalg.norm(vec_pref_rx)
+    #                 dir_pref_rx  = vec_pref_rx / dist_pref_rx
                     
-                    if env.check_building_intersection(p_ref, dir_pref_rx, max_distance=dist_pref_rx-1e-6, exclude_building_id=b.id)[0]:
-                        print(f"  Building {b_idx}, Window {w_idx}: Path window->RX blocked by another building")
-                        continue    
-    # Ensure rays are shown, including window reflections
-    # env.visualise_environment(show_rays=True, show_movement=True, movement_time=total_sim_time)
+    #                 if env.check_building_intersection(p_ref, dir_pref_rx, max_distance=dist_pref_rx-1e-6, exclude_building_id=b.id)[0]:
+    #                     print(f"  Building {b_idx}, Window {w_idx}: Path window->RX blocked by another building")
+    #                     continue    
+    
+    
+    if visualise:
+        env.visualise_environment(show_rays=True, show_movement=True, movement_time=total_sim_time)
 
 
 if __name__ == "__main__":

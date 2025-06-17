@@ -1,0 +1,87 @@
+# Autoencoder+SRCNN Hyperparameter Sweep Configuration for Standard Training 2.0
+# Optuna-based hyperparameter optimization with W&B logging
+program: standard_training_2/train.py # The script your agent will run
+method: bayes # Strategy: bayes (TPE) is efficient for hyperparameter optimization
+metric:
+  name: eval_nmse  # The exact metric name logged that you want to optimize
+  goal: minimize   # Minimize NMSE (lower is better)
+
+parameters:
+  # --- Fixed W&B Configuration ---
+  wandb.project:
+    value: "Model Optimisation" # Standardised project name
+  
+  # --- Base Configuration Path ---
+  train_config_path:
+    value: "../ae_srcnn.yaml" # Path to base config, relative to this sweep file
+
+  # --- Training Hyperparameters ---
+  training.learning_rate:
+    distribution: log_uniform_values # Good for learning rates
+    min: 1e-5
+    max: 1e-3 # Adjusted max
+
+  training.weight_decay:
+    distribution: categorical # Changed from `values` to `categorical` for clarity
+    values: [0, 1e-6, 1e-5, 1e-4]
+
+  training.batch_size:
+    distribution: categorical # Changed from `values` to `categorical`
+    values: [32, 64, 128] # Adjusted batch sizes, base is 32
+ 
+  # --- Model Architecture Parameters ---
+  model.params.autoencoder_type:
+    distribution: categorical # Changed from `values` to `categorical`
+    values: ['basic', 'residual']
+
+  # --- Scheduler Parameters (Targeting ReduceLROnPlateau as per base ae_srcnn.yaml) ---
+  training.scheduler.params.patience:
+    distribution: int_uniform
+    min: 5
+    max: 15
+
+  training.scheduler.params.factor:
+    distribution: uniform
+    min: 0.1
+    max: 0.5
+
+  # --- Early Stopping Parameters ---
+  training.early_stopping.patience:
+    distribution: int_uniform
+    min: 10 # Standard range
+    max: 30 # Standard range
+
+  # --- Fixed Parameters for Sweep ---
+  data.num_workers: # Added for completeness, though fixed in base
+    value: 0
+  data.pin_memory: # Added for completeness
+    value: true
+  hardware.use_amp: # Added for completeness
+    value: true
+
+  training.epochs:
+    value: 100 # Fixed epochs for sweep
+  
+  framework.seed:
+    value: 42  # Fixed seed for reproducible comparisons
+  
+  # --- Evaluation Configuration for Optuna ---
+  evaluation.optuna_wandb_num_plots:
+    value: 3  # Number of evaluation plots to log to W&B per trial
+  
+  evaluation.plot_examples:
+    value: 3 # Consistent with other sweeps
+
+  # --- Optuna Runner W&B Configuration ---
+  optuna_runner_wandb.project:
+    value: "Model Optimisation"
+  
+  optuna_runner_wandb.entity:
+    value: null  # Use default entity
+
+  # --- W&B Configuration for Individual Training Runs ---
+  wandb.entity:
+    value: null  # Use default entity
+  
+  wandb.log_freq_train:
+    value: 5  # Log every 5 epochs during training for efficiency

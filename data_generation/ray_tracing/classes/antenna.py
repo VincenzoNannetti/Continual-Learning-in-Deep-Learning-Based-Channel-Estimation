@@ -42,18 +42,17 @@ class Antenna:
         self.time_elapsed_for_movement = 0.0
         self.movement_state            = {}
         self.pavement_bounds           = pavement_bounds
-        
+        self.speed                     = float(self.rng.uniform(self.speed_range[0], self.speed_range[1]))
+
         # Initialise movement if configured
         if movement_config and self.movement_type != "static":
             self._initialise_movement()
     
     def _initialise_movement(self):
         """Helper method to set up movement parameters"""
-        self.speed = float(self.rng.uniform(self.speed_range[0], self.speed_range[1]))
         if self.speed <= 0:
             self._set_static()
             return
-            
         if self.movement_type == "linear":
             self._setup_linear_movement()
         elif self.movement_type == "forward_back":
@@ -62,20 +61,21 @@ class Antenna:
             self._setup_circular_movement()
         elif self.movement_type == "zigzag":
             self._setup_zigzag_movement()
+        elif self.movement_type == "random_waypoint":
+            self._setup_random_waypoint_movement()
         else:
             self._set_static()
     
     def _set_static(self):
         """Helper method to set antenna as static"""
-        self.movement_type = "static"
-        self.speed = 0.0
+        self.movement_type   = "static"
+        self.speed           = 0.0
         self.velocity_vector = np.zeros(3, dtype=float)
     
     def _setup_linear_movement(self):
         """Helper method to set up linear movement"""
         params = self.movement_cfg.get("linear_params", {})
         direction = np.array(params.get("direction", [0,0,0]), dtype=float)
-        
         if self.antenna_type == "RX" and np.count_nonzero(direction) > 0:
             if len(direction) == 3 and direction[2] != 0 and not params.get("allow_z_movement", False):
                 direction[2] = 0
@@ -110,35 +110,72 @@ class Antenna:
         self.movement_params = params.copy()
         self.movement_state = {}
         
+        # Get the configured radius (this should be respected, not overridden)
+        configured_radius = params.get('radius', 1.0)
+        
         # Set up center
         if "center_abs" in params:
+            # Absolute center position provided
             self.movement_state["center"] = np.array(params["center_abs"], dtype=float)
+            # Calculate starting angle based on initial position relative to this center
+            center = self.movement_state["center"]
+            dx = self.initial_pos[0] - center[0]
+            dy = self.initial_pos[1] - center[1]
+            distance_to_center = np.sqrt(dx*dx + dy*dy)
+            
+            if distance_to_center < 1e-6:
+                # UE is at the center, start at angle 0 (east direction)
+                self.movement_state['angle'] = 0.0
+            else:
+                # Use the angle from center to initial position
+                self.movement_state['angle'] = np.arctan2(dy, dx)
+                
         elif "center_offset" in params:
+            # Center offset from initial position provided
             offset = np.array(params["center_offset"], dtype=float)
             if len(offset) not in [2, 3]:
                 raise ValueError("center_offset must be 2D or 3D array")
-            center_xy = self.initial_pos[:2] + offset[:2]
-            self.movement_state["center"] = np.array([center_xy[0], center_xy[1], self.initial_pos[2]])
+            
+            # Normalize the offset direction to create a center at the correct distance
+            offset_2d = offset[:2]
+            offset_magnitude = np.linalg.norm(offset_2d)
+            
+            if offset_magnitude < 1e-6:
+                # Zero offset, center at initial position
+                self.movement_state["center"] = self.initial_pos.copy()
+                self.movement_state['angle'] = 0.0
+            else:
+                # Calculate center position so UE is on circumference of desired radius
+                offset_direction = offset_2d / offset_magnitude
+                center_offset_distance = configured_radius  # Distance from UE to center = radius
+                center_position_2d = self.initial_pos[:2] + offset_direction * center_offset_distance
+                self.movement_state["center"] = np.array([center_position_2d[0], center_position_2d[1], self.initial_pos[2]])
+                
+                # Starting angle: from center to current UE position (opposite to offset direction)
+                self.movement_state['angle'] = np.arctan2(-offset_direction[1], -offset_direction[0])
+            
         else:
+            # No center specified, use initial position as center
             self.movement_state["center"] = self.initial_pos.copy()
-            
-        # Set up radius and angle
-        center = self.movement_state["center"]
-        if np.allclose(self.initial_pos[:2], center[:2], atol=1e-6):
-            self.movement_params.setdefault('radius', 10.0)
             self.movement_state['angle'] = 0.0
-        else:
-            dx = self.initial_pos[0] - center[0]
-            dy = self.initial_pos[1] - center[1]
-            implied_radius = np.sqrt(dx*dx + dy*dy)
             
-            if 'radius' in self.movement_params:
-                if not np.isclose(implied_radius, self.movement_params['radius'], rtol=1e-3, atol=1e-3):
-                    print(f"INFO: Antenna '{self.name}' circular motion: Using implied radius {implied_radius:.2f} from initial position")
-            self.movement_params['radius'] = implied_radius
-            self.movement_state['angle'] = np.arctan2(dy, dx)
-            
+        # Always use the configured radius, don't override it
+        self.movement_params['radius'] = configured_radius
         self.movement_state['effective_clockwise'] = self.movement_params.get('clockwise', True)
+        
+        # Verify that the UE will start at its current position
+        center = self.movement_state["center"]
+        angle = self.movement_state['angle']
+        radius = self.movement_params['radius']
+        expected_start_pos = center + np.array([radius * np.cos(angle), radius * np.sin(angle), 0])
+        
+        # Check if the expected position matches the initial position (within tolerance)
+        position_error = np.linalg.norm(expected_start_pos[:2] - self.initial_pos[:2])
+        if position_error > 0.1:  # 10cm tolerance
+            print(f"INFO: Antenna '{self.name}' circular motion will start from current position.")
+            print(f"      Initial pos: [{self.initial_pos[0]:.2f}, {self.initial_pos[1]:.2f}]")
+            print(f"      Circle center: [{center[0]:.2f}, {center[1]:.2f}], radius: {radius:.2f}m")
+            print(f"      The UE will move smoothly from its starting position in a {radius:.2f}m radius circle.")
 
     def _setup_zigzag_movement(self):
         """Helper method to set up zigzag movement"""
@@ -164,6 +201,13 @@ class Antenna:
             self.velocity_vector = np.zeros(3, dtype=float)
         # else, it will be managed by the update_zigzag function
 
+    def _setup_random_waypoint_movement(self):
+        """Helper method to set up random waypoint movement."""
+        params = self.movement_cfg.get("random_waypoint_params", {})
+        self.movement_params = params.copy()
+        if self.speed <= 1e-9:
+            self.velocity_vector = np.zeros(3, dtype=float)
+
     def get_name(self):
         return self.name
 
@@ -172,6 +216,9 @@ class Antenna:
 
     def get_pos(self):
         return self.pos.copy()
+
+    def get_speed(self):
+        return self.speed
 
     def get_antenna_type(self):
         return self.antenna_type
@@ -193,8 +240,8 @@ class Antenna:
                 return 
 
         self.time_elapsed_for_movement += dt
-        new_pos = self.pos
-        new_velocity = self.velocity_vector
+        new_pos                = self.pos
+        new_velocity           = self.velocity_vector
         updated_movement_state = self.movement_state.copy()
 
         # Store the original z-coordinate

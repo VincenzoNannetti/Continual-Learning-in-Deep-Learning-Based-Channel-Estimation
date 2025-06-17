@@ -1,0 +1,80 @@
+# --- Combined (DnCNN+SRCNN) Model Configuration for Standard Training 2.0 ---
+
+experiment_name: dncnn_srcnn_standard_training_2
+
+framework:
+  seed: 42
+
+model:
+  name: combined_srcnn_dncnn
+  params:
+    order: dncnn_first
+    dncnn_args:
+      num_channels: 2
+    srcnn_args: {}
+  # Pretrained model loading (optional)
+  pretrained_path: null
+  pretrained_dncnn: null 
+  pretrained_srcnn: null 
+  strict_load: False
+  # Freezing options
+  freeze_dncnn: False
+  freeze_srcnn: False
+
+data:
+  dataset_type: standard
+  data_dir: ./data/raw/ray_tracing/
+  preprocessed_dir: ./data/preprocessed/ray_tracing/
+  # Interpolation settings (currently not used by StandardDataset, but kept for potential future use)
+  interpolation_method: rbf
+  interpolation_kernel: thin_plate_spline
+  # Dataset parameters
+  data_name: domain_high_snr_med_linear
+  dataset_a_name: domain_high_snr_med_linear
+  dataset_b_name: domain_low_snr_fast_linear
+  validation_split: 0.15
+  test_split: 0.15
+  # Training parameters
+  num_workers: 0
+  pin_memory: True
+  persistent_workers: False
+
+training:
+  epochs: 100
+  batch_size: 64
+  loss_function: mse
+  optimiser: adam
+  learning_rate: 0.00010667174956337008
+  weight_decay: 0
+  betas: [0.9, 0.999]
+  eps: 1e-8
+
+  scheduler:
+    type: ReduceLROnPlateau
+    params:
+      mode: min
+      factor: 0.21725003977803553
+      patience: 9
+      min_lr: 1e-7
+      verbose: True
+
+  early_stopping:
+    patience: 14
+    min_delta: 0.00001
+
+evaluation:
+  metrics: [nmse, psnr, mse, ssim]
+  save_results_dir: ./standard_training_2/results/
+  save_plot_path: ./standard_training_2/plots/dncnn_srcnn_evaluation.png
+  plot_examples: 3
+  optuna_wandb_num_plots: 3
+
+logging:
+  checkpoint_dir: ./standard_training_2/checkpoints/dncnn_srcnn/
+  wandb_enabled: False
+
+hardware:
+  device: auto
+  use_amp: True
+  compile_model: False
+

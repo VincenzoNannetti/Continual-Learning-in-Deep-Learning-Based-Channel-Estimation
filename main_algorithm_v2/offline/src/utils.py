@@ -65,6 +65,9 @@ def create_scheduler(optimizer, scheduler_config):
     scheduler_type = scheduler_config.type
     params = scheduler_config.params.model_dump() if scheduler_config.params else {}
     
+    # Filter out None values from params
+    params = {k: v for k, v in params.items() if v is not None}
+    
     if scheduler_type == 'ReduceLROnPlateau':
         from torch.optim.lr_scheduler import ReduceLROnPlateau
         return ReduceLROnPlateau(optimizer, **params)

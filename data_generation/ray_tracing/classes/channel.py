@@ -17,36 +17,63 @@ def advance_phases(phases, f_D, dt):
 
 
 class Channel:
-    def __init__(self, environment, tx_antenna, rx_antenna, snr, center_frequency, rms_delay_spread_ns=100, shadow_fading_std_db=4.0):
-        self.environment          = environment                                                                     # Environment object containing scatterers, antennas, etc.
-        self.tx_antenna           = tx_antenna                                                                      # TX antenna from environment
-        self.rx_antenna           = rx_antenna                                                                      # RX antenna from environment
-        self.fc                   = center_frequency                                                                # System center frequency in Hz
-        self.snr                  = snr                                                                             # determines power of noise
+    def __init__(self, environment, tx_antenna, rx_antenna, snr, center_frequency, symbols_per_block, shadow_fading_std_db=0.0):
+        self.environment                      = environment                      # Environment object containing scatterers, antennas, etc.
+        self.tx_antenna                       = tx_antenna                       # TX antenna from environment
+        self.rx_antenna                       = rx_antenna                       # RX antenna from environment
+        self.fc                               = center_frequency                 # System center frequency in Hz
+        self.snr                              = snr                              # determines power of noise
+        self.shadow_fading_std_db             = shadow_fading_std_db             # Shadow fading standard deviation in dB
+        # self.shadow_fading_correlation_time_s = shadow_fading_correlation_time_s # Correlation time for shadow fading in seconds
+        self.shadow_fading_correlation_time_s = 0.0
         # Extract antenna properties
         self.tx_gain = self.tx_antenna.gain
         self.rx_gain = self.rx_antenna.gain
+
+        # Initialise random number generator
+        self.rng = np.random.default_rng()
+                
         # Calculate antenna distance
         tx_pos = np.array(self.tx_antenna.get_pos(), dtype=float)
         rx_pos = np.array(self.rx_antenna.get_pos(), dtype=float)
+        
         # Extract heights from antenna positions (z is height)
         self.tx_height = tx_pos[2]
         self.rx_height = rx_pos[2]
+        
         # 3GPP parameter additions
-        self.rms_delay_spread_ns  = rms_delay_spread_ns   # RMS delay spread in nanoseconds
-        self.shadow_fading_std_db = shadow_fading_std_db  # Shadow fading standard deviation in dB
+        if self.environment.environment_type == "UMa":
+            mu_ds_uma_los            = -6.955 - 0.0963 * np.log10(self.fc / 1e9)
+            sigma_ds_uma_los         = 0.66
+            x_rv_uma_los             = self.rng.normal(0,1)
+            log10_ds_uma_los         = mu_ds_uma_los + (sigma_ds_uma_los * x_rv_uma_los)
+            self.r_tau               = 2.5
+            self.rms_delay_spread_ns = 10**log10_ds_uma_los * 1e9
+        elif self.environment.environment_type == "UMi":
+            mu_ds_umi_los            = -0.24*np.log10(1+self.fc/1e9) - 7.14
+            sigma_ds_umi_los         = 0.38
+            x_rv_umi_los             = self.rng.normal(0,1)
+            log10_ds_umi_los         = mu_ds_umi_los + (sigma_ds_umi_los * x_rv_umi_los)
+            self.r_tau               = 2.2
+            self.rms_delay_spread_ns = 10**log10_ds_umi_los * 1e9
+        else:
+            raise ValueError(f"Environment type {self.environment.environment_type} not supported")
+        
+        self.symbols_per_block    = symbols_per_block     # Number of OFDM symbols per block
         self.channel_matrix       = None
         self.channel_matrix_noisy = None
         self.noise_matrix         = None
+        
         # Extract cluster information from environment
         self.num_cluster = len(environment.clusters)
-        # Cluster delay and power arrays (populated in prepare_channel)
+        # Cluster delay array (populated in prepare_channel)
         self.cluster_delays = None
-        self.cluster_powers = None
-        # Phase tracking for Doppler evolution (populated in apply_channel)
-        self.scatterer_phases = None
-        # Initialise random number generator
-        self.rng = np.random.default_rng()
+            
+        # Initialise last shadowing value (in dB)
+        if self.shadow_fading_std_db > 0.0:
+            self.last_shadowing_db = self.rng.normal(loc=0.0, scale=self.shadow_fading_std_db)
+        else:
+            self.last_shadowing_db = 0.0
                         
 
     def _calculate_distances(self, tx_pos, rx_pos):
@@ -61,21 +88,19 @@ class Channel:
             tuple: (horizontal_distance, height_difference, LOS_distance)
         """
         horizontal_distance = np.sqrt((tx_pos[0] - rx_pos[0])**2 + (tx_pos[1] - rx_pos[1])**2)
-        height_difference = abs(tx_pos[2] - rx_pos[2])
-        LOS_distance = math.hypot(horizontal_distance, height_difference)
+        height_difference   = abs(tx_pos[2] - rx_pos[2])
+        LOS_distance        = math.hypot(horizontal_distance, height_difference)
         return horizontal_distance, height_difference, LOS_distance
 
     def prepare_channel(self):
-        """Prepare channel parameters before signal processing"""
-
+        """Prepare channel parameters before signal processing
+        It should be noted that the metrics used here are for LOS since there will always be a LOS path.
+        """
         self.cluster_delays = np.array([])
-        self.cluster_powers = np.array([])
+        effective_scale = self.r_tau * self.rms_delay_spread_ns
         if self.num_cluster > 0: 
-            self.cluster_delays = self.rng.exponential(scale=self.rms_delay_spread_ns, size=self.num_cluster)
+            self.cluster_delays = self.rng.exponential(scale=effective_scale, size=self.num_cluster)
             self.cluster_delays.sort()
-
-        # Initialise phase tracking for all scatterers
-        self.scatterer_phases = np.zeros(len(self.environment.scatterers))
 
     def apply_channel(self, input_data, subcarrier_spacing, num_subcarriers, cyclic_prefix=0):
         # Ensure channel parameters are prepared
@@ -114,37 +139,64 @@ class Channel:
 
         # Calculate the OFDM symbol duration (time step for updates)
         symbol_duration = 1.0 / subcarrier_spacing
+        dt_effective_block = self.symbols_per_block * symbol_duration
 
-        # Initialise scatterer phase tracking if not already done
         # num_scatterers is determined once, assuming it doesn't change during one apply_channel call
         num_scatterers = len(self.environment.scatterers)
-        if self.scatterer_phases is None or len(self.scatterer_phases) != num_scatterers:
-            self.scatterer_phases = np.zeros(num_scatterers)
         
-        cluster_ids_all_scatterers = np.array([s.cluster_id for s in self.environment.scatterers], dtype=np.int32) if num_scatterers > 0 else np.empty((0,), dtype=np.int32)
+        # Pre-calculate cluster IDs for all scatterers if they exist
+        # This assumes scatterers or their cluster assignments don't change within this apply_channel call
+        cluster_ids_all_scatterers = np.empty((0,), dtype=np.int32)
+        if num_scatterers > 0:
+            cluster_ids_all_scatterers = np.array([s.cluster_id for s in self.environment.scatterers], dtype=np.int32)
+
+        # Pre-calculate alpha for shadow fading if applicable
+        current_rx_speed = self.rx_antenna.get_speed()
+        shadow_fading_alpha = 1.0 # Default if no shadow fading or no correlation
+        if self.shadow_fading_std_db > 0.0:
+            if current_rx_speed > 0:
+                _shadow_fading_correlation_time_s = 10 / current_rx_speed
+            else:
+                _shadow_fading_correlation_time_s = 0.0
+            
+            if _shadow_fading_correlation_time_s > 1e-9:
+                shadow_fading_alpha = np.exp(-dt_effective_block / _shadow_fading_correlation_time_s)
+            else:
+                shadow_fading_alpha = 0.0 # No correlation if correlation time is zero
 
         # loop through each OFDM symbol
         for i in range(no_ofdm_symbols):
             # Get current RX antenna position for this symbol
-            rx_pos               = np.array(self.rx_antenna.get_pos(), dtype=float)
+            rx_pos             = np.array(self.rx_antenna.get_pos(), dtype=float)
             _, _, LOS_distance = self._calculate_distances(tx_pos, rx_pos)         # Recalculate LOS distance
 
             # Get current scatterer data from environment for this symbol
             if num_scatterers > 0:
                 scatterer_positions, scatterer_velocities, reflection_coeffs, scatterer_speeds, visible_mask = \
-                    self.environment.get_scatterer_snapshot(tx_pos, rx_pos) # Use updated rx_pos                
+                    self.environment.get_scatterer_snapshot(tx_pos, rx_pos) # Use updated rx_pos
+                # cluster_ids_all_scatterers is now pre-calculated
             else:
                 # Create empty arrays with correct shapes if no scatterers
                 scatterer_positions   = np.empty((0, 3), dtype=float)
                 reflection_coeffs     = np.empty((0,),   dtype=complex)
                 visible_mask          = np.empty((0,),   dtype=bool) 
+            
+            # Shadow fading update for the current symbol
+            current_shadowing_db = 0.0
+            if self.shadow_fading_std_db > 0.0:
+                # Alpha is pre-calculated
+                innovation = self.rng.normal(loc=0.0, scale=self.shadow_fading_std_db)
+                current_shadowing_db = shadow_fading_alpha * self.last_shadowing_db + np.sqrt(max(0, 1 - shadow_fading_alpha**2)) * innovation
+                self.last_shadowing_db = current_shadowing_db
+            
+            shadowing_factor_linear = 10**(current_shadowing_db / 20.0)
 
             # LOS gain for all sub‑carriers at once 
             LOS_gain_vec = self.calculate_path_gain(distance        = LOS_distance,
                                                     frequency       = subcarrier_freqs,
                                                     g_tx_lin        = g_tx_lin,
                                                     g_rx_lin        = g_rx_lin)
-            
+
             # geometry based terms - they dont change across subcarriers
             vec_tx_sc                   = scatterer_positions - tx_pos              # (N, 3)
             dist_tx_sc                  = np.linalg.norm(vec_tx_sc, axis=1)         # (N,) Total path distance
@@ -166,31 +218,32 @@ class Channel:
                 f_k     = self.fc + (j - num_subcarriers // 2) * subcarrier_spacing # calculate the subcarriers frequency
                 lambda_ = 3e8 / f_k                                                 # Wavelength for this subcarrier
 
-                dominant_gain = LOS_gain_vec[j]
+                dominant_gain = LOS_gain_vec[j] * shadowing_factor_linear # Apply shadowing to LOS gain
                 
                 # Window gains
                 window_gain = 0+0j
                 if hasattr(self, 'window_paths'):
                     for wp in self.window_paths:
-                        d_wp = wp["distance"]
-                        fs_amp        = lambda_ / (4 * np.pi * d_wp) if d_wp > 1e-9 else 0 
-                        path_gain     = fs_amp * np.sqrt(g_tx_lin * g_rx_lin) * np.exp(-1j * 2 * np.pi * d_wp / lambda_)
-                        window_gain   += wp["coeff"] * path_gain
+                        d_wp        = wp["distance"]
+                        fs_amp      = lambda_ / (4 * np.pi * d_wp) if d_wp > 1e-9 else 0 
+                        path_gain   = fs_amp * np.sqrt(g_tx_lin * g_rx_lin) * np.exp(-1j * 2 * np.pi * d_wp / lambda_)
+                        window_gain += wp["coeff"] * path_gain
+                window_gain *= shadowing_factor_linear
 
                 # Scatterer gains
                 scatterer_gain = (0 + 0j)
                 if num_scatterers > 0:
                     if len(valid_idx) > 0:
                         # Filter arrays to only include valid scatterers for calculations
-                        _reflection_coeffs    = reflection_coeffs[valid_idx]
-                        _d_n_array            = d_n_array[valid_idx]
-                        _cluster_ids          = cluster_ids_all_scatterers[valid_idx] 
+                        _reflection_coeffs = reflection_coeffs[valid_idx]
+                        _d_n_array         = d_n_array[valid_idx]
+                        _cluster_ids       = cluster_ids_all_scatterers[valid_idx] 
 
                         # path-gain for all valid scatterers 
                         path_gain_vec = self.calculate_path_gain(_d_n_array,          
-                                                                f_k,                
-                                                                g_tx_lin,
-                                                                g_rx_lin)             
+                                                                 f_k,                
+                                                                 g_tx_lin,
+                                                                 g_rx_lin)             
 
                         scatterer_contribution_array = path_gain_vec * _reflection_coeffs   # vector
 
@@ -212,14 +265,10 @@ class Channel:
                                 sum_within_cluster = np.sum(scatterer_contribution_array[mask] * delay_phase_factors[cluster_id])
                                 
                                 # Apply cluster power weighting from the power-law model
-                                if len(self.cluster_powers) > cluster_id:
-                                    cluster_sums[cluster_id] = sum_within_cluster
-                                else:
-                                    # Fallback if cluster powers aren't available 
-                                    cluster_sums[cluster_id] = sum_within_cluster
+                                cluster_sums[cluster_id] = sum_within_cluster
                         
                         # Sum all cluster contributions
-                        scatterer_gain = np.sum(cluster_sums)
+                        scatterer_gain = np.sum(cluster_sums) * shadowing_factor_linear
 
                 # Combine dominant (LOS) and explicit scatterer paths
                 total_dominant_paths_gain = dominant_gain + scatterer_gain + window_gain
@@ -242,7 +291,7 @@ class Channel:
                 self.channel_matrix[j, i] = final_gain
 
             # Update scatterer positions AND UE position through the environment
-            self.environment.advance(symbol_duration)
+            self.environment.advance(dt_effective_block)
                                     
         # input data in time domain so convert to freq so we can multiply instead of convolve
         input_data    = np.fft.fft(input_data, axis=0)
@@ -314,7 +363,7 @@ class Channel:
         frequency (float/array): Frequency in Hz. Can be scalar or array.
         g_tx_lin (float): Linear transmitter antenna gain
         g_rx_lin (float): Linear receiver antenna gain
-        
+
         Note: distance and frequency can differ in rank/shape and will be properly broadcast.
         """
         distance   = np.asarray(distance)
@@ -322,4 +371,5 @@ class Channel:
         wavelength = 3e8 / frequency
         phase      = np.exp(-1j * 2 * np.pi * distance / wavelength)
         fs_amp     = wavelength / (4 * np.pi * distance)
+
         return fs_amp * math.sqrt(g_tx_lin * g_rx_lin) * phase

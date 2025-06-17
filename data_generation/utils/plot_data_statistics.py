@@ -4,9 +4,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import argparse
-from scipy.stats import entropy # Added for KL divergence
+from scipy.stats import entropy, wasserstein_distance, ks_2samp # Enhanced imports for additional metrics
+from scipy.spatial.distance import jensenshannon
+from tqdm import tqdm
+import pandas as pd # For creating comparison tables
 
-from .ieee_plot_style import setup_ieee_style
+try:
+    from .ieee_plot_style import setup_ieee_style
+except ImportError:
+    from ieee_plot_style import setup_ieee_style
 
 def load_data(mat_file_path):
     """Loads data from the specified .mat file."""
@@ -47,7 +53,7 @@ def plot_example_heatmap(perfect_matrix, noisy_matrix, sample_index, save_path):
     vmax_p = np.max(np.abs(perfect_matrix))
     im1 = axs[0].pcolormesh(x_coords, y_coords, np.abs(perfect_matrix), cmap=cmap, shading='flat', vmin=vmin_p, vmax=vmax_p)
     axs[0].set_title('Perfect Channel')
-    axs[0].set_xlabel('OFDM Symbol Index')
+    axs[0].set_xlabel('Time Block Index')
     axs[0].set_ylabel('Subcarrier Index')
     # Use calculated tick spacing
     axs[0].set_xticks(np.arange(0, n_sym + 1, x_tick_spacing)) # Include end tick if space allows
@@ -65,7 +71,7 @@ def plot_example_heatmap(perfect_matrix, noisy_matrix, sample_index, save_path):
     vmax_n = np.max(np.abs(noisy_matrix))
     im2 = axs[1].pcolormesh(x_coords, y_coords, np.abs(noisy_matrix), cmap=cmap, shading='flat', vmin=vmin_n, vmax=vmax_n)
     axs[1].set_title('Noisy Channel')
-    axs[1].set_xlabel('OFDM Symbol Index')
+    axs[1].set_xlabel('Time Block Index')
     axs[1].set_ylabel('Subcarrier Index')
     # Use calculated tick spacing
     axs[1].set_xticks(np.arange(0, n_sym + 1, x_tick_spacing))
@@ -83,7 +89,7 @@ def plot_example_heatmap(perfect_matrix, noisy_matrix, sample_index, save_path):
     plt.close(fig)
     print(f"Saved heatmap for sample {sample_index}.")
 
-def plot_distribution(data1, data2, title1, title2, xlabel, save_path, filename, bins=50, max_points=100000):
+def plot_distribution(data1, data2, title1, title2, xlabel, save_path, filename, bins=50, max_points=1000000):
     """Plots the distribution (histogram and KDE) side-by-side for two datasets, with subsampling for KDE and Histogram."""
     fig, axs = plt.subplots(1, 2, figsize=(7, 2.8))
     fig.suptitle(f'{xlabel} Distribution', fontsize=plt.rcParams['figure.titlesize'], y=0.95)
@@ -231,50 +237,138 @@ def plot_correlation(perfect_matrices, noisy_matrices, save_path):
     print("Saved Average Correlation plot.")
 
 def plot_noise_distribution(perfect_matrices, received_matrices, save_path, max_points=100000):
-    """Plots the distribution of the real and imaginary parts of the noise, with subsampling for KDE and Histogram."""
+    """Plots the distribution of real, imaginary, magnitude, and phase of the noise.
+       Subsampling is used for KDE and Histogram if data is too large."""
     noise = received_matrices - perfect_matrices
     noise_real = noise.real.flatten()
     noise_imag = noise.imag.flatten()
+    noise_magnitude = np.abs(noise).flatten()
+    noise_phase = np.angle(noise).flatten() # Phase will be in radians (-pi to pi)
 
-    # --- Subsampling --- #
-    if noise_real.size > max_points:
-        print(f"Subsampling real noise from {noise_real.size} to {max_points} for Hist/KDE plot.")
-        plot_noise_real = noise_real[np.random.choice(noise_real.size, max_points, replace=False)]
-    else:
-        plot_noise_real = noise_real
+    data_to_plot = {
+        "Real Part of Noise": noise_real,
+        "Imaginary Part of Noise": noise_imag,
+        "Magnitude of Noise": noise_magnitude,
+        "Phase of Noise (Radians)": noise_phase
+    }
 
-    if noise_imag.size > max_points:
-        print(f"Subsampling imag noise from {noise_imag.size} to {max_points} for Hist/KDE plot.")
-        plot_noise_imag = noise_imag[np.random.choice(noise_imag.size, max_points, replace=False)]
-    else:
-        plot_noise_imag = noise_imag
-    # -------------------
+    # Determine figure layout (2x2 grid)
+    fig, axs = plt.subplots(2, 2, figsize=(8, 6)) # Adjusted figsize for 2x2
+    axs_flat = axs.flatten() # Flatten for easy iteration
 
-    fig, axs = plt.subplots(1, 2, figsize=(7, 2.8))
-    fig.suptitle('Noise Component Distribution', fontsize=plt.rcParams['figure.titlesize'], y=0.95)
+    plot_idx = 0
+    for title, data_flat in data_to_plot.items():
+        current_ax = axs_flat[plot_idx]
+        
+        # --- Subsampling --- #
+        if data_flat.size > max_points:
+            print(f"Subsampling {title.lower()} from {data_flat.size} to {max_points} for Hist/KDE plot.")
+            plot_data = data_flat[np.random.choice(data_flat.size, max_points, replace=False)]
+        else:
+            plot_data = data_flat
 
-    bins = 50
-    color_real = '#1f77b4'
-    color_imag = '#ff7f0e'
+        bins = 50
+        # Special handling for phase data bins if desired (e.g., ensure full -pi to pi range)
+        # if "Phase" in title:
+        #     bins = np.linspace(-np.pi, np.pi, 51) # Example: 50 bins covering -pi to pi
 
-    # Plot Real Part - Use SUBSAMPLED data for hist and KDE
-    sns.histplot(plot_noise_real, kde=False, bins=bins, stat='density', ax=axs[0], color=color_real, edgecolor=None, linewidth=0.5)
-    sns.kdeplot(plot_noise_real, ax=axs[0], color=color_real)
-    axs[0].set_title('Noise (Real Part)')
-    axs[0].set_xlabel('Value')
-    axs[0].set_ylabel('Probability Density')
+        sns.histplot(plot_data, kde=False, bins=bins, stat='density', ax=current_ax, edgecolor=None, linewidth=0.5)
+        sns.kdeplot(plot_data, ax=current_ax, color=sns.color_palette()[0]) # Add KDE line separately
+        
+        current_ax.set_title(title)
+        current_ax.set_xlabel("Value") # Generic xlabel, could be more specific if needed
+        if plot_idx % 2 == 0: # Only set Y label for left column plots
+            current_ax.set_ylabel('Probability Density')
+        else:
+            current_ax.set_ylabel('')
 
-    # Plot Imaginary Part - Use SUBSAMPLED data for hist and KDE
-    sns.histplot(plot_noise_imag, kde=False, bins=bins, stat='density', ax=axs[1], color=color_imag, edgecolor=None, linewidth=0.5)
-    sns.kdeplot(plot_noise_imag, ax=axs[1], color=color_imag)
-    axs[1].set_title('Noise (Imaginary Part)')
-    axs[1].set_xlabel('Value')
-    axs[1].set_ylabel('Probability Density')
 
-    plt.tight_layout(rect=[0, 0.03, 1, 0.93])
-    plt.savefig(os.path.join(save_path, 'noise_distribution.svg'))
+        plot_idx += 1
+    
+    fig.suptitle('Noise Characteristics Distribution', fontsize=plt.rcParams['figure.titlesize'], y=0.98)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout for suptitle
+    filename = "noise_characteristics_distribution.svg"
+    plt.savefig(os.path.join(save_path, filename))
     plt.close(fig)
-    print("Saved Noise Distribution plot.")
+    print(f"Saved noise characteristics plot: {filename}")
+
+def plot_doppler_spectrum(channel_matrices, sampling_rate_symbols, save_path, filename_suffix="", max_points_fft=None):
+    """Calculates and plots the average Doppler spectrum from channel matrices.
+
+    Args:
+        channel_matrices (np.ndarray): Channel matrices (n_samples, n_subcarriers, n_time_blocks).
+                                       Each column along the last axis is a time block (e.g., 14 OFDM symbols).
+        sampling_rate_symbols (float): Sampling rate of the time blocks in Hz (i.e., 1 / block_duration).
+        save_path (str): Directory to save the plot.
+        filename_suffix (str): Suffix for the plot filename.
+        max_points_fft (int, optional): Max number of time blocks to use for FFT per sample to manage computation.
+    """
+    if channel_matrices.ndim != 3:
+        print("Warning: Doppler spectrum expects 3D channel matrices (n_samples, n_subcarriers, n_time_blocks). Skipping.")
+        return
+    
+    n_samples, n_sc, n_sym = channel_matrices.shape
+    if n_sym < 2:
+        print("Warning: Not enough symbols to calculate Doppler spectrum. Skipping.")
+        return
+
+    all_doppler_spectra = []
+
+    print(f"Calculating Doppler spectrum for {n_samples} samples...")
+    for i in tqdm(range(n_samples), desc="Doppler Spectrum Progress"):
+        sample_matrix = channel_matrices[i, :, :] # Shape (n_sc, n_sym)
+        
+        symbols_to_use = n_sym
+        if max_points_fft is not None and n_sym > max_points_fft:
+            symbols_to_use = max_points_fft
+            sample_matrix = sample_matrix[:, :symbols_to_use] # Truncate for this sample
+
+        # IFFT along the time (symbol) axis to get Doppler shifts
+        # H(f, t) -> H(f, f_D)
+        # We apply FFT, not IFFT, as we want to go from time (blocks) to frequency (Doppler)
+        # The input is effectively a time series for each subcarrier, sampled at the block rate.
+        channel_doppler_domain = np.fft.fft(sample_matrix, axis=1) # FFT along time block axis
+        
+        # Power spectrum: |H(f, f_D)|^2
+        power_spectrum_sample = np.abs(channel_doppler_domain)**2
+        
+        # Average over subcarriers
+        avg_power_spectrum_sample = np.mean(power_spectrum_sample, axis=0) # Average along subcarrier axis
+        all_doppler_spectra.append(avg_power_spectrum_sample)
+    
+    if not all_doppler_spectra:
+        print("No Doppler spectra were calculated.")
+        return
+
+    # Average Doppler spectrum over all samples
+    avg_doppler_spectrum = np.mean(np.array(all_doppler_spectra), axis=0)
+    
+    # Create Doppler frequency axis for plotting
+    # FFT frequencies range from -fs_block/2 to fs_block/2
+    # symbols_to_use here refers to the number of points in FFT (could be truncated from original n_sym/n_time_blocks)
+    fft_len = avg_doppler_spectrum.shape[0] # Should match symbols_to_use if truncation happened, else n_time_blocks
+    doppler_freq_axis = np.fft.fftshift(np.fft.fftfreq(fft_len, d=1.0/sampling_rate_symbols)) # sampling_rate_symbols is the block rate
+    avg_doppler_spectrum_shifted = np.fft.fftshift(avg_doppler_spectrum)
+
+    # Plot in dB
+    # Add epsilon for log(0) and normalise by max for relative dB plot
+    epsilon = 1e-12
+    doppler_db = 10 * np.log10(avg_doppler_spectrum_shifted + epsilon)
+    doppler_db_normalized = doppler_db - np.max(doppler_db) # Normalize to 0 dB peak
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(doppler_freq_axis, doppler_db_normalized)
+    ax.set_title(f'Average Doppler Power Spectrum')
+    ax.set_xlabel('Doppler Frequency (Hz)')
+    ax.set_ylabel('Normalised Power (dB)')
+    ax.grid(True, linestyle=':', alpha=0.7)
+    ax.set_ylim(bottom=max(np.min(doppler_db_normalized), -60)) # Show at least 60dB dynamic range or actual min
+    
+    filename = f'average_doppler_spectrum{filename_suffix.replace(" ", "_")}.svg'
+    plt.savefig(os.path.join(save_path, filename))
+    plt.close(fig)
+    print(f"Saved Average Doppler Spectrum plot: {filename}")
 
 def plot_overlayed_distribution(data1, data2, label1, label2, xlabel, title, save_path, filename, bins=50, max_points=100000):
     """Plots the overlayed distribution (KDE) for two datasets, with subsampling."""
@@ -456,7 +550,7 @@ def calculate_correlation_original(matrices, axis):
 
     return np.mean(correlations) if correlations else 0
 
-# --- Helper function for KL Divergence ---
+# --- Enhanced Statistical Comparison Functions ---
 def calculate_kl_divergence(data_a, data_b, num_bins=100, epsilon=1e-10):
     """Calculates KL divergence between two data distributions using histograms.
 
@@ -478,8 +572,6 @@ def calculate_kl_divergence(data_a, data_b, num_bins=100, epsilon=1e-10):
     # Handle edge case where min and max are the same
     if np.isclose(min_val, max_val):
         print("Warning: Data appears constant, KL divergence is likely 0 or undefined.")
-        # If both datasets are identical constants, KL is 0. If different, it's infinite.
-        # We can return 0 as a practical measure here, or NaN. Let's return NaN.
         return np.nan, np.nan
 
     bins = np.linspace(min_val, max_val, num_bins + 1)
@@ -498,7 +590,6 @@ def calculate_kl_divergence(data_a, data_b, num_bins=100, epsilon=1e-10):
     pmf_a_smooth /= np.sum(pmf_a_smooth) # Re-normalise after adding epsilon
     pmf_b_smooth /= np.sum(pmf_b_smooth) # Re-normalise after adding epsilon
 
-
     # Calculate KL divergence using scipy.stats.entropy
     try:
         kl_div_ab = entropy(pk=pmf_a_smooth, qk=pmf_b_smooth)
@@ -507,6 +598,282 @@ def calculate_kl_divergence(data_a, data_b, num_bins=100, epsilon=1e-10):
     except Exception as e:
         print(f"Error calculating KL divergence: {e}")
         return np.nan, np.nan
+
+def calculate_comprehensive_metrics(data_a, data_b, metric_name="", max_samples=50000):
+    """Calculate comprehensive statistical metrics between two datasets.
+    
+    Args:
+        data_a, data_b: Input data arrays
+        metric_name: Name for logging purposes
+        max_samples: Maximum samples for computational efficiency
+        
+    Returns:
+        dict: Dictionary containing all calculated metrics
+    """
+    # Flatten and subsample if necessary
+    flat_a = data_a.flatten()
+    flat_b = data_b.flatten()
+    
+    if len(flat_a) > max_samples:
+        flat_a = np.random.choice(flat_a, max_samples, replace=False)
+    if len(flat_b) > max_samples:
+        flat_b = np.random.choice(flat_b, max_samples, replace=False)
+    
+    metrics = {}
+    
+    try:
+        # Basic statistics
+        metrics['mean_a'] = np.mean(flat_a)
+        metrics['mean_b'] = np.mean(flat_b)
+        metrics['std_a'] = np.std(flat_a)
+        metrics['std_b'] = np.std(flat_b)
+        metrics['mean_diff'] = abs(metrics['mean_a'] - metrics['mean_b'])
+        metrics['std_ratio'] = metrics['std_a'] / metrics['std_b'] if metrics['std_b'] != 0 else np.inf
+        
+        # KL Divergence
+        kl_ab, kl_ba = calculate_kl_divergence(flat_a, flat_b)
+        metrics['kl_divergence_ab'] = kl_ab
+        metrics['kl_divergence_ba'] = kl_ba
+        metrics['kl_divergence_symmetric'] = (kl_ab + kl_ba) / 2
+        
+        # Jensen-Shannon Divergence (symmetric)
+        # First create probability distributions
+        combined_data = np.concatenate((flat_a, flat_b))
+        min_val, max_val = np.min(combined_data), np.max(combined_data)
+        if not np.isclose(min_val, max_val):
+            bins = np.linspace(min_val, max_val, 101)
+            hist_a, _ = np.histogram(flat_a, bins=bins, density=True)
+            hist_b, _ = np.histogram(flat_b, bins=bins, density=True)
+            # Normalise
+            hist_a = hist_a / np.sum(hist_a) if np.sum(hist_a) > 0 else hist_a
+            hist_b = hist_b / np.sum(hist_b) if np.sum(hist_b) > 0 else hist_b
+            # Add small epsilon to avoid log(0)
+            hist_a = hist_a + 1e-10
+            hist_b = hist_b + 1e-10
+            hist_a = hist_a / np.sum(hist_a)
+            hist_b = hist_b / np.sum(hist_b)
+            metrics['js_divergence'] = jensenshannon(hist_a, hist_b) ** 2  # Squared for distance metric
+        else:
+            metrics['js_divergence'] = np.nan
+            
+        # Wasserstein Distance (Earth Mover's Distance)
+        metrics['wasserstein_distance'] = wasserstein_distance(flat_a, flat_b)
+        
+        # Kolmogorov-Smirnov Test
+        ks_stat, ks_pvalue = ks_2samp(flat_a, flat_b)
+        metrics['ks_statistic'] = ks_stat
+        metrics['ks_pvalue'] = ks_pvalue
+        
+        # Additional distributional metrics
+        metrics['range_a'] = np.max(flat_a) - np.min(flat_a)
+        metrics['range_b'] = np.max(flat_b) - np.min(flat_b)
+        metrics['range_ratio'] = metrics['range_a'] / metrics['range_b'] if metrics['range_b'] != 0 else np.inf
+        
+        # Percentile differences
+        for p in [25, 50, 75, 90, 95]:
+            perc_a = np.percentile(flat_a, p)
+            perc_b = np.percentile(flat_b, p)
+            metrics[f'percentile_{p}_diff'] = abs(perc_a - perc_b)
+            
+    except Exception as e:
+        print(f"Error calculating metrics for {metric_name}: {e}")
+        
+    return metrics
+
+def plot_comprehensive_comparison(data_a, data_b, label_a, label_b, title, save_path, filename_base, max_points=50000):
+    """Create comprehensive comparison plots including overlayed distributions and statistical summaries."""
+    
+    # Flatten and subsample data
+    flat_a = data_a.flatten()
+    flat_b = data_b.flatten()
+    
+    if len(flat_a) > max_points:
+        flat_a = np.random.choice(flat_a, max_points, replace=False)
+    if len(flat_b) > max_points:
+        flat_b = np.random.choice(flat_b, max_points, replace=False)
+    
+    # Create figure with subplots
+    fig = plt.figure(figsize=(12, 8))
+    gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.3)
+    
+    # 1. Overlayed KDE
+    ax1 = fig.add_subplot(gs[0, 0])
+    sns.kdeplot(flat_a, ax=ax1, label=label_a, fill=True, alpha=0.6)
+    sns.kdeplot(flat_b, ax=ax1, label=label_b, fill=True, alpha=0.6)
+    ax1.set_title('Probability Density')
+    ax1.set_xlabel('Value')
+    ax1.legend()
+    
+    # 2. Box plots
+    ax2 = fig.add_subplot(gs[0, 1])
+    box_data = [flat_a, flat_b]
+    box_labels = [label_a, label_b]
+    bp = ax2.boxplot(box_data, labels=box_labels, patch_artist=True)
+    colors = ['lightblue', 'lightcoral']
+    for patch, color in zip(bp['boxes'], colors):
+        patch.set_facecolor(color)
+    ax2.set_title('Box Plot Comparison')
+    ax2.tick_params(axis='x', rotation=45)
+    
+    # 3. Q-Q Plot
+    ax3 = fig.add_subplot(gs[0, 2])
+    # Sort both datasets for Q-Q plot
+    sorted_a = np.sort(flat_a)
+    sorted_b = np.sort(flat_b)
+    # Interpolate to same length
+    min_len = min(len(sorted_a), len(sorted_b))
+    if len(sorted_a) != len(sorted_b):
+        if len(sorted_a) > min_len:
+            indices = np.linspace(0, len(sorted_a)-1, min_len).astype(int)
+            sorted_a = sorted_a[indices]
+        if len(sorted_b) > min_len:
+            indices = np.linspace(0, len(sorted_b)-1, min_len).astype(int)
+            sorted_b = sorted_b[indices]
+    
+    ax3.scatter(sorted_a, sorted_b, alpha=0.5, s=1)
+    min_val = min(np.min(sorted_a), np.min(sorted_b))
+    max_val = max(np.max(sorted_a), np.max(sorted_b))
+    ax3.plot([min_val, max_val], [min_val, max_val], 'r--', alpha=0.8)
+    ax3.set_xlabel(f'{label_a} Quantiles')
+    ax3.set_ylabel(f'{label_b} Quantiles')
+    ax3.set_title('Q-Q Plot')
+    ax3.set_aspect('equal', adjustable='box')
+    
+    # 4. Histogram comparison
+    ax4 = fig.add_subplot(gs[1, :2])
+    bins = np.linspace(min(np.min(flat_a), np.min(flat_b)), 
+                      max(np.max(flat_a), np.max(flat_b)), 50)
+    ax4.hist(flat_a, bins=bins, alpha=0.6, label=label_a, density=True, color='blue')
+    ax4.hist(flat_b, bins=bins, alpha=0.6, label=label_b, density=True, color='red')
+    ax4.set_title('Histogram Comparison')
+    ax4.set_xlabel('Value')
+    ax4.set_ylabel('Density')
+    ax4.legend()
+    
+    # 5. Statistical summary
+    ax5 = fig.add_subplot(gs[1, 2])
+    ax5.axis('off')
+    
+    # Calculate key metrics
+    metrics = calculate_comprehensive_metrics(flat_a, flat_b)
+    
+    summary_text = f"""Statistical Summary:
+    
+Mean: {metrics.get('mean_a', 0):.3f} vs {metrics.get('mean_b', 0):.3f}
+Std: {metrics.get('std_a', 0):.3f} vs {metrics.get('std_b', 0):.3f}
+
+Distance Metrics:
+KL Div (A||B): {metrics.get('kl_divergence_ab', np.nan):.3f}
+KL Div (B||A): {metrics.get('kl_divergence_ba', np.nan):.3f}
+JS Divergence: {metrics.get('js_divergence', np.nan):.3f}
+Wasserstein: {metrics.get('wasserstein_distance', np.nan):.3f}
+
+Statistical Tests:
+KS Statistic: {metrics.get('ks_statistic', np.nan):.3f}
+KS p-value: {metrics.get('ks_pvalue', np.nan):.3e}
+"""
+    
+    ax5.text(0.05, 0.95, summary_text, transform=ax5.transAxes, fontsize=9,
+             verticalalignment='top', fontfamily='monospace',
+             bbox=dict(boxstyle='round', facecolor='lightgray', alpha=0.8))
+    
+    fig.suptitle(title, fontsize=14, y=0.95)
+    
+    # Save the plot
+    plt.savefig(os.path.join(save_path, f'{filename_base}_comprehensive.svg'), 
+                bbox_inches='tight', dpi=300)
+    plt.close(fig)
+    
+    return metrics
+
+def create_comparison_report(all_metrics, save_path):
+    """Create a comprehensive comparison report with all calculated metrics."""
+    
+    # Convert metrics to DataFrame for easy handling
+    df_data = []
+    for metric_name, metrics in all_metrics.items():
+        row = {'Metric': metric_name}
+        row.update(metrics)
+        df_data.append(row)
+    
+    df = pd.DataFrame(df_data)
+    
+    # Save as CSV
+    csv_path = os.path.join(save_path, 'dataset_comparison_metrics.csv')
+    df.to_csv(csv_path, index=False)
+    print(f"Saved comprehensive metrics to: {csv_path}")
+    
+    # Create summary plot of key metrics
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig.suptitle('Dataset Comparison Summary', fontsize=16)
+    
+    # Extract key metrics for plotting
+    metrics_to_plot = ['kl_divergence_symmetric', 'js_divergence', 'wasserstein_distance', 'ks_statistic']
+    metric_labels = ['KL Divergence\n(Symmetric)', 'Jensen-Shannon\nDivergence', 'Wasserstein\nDistance', 'Kolmogorov-Smirnov\nStatistic']
+    
+    for i, (metric, label) in enumerate(zip(metrics_to_plot, metric_labels)):
+        ax = axes[i//2, i%2]
+        
+        # Get values for this metric
+        values = []
+        names = []
+        for _, row in df.iterrows():
+            if metric in row and not pd.isna(row[metric]):
+                values.append(row[metric])
+                names.append(row['Metric'])
+        
+        if values:
+            bars = ax.bar(range(len(values)), values, color=plt.cm.Set3(np.linspace(0, 1, len(values))))
+            ax.set_title(label)
+            ax.set_xticks(range(len(values)))
+            ax.set_xticklabels(names, rotation=45, ha='right')
+            ax.set_ylabel('Value')
+            
+            # Add value labels on bars
+            for j, (bar, val) in enumerate(zip(bars, values)):
+                ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + max(values)*0.01,
+                       f'{val:.3f}', ha='center', va='bottom', fontsize=8)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(save_path, 'comparison_summary.svg'), bbox_inches='tight', dpi=300)
+    plt.close(fig)
+    
+    # Print summary to console
+    print("\n" + "="*60)
+    print("DATASET COMPARISON SUMMARY")
+    print("="*60)
+    
+    for _, row in df.iterrows():
+        print(f"\n{row['Metric']}:")
+        print("-" * 40)
+        
+        # Key metrics to highlight
+        key_metrics = {
+            'Mean Difference': 'mean_diff',
+            'KL Divergence (A→B)': 'kl_divergence_ab', 
+            'KL Divergence (B→A)': 'kl_divergence_ba',
+            'Jensen-Shannon Div': 'js_divergence',
+            'Wasserstein Distance': 'wasserstein_distance',
+            'KS Test p-value': 'ks_pvalue'
+        }
+        
+        for display_name, col_name in key_metrics.items():
+            if col_name in row and not pd.isna(row[col_name]):
+                value = row[col_name]
+                if col_name == 'ks_pvalue':
+                    print(f"  {display_name}: {value:.2e} {'(Significant)' if value < 0.05 else '(Not significant)'}")
+                else:
+                    print(f"  {display_name}: {value:.4f}")
+    
+    print("\n" + "="*60)
+    print("INTERPRETATION GUIDE:")
+    print("• Higher KL/JS divergence = More different distributions")
+    print("• Higher Wasserstein distance = More different distributions") 
+    print("• KS p-value < 0.05 = Statistically significant difference")
+    print("• Values closer to 0 = More similar datasets")
+    print("="*60)
+    
+    return df
 
 
 if __name__ == "__main__":
@@ -672,100 +1039,122 @@ if __name__ == "__main__":
         #                       'Perfect Channel', 'Noisy Channel',
         #                           plot_save_path_b, 'complex_distributions_B.svg')
 
-    # --- Generate Comparison Plots --- #
+    # --- Generate Enhanced Comparison Plots --- #
     if args.compare and perfect_m_A is not None and received_m_A is not None and perfect_m_B is not None and received_m_B is not None:
-        print("\n--- Generating Comparison Plots (A vs B) ---")
-
-        # Overlayed Magnitude Distribution (Perfect Channel)
+        print("\n--- Generating Enhanced Comparison Analysis (A vs B) ---")
+        
+        # Calculate noise for both datasets
+        noise_A = received_m_A - perfect_m_A
+        noise_B = received_m_B - perfect_m_B
+        
+        # Dictionary to store all metrics for final report
+        all_comparison_metrics = {}
+        
+        # 1. Perfect Channel Magnitude Comparison
+        print("  Analysing Perfect Channel Magnitude...")
+        metrics = plot_comprehensive_comparison(
+            np.abs(perfect_m_A), np.abs(perfect_m_B),
+            'Dataset A (Perfect)', 'Dataset B (Perfect)',
+            'Perfect Channel Magnitude Comparison',
+            plot_save_path_comparison, 'perfect_magnitude'
+        )
+        all_comparison_metrics['Perfect Channel Magnitude'] = metrics
+        
+        # 2. Noisy Channel Magnitude Comparison  
+        print("  Analysing Noisy Channel Magnitude...")
+        metrics = plot_comprehensive_comparison(
+            np.abs(received_m_A), np.abs(received_m_B),
+            'Dataset A (Noisy)', 'Dataset B (Noisy)', 
+            'Noisy Channel Magnitude Comparison',
+            plot_save_path_comparison, 'noisy_magnitude'
+        )
+        all_comparison_metrics['Noisy Channel Magnitude'] = metrics
+        
+        # 3. Perfect Channel Phase Comparison
+        print("  Analysing Perfect Channel Phase...")
+        metrics = plot_comprehensive_comparison(
+            np.angle(perfect_m_A), np.angle(perfect_m_B),
+            'Dataset A (Perfect)', 'Dataset B (Perfect)',
+            'Perfect Channel Phase Comparison', 
+            plot_save_path_comparison, 'perfect_phase'
+        )
+        all_comparison_metrics['Perfect Channel Phase'] = metrics
+        
+        # 4. Noisy Channel Phase Comparison
+        print("  Analysing Noisy Channel Phase...")
+        metrics = plot_comprehensive_comparison(
+            np.angle(received_m_A), np.angle(received_m_B),
+            'Dataset A (Noisy)', 'Dataset B (Noisy)',
+            'Noisy Channel Phase Comparison',
+            plot_save_path_comparison, 'noisy_phase'
+        )
+        all_comparison_metrics['Noisy Channel Phase'] = metrics
+        
+        # 5. Noise Real Part Comparison
+        print("  Analysing Noise (Real Part)...")
+        metrics = plot_comprehensive_comparison(
+            noise_A.real, noise_B.real,
+            'Dataset A (Noise)', 'Dataset B (Noise)',
+            'Noise Real Part Comparison',
+            plot_save_path_comparison, 'noise_real'
+        )
+        all_comparison_metrics['Noise Real Part'] = metrics
+        
+        # 6. Noise Imaginary Part Comparison
+        print("  Analysing Noise (Imaginary Part)...")
+        metrics = plot_comprehensive_comparison(
+            noise_A.imag, noise_B.imag,
+            'Dataset A (Noise)', 'Dataset B (Noise)',
+            'Noise Imaginary Part Comparison',
+            plot_save_path_comparison, 'noise_imag'
+        )
+        all_comparison_metrics['Noise Imaginary Part'] = metrics
+        
+        # 7. Noise Magnitude Comparison
+        print("  Analysing Noise Magnitude...")
+        metrics = plot_comprehensive_comparison(
+            np.abs(noise_A), np.abs(noise_B),
+            'Dataset A (Noise)', 'Dataset B (Noise)',
+            'Noise Magnitude Comparison',
+            plot_save_path_comparison, 'noise_magnitude'
+        )
+        all_comparison_metrics['Noise Magnitude'] = metrics
+        
+        # 8. Channel Real Part Comparison (Perfect)
+        print("  Analysing Perfect Channel Real Part...")
+        metrics = plot_comprehensive_comparison(
+            perfect_m_A.real, perfect_m_B.real,
+            'Dataset A (Perfect)', 'Dataset B (Perfect)',
+            'Perfect Channel Real Part Comparison',
+            plot_save_path_comparison, 'perfect_real'
+        )
+        all_comparison_metrics['Perfect Channel Real Part'] = metrics
+        
+        # 9. Channel Imaginary Part Comparison (Perfect)
+        print("  Analysing Perfect Channel Imaginary Part...")
+        metrics = plot_comprehensive_comparison(
+            perfect_m_A.imag, perfect_m_B.imag,
+            'Dataset A (Perfect)', 'Dataset B (Perfect)',
+            'Perfect Channel Imaginary Part Comparison',
+            plot_save_path_comparison, 'perfect_imag'
+        )
+        all_comparison_metrics['Perfect Channel Imaginary Part'] = metrics
+        
+        # Generate comprehensive comparison report
+        print("  Creating comprehensive comparison report...")
+        comparison_df = create_comparison_report(all_comparison_metrics, plot_save_path_comparison)
+        
+        # Create legacy overlayed plots for backward compatibility
+        print("  Creating additional overlayed distribution plots...")
         plot_overlayed_distribution(np.abs(perfect_m_A), np.abs(perfect_m_B),
                                   'Dataset A (Perfect)', 'Dataset B (Perfect)',
                                   'Magnitude', 'Overlayed Magnitude Distribution (Perfect)',
-                                  plot_save_path_comparison, 'magnitude_comparison_perfect.svg')
-
-        # Overlayed Magnitude Distribution (Received Channel)
+                                  plot_save_path_comparison, 'magnitude_comparison_perfect_legacy.svg')
+        
         plot_overlayed_distribution(np.abs(received_m_A), np.abs(received_m_B),
                                   'Dataset A (Noisy)', 'Dataset B (Noisy)',
                                   'Magnitude', 'Overlayed Magnitude Distribution (Noisy)',
-                                  plot_save_path_comparison, 'magnitude_comparison_noisy.svg')
-
-        # --- Overlayed Phase Distribution Omitted ---
-        # plot_overlayed_distribution(np.angle(perfect_m_A), np.angle(perfect_m_B),
-        #                           'Dataset A (Perfect)', 'Dataset B (Perfect)',
-        #                           'Phase (Radians)', 'Overlayed Phase Distribution (Perfect)',
-        #                           plot_save_path_comparison, 'phase_comparison_perfect.svg')
-        # plot_overlayed_distribution(np.angle(received_m_A), np.angle(received_m_B),
-        #                           'Dataset A (Noisy)', 'Dataset B (Noisy)',
-        #                           'Phase (Radians)', 'Overlayed Phase Distribution (Noisy)',
-        #                           plot_save_path_comparison, 'phase_comparison_noisy.svg')
-
-        # --- Add Overlayed Noise Distributions ---
-        noise_A = received_m_A - perfect_m_A
-        noise_B = received_m_B - perfect_m_B
-
-        # Overlayed Noise Distribution (Real Part)
-        plot_overlayed_distribution(noise_A.real, noise_B.real,
-                                  'Dataset A (Noise Real)', 'Dataset B (Noise Real)',
-                                  'Noise Value', 'Overlayed Noise Distribution (Real Part)',
-                                  plot_save_path_comparison, 'noise_comparison_real.svg')
-
-        # Overlayed Noise Distribution (Imaginary Part)
-        plot_overlayed_distribution(noise_A.imag, noise_B.imag,
-                                  'Dataset A (Noise Imag)', 'Dataset B (Noise Imag)',
-                                  'Noise Value', 'Overlayed Noise Distribution (Imaginary Part)',
-                                  plot_save_path_comparison, 'noise_comparison_imag.svg')
-
-        # --- Add Overlayed Noise Magnitude Distribution ---
-        noise_magnitude_A = np.abs(noise_A)
-        noise_magnitude_B = np.abs(noise_B)
-
-        plot_overlayed_distribution(noise_magnitude_A, noise_magnitude_B,
-                                  'Dataset A (Noise Mag)', 'Dataset B (Noise Mag)',
-                                  'Noise Magnitude', 'Overlayed Noise Magnitude Distribution',
-                                  plot_save_path_comparison, 'noise_comparison_magnitude.svg')
-
-        # --- Add KL Divergence Calculations ---
-        print("--- Calculating KL Divergence (A vs B) ---")
-        kl_results = {}
-
-        # 1. Perfect Magnitude
-        print("  Calculating KL divergence for Perfect Magnitude...")
-        kl_ab, kl_ba = calculate_kl_divergence(np.abs(perfect_m_A).flatten(), np.abs(perfect_m_B).flatten())
-        kl_results['Perfect Magnitude (A||B)'] = kl_ab
-        kl_results['Perfect Magnitude (B||A)'] = kl_ba
-
-        # 2. Noisy Magnitude
-        print("  Calculating KL divergence for Noisy Magnitude...")
-        kl_ab, kl_ba = calculate_kl_divergence(np.abs(received_m_A).flatten(), np.abs(received_m_B).flatten())
-        kl_results['Noisy Magnitude (A||B)'] = kl_ab
-        kl_results['Noisy Magnitude (B||A)'] = kl_ba
-
-        # Calculate Noise
-        noise_A = received_m_A - perfect_m_A
-        noise_B = received_m_B - perfect_m_B
-
-        # 3. Noise Real Part
-        print("  Calculating KL divergence for Noise (Real Part)...")
-        kl_ab, kl_ba = calculate_kl_divergence(noise_A.real.flatten(), noise_B.real.flatten())
-        kl_results['Noise Real (A||B)'] = kl_ab
-        kl_results['Noise Real (B||A)'] = kl_ba
-
-        # 4. Noise Imaginary Part
-        print("  Calculating KL divergence for Noise (Imaginary Part)...")
-        kl_ab, kl_ba = calculate_kl_divergence(noise_A.imag.flatten(), noise_B.imag.flatten())
-        kl_results['Noise Imag (A||B)'] = kl_ab
-        kl_results['Noise Imag (B||A)'] = kl_ba
-
-        # 5. Noise Magnitude
-        print("  Calculating KL divergence for Noise Magnitude...")
-        kl_ab, kl_ba = calculate_kl_divergence(np.abs(noise_A).flatten(), np.abs(noise_B).flatten())
-        kl_results['Noise Magnitude (A||B)'] = kl_ab
-        kl_results['Noise Magnitude (B||A)'] = kl_ba
-
-        # Print results
-        print("--- KL Divergence Results ---")
-        for key, value in kl_results.items():
-            print(f"  {key}: {value:.4f}" if not np.isnan(value) else f"  {key}: Calculation failed/undefined")
-        print("-" * 30)
+                                  plot_save_path_comparison, 'magnitude_comparison_noisy_legacy.svg')
 
     print("\nPlot generation process finished.")
 

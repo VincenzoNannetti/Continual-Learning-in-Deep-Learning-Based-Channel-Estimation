@@ -1,0 +1,101 @@
+# Residual Autoencoder Hyperparameter Sweep Configuration for Standard Training 2.0
+# Optuna-based hyperparameter optimization with W&B logging
+program: standard_training_2/train.py # The script your agent will run
+method: bayes # Strategy: bayes (TPE) is efficient for hyperparameter optimization
+metric:
+  name: eval_nmse  # The exact metric name logged that you want to optimize
+  goal: minimize   # Minimize NMSE (lower is better)
+
+parameters:
+  # --- Fixed W&B Configuration ---
+  wandb.project:
+    value: "Model Optimisation"  # Project name for all runs
+  
+  # --- Base Configuration Path ---
+  train_config_path:
+    value: "../residual_autoencoder.yaml" # Path to base residual autoencoder training config, relative to this sweep file
+
+  # --- Training Hyperparameters to Optimize ---
+  training.learning_rate:
+    distribution: log_uniform_values # Good for learning rates
+    min: 1e-5
+    max: 1e-3
+
+  training.weight_decay:
+    distribution: log_uniform_values
+    min: 1e-7
+    max: 1e-4
+
+  training.batch_size:
+    distribution: categorical
+    values: [8, 16, 32, 64]  # Reduced batch sizes for memory efficiency
+
+  # --- Model Architecture Parameters ---
+  model.params.feature_maps:
+    distribution: categorical
+    values: [16, 32, 64]  # Added feature maps parameter
+
+  model.params.dropout_rate:
+    distribution: uniform
+    min: 0.0
+    max: 0.3  # Added dropout rate parameter
+
+  # --- Data Processing Parameters ---
+  data.snr:
+    distribution: categorical
+    values: [20]  # constant value for now
+
+  # --- Scheduler Parameters ---
+  training.scheduler.params.patience:
+    distribution: int_uniform
+    min: 5
+    max: 15
+
+  training.scheduler.params.factor:
+    distribution: uniform
+    min: 0.1
+    max: 0.5
+
+  # --- Early Stopping Parameters ---
+  training.early_stopping.patience:
+    distribution: int_uniform
+    min: 10
+    max: 30
+
+  # --- Fixed Parameters for Stability and Windows Compatibility ---
+  data.num_workers:
+    value: 0  # Windows compatibility
+  
+  data.pin_memory:
+    value: true  # Faster CPU->GPU transfer
+  
+  hardware.use_amp:
+    value: true  
+  
+  # --- Fixed Training Parameters ---
+  training.epochs:
+    value: 100 # Default epochs for sweep, can be adjusted
+  
+  framework.seed:
+    value: 42  # Fixed seed for reproducible comparisons
+  
+  # --- Evaluation Configuration for Optuna ---
+  evaluation.optuna_wandb_num_plots:
+    value: 3  # Number of evaluation plots to log to W&B per trial
+  
+  evaluation.plot_examples:
+    value: 3
+
+  # --- Optuna Runner W&B Configuration ---
+  optuna_runner_wandb.project:
+    value: "Model Optimisation"
+  
+  optuna_runner_wandb.entity:
+    value: null  # Use default entity
+
+  # --- W&B Configuration for Individual Training Runs ---
+  wandb.entity:
+    value: null  # Use default entity
+  
+  wandb.log_freq_train:
+    value: 5  # Log every 5 epochs during training for efficiency 

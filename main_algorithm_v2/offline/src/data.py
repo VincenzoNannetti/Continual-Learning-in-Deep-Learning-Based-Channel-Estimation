@@ -72,6 +72,44 @@ class ChannelDataset(Dataset):
         print(f"[CACHE_LOAD] Attempting to load cache from: {cache_path}")
         if not os.path.exists(cache_path):
             print(f"[CACHE_LOAD] No cached data found at: {cache_path}")
+            
+            # Try to find existing preprocessed data that matches
+            base_name = os.path.splitext(os.path.basename(self.data_path))[0]
+            cache_dir = os.path.join(self.preprocessed_dir, "tester_data")
+            
+            # Look for files that match the pattern
+            if os.path.exists(cache_dir):
+                try:
+                    files = os.listdir(cache_dir)
+                    print(f"[CACHE_LOAD] Searching {len(files)} files in cache directory...")
+                    
+                    for filename in files:
+                        if (filename.startswith(base_name) and 
+                            f"snr{self.snr}" in filename and 
+                            self.interpolation_kernel in filename and
+                            filename.endswith('.mat')):
+                            
+                            alternative_path = os.path.join(cache_dir, filename)
+                            print(f"[CACHE_LOAD] Found matching cache file: {alternative_path}")
+                            try:
+                                cached = sio.loadmat(alternative_path)
+                                # For existing preprocessed files, use simpler extraction
+                                if 'interpolated_data' in cached and 'ground_truth' in cached:
+                                    interpolated_data = cached['interpolated_data']
+                                    gt_2ch = cached['ground_truth']
+                                    print(f"[CACHE_LOAD] Successfully loaded from alternative cache with {interpolated_data.shape[0]} samples!")
+                                    return interpolated_data, gt_2ch
+                            except Exception as e:
+                                print(f"[CACHE_LOAD] Error loading alternative cache {filename}: {e}")
+                                continue
+                    print(f"[CACHE_LOAD] No matching cache files found for base_name='{base_name}', snr={self.snr}, kernel='{self.interpolation_kernel}'")
+                except PermissionError as e:
+                    print(f"[CACHE_LOAD] Permission error listing cache directory: {e}")
+                except Exception as e:
+                    print(f"[CACHE_LOAD] Error accessing cache directory: {e}")
+            else:
+                print(f"[CACHE_LOAD] Cache directory does not exist: {cache_dir}")
+            
             return None
         
         print(f"[CACHE_LOAD] Loading cached data from: {cache_path}")

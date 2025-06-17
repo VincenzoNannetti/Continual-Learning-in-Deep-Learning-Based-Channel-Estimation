@@ -25,14 +25,18 @@ class DomainBatchNorm2d(nn.Module):
     A Batch Normalization layer that maintains separate running statistics
     and trainable parameters for each domain/task.
     """
-    def __init__(self, num_features: int, num_tasks: int):
+    def __init__(self, num_features: int, num_tasks: int, default_task_id: str = None):
         super().__init__()
         self.num_features = num_features
         self.num_tasks = num_tasks
         self.bns = nn.ModuleDict({
             str(i): nn.BatchNorm2d(num_features) for i in range(num_tasks)
         })
-        self.active_task_id = '0'
+        # Set active task to first available task or provided default
+        if default_task_id is not None and default_task_id in self.bns:
+            self.active_task_id = default_task_id
+        else:
+            self.active_task_id = str(min(range(num_tasks)))  # First available task
 
     def set_active_task(self, task_id: str):
         if task_id not in self.bns:
@@ -299,36 +303,67 @@ class UNet_SRCNN_LoRA(nn.Module):
             # Unfreeze Domain-Specific BN parameters
             elif 'bns.' in name:  # DomainBatchNorm2d parameters
                 param.requires_grad = True
-            # Unfreeze biases if configured
-            elif config.model.params.lora_bias_trainable != 'none' and 'bias' in name:
+            # Unfreeze biases if configured (but respect LoRA layer's bias freezing)
+            elif (config.model.params.lora_bias_trainable != 'none' and 'bias' in name and 
+                  'task_adapters' not in name):  # Don't unfreeze conv biases in LoRA layers
                 param.requires_grad = True
 
         print("Finished model setup. Trainable parameters are now LoRA adapters and BN layers.")
 
-    def _inject_adapters(self, module: nn.Module):
+    def _inject_adapters(self, module: nn.Module, module_path: str = ""):
         """
         Recursively traverse the model and replace Conv2d layers with their
         LoRA-adapted versions, optionally with Domain-Specific BN.
+        Skips layers where LoRA would be problematic (min(out_channels, in_channels*k*k) too small).
         """
         for name, child_module in module.named_children():
+            current_path = f"{module_path}.{name}" if module_path else name
+            
             if isinstance(child_module, nn.Conv2d):
-                # This is a Conv2d layer we need to adapt
+                # This is a Conv2d layer we might want to adapt
                 conv_layer = child_module
                 
-                # Create the LoRA wrapper for the conv layer
-                lora_conv = LoRAConv2d(conv_layer, lora_dropout=self.config.model.params.lora_dropout)
+                # Check if LoRA is viable for this layer
+                out_channels = conv_layer.out_channels
+                in_channels = conv_layer.in_channels
+                k_h, k_w = conv_layer.kernel_size
+                k = in_channels * k_h * k_w
+                min_dk = min(out_channels, k)
                 
-                # Check if we need to add domain-specific BN
-                if self.config.model.params.use_domain_specific_bn:
-                    dbn = DomainBatchNorm2d(conv_layer.out_channels, self.config.data.tasks)
-                    # Replace the original conv with a sequence of (LoRA-Conv -> DBN)
-                    setattr(module, name, nn.Sequential(lora_conv, dbn))
+                # # Skip problematic output layers with very few output channels
+                # skip_layer = False
+                # if 'final_conv' in current_path or 'conv3' in current_path:
+                #     # These are typically output layers with only 2 channels
+                #     if out_channels <= 2:
+                #         print(f"⚠️  Skipping LoRA for {current_path}: output layer with {out_channels} channels")
+                #         skip_layer = True
+                
+                # # Additional constraint: skip if rank would be problematic
+                # # For now, assume we want at least min_dk >= 4 for meaningful LoRA
+                # if min_dk < 4 and not skip_layer:
+                #     print(f"⚠️  Skipping LoRA for {current_path}: min(d,k)={min_dk} too small")
+                #     skip_layer = True
+                skip_layer = False
+                if not skip_layer:
+                    # Create the LoRA wrapper for the conv layer
+                    lora_dropout = getattr(self.config.model.params, 'lora_dropout', 0.0)
+                    lora_conv    = LoRAConv2d(conv_layer, lora_dropout=lora_dropout)
+                    
+                    # Check if we need to add domain-specific BN
+                    if self.config.model.params.use_domain_specific_bn:
+                        dbn = DomainBatchNorm2d(conv_layer.out_channels, self.config.data.tasks)
+                        # Replace the original conv with a sequence of (LoRA-Conv -> DBN)
+                        setattr(module, name, nn.Sequential(lora_conv, dbn))
+                    else:
+                        # Just replace with the LoRA-Conv layer
+                        setattr(module, name, lora_conv)
+                    
+                    print(f"✅ Added LoRA to {current_path}: {out_channels}x{in_channels}x{k_h}x{k_w} (min_dk={min_dk})")
                 else:
-                    # Just replace with the LoRA-Conv layer
-                    setattr(module, name, lora_conv)
+                    print(f"🔄 Keeping standard Conv2d for {current_path}")
             else:
                 # Recurse into submodules
-                self._inject_adapters(child_module)
+                self._inject_adapters(child_module, current_path)
     
     def add_task(self, task_id: str):
         """
@@ -347,7 +382,7 @@ class UNet_SRCNN_LoRA(nn.Module):
         """
         Activates the adapters and BN layers for a specific task.
         """
-        print(f"Setting active task to: {task_id}")
+        # print(f"Setting active task to: {task_id}")
         for module in self.modules():
             if isinstance(module, (LoRAConv2d, DomainBatchNorm2d)):
                 module.set_active_task(task_id)

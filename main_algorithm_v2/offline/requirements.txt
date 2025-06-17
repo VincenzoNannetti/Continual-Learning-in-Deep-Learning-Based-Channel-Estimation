@@ -1,7 +1,0 @@
-torch
-numpy
-scipy
-scikit-learn
-tqdm
-pydantic
-PyYAML 

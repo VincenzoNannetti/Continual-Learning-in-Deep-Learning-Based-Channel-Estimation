@@ -5,7 +5,7 @@ framework:
 
 model:
   name: UNet_SRCNN_LoRA
-  pretrained_path: C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Project\standard_training_2\optuna_study_results\trial_1_unet_srcnn\checkpoints\best_model.pth
+  pretrained_path: C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Project\standard_training_2\checkpoints\unet_srcnn\best_model.pth #C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Project\standard_training_2\optuna_study_results\trial_1_unet_srcnn\checkpoints\best_model.pth
   evaluation_path: null #C:\Users\Vincenzo_DES\OneDrive - Imperial College London\Year 4\ELEC70017 - Individual Project\Project\main_algorithm\offline\checkpoints\lora\unet_srcnn_lora_refactored-20250606_193203\lora_run_checkpoint.pth
   params:
     # Option for domain-specific batch normalisation
@@ -17,27 +17,27 @@ model:
     lora_dropout: 0.0
     lora_bias_trainable: 'none'
     
-    # Task-specific LoRA parameters
+    # Task-specific LoRA parameters (optimized for domain difficulty)
     task_lora_ranks:
-      0: 8
-      1: 3
-      2: 5
-      3: 13
-      4: 9
-      5: 4
-      6: 4
-      7: 54
-      8: 23
+      0: 4   # High SNR (20 dB) - smaller ranks for easier domains
+      1: 4   # High SNR (20 dB)
+      2: 4   # High SNR (20 dB)
+      3: 16  # Low SNR (3 dB) - larger ranks for harder domains
+      4: 16  # Low SNR (3 dB)
+      5: 16  # Low SNR (3 dB)
+      6: 4  # Medium SNR (10 dB) - medium ranks
+      7: 4  # Medium SNR (10 dB)
+      8: 4   # Medium SNR (10 dB)
     task_lora_alphas:
-      0: 1
-      1: 1
-      2: 1
-      3: 1
-      4: 1
-      5: 1
-      6: 1
-      7: 1
-      8: 1
+      0: 4  # Match rank for high SNR
+      1: 4  # Match rank for high SNR
+      2: 4  # Match rank for high SNR
+      3: 6  # Match rank for low SNR
+      4: 6  # Match rank for low SNR
+      5: 6  # Match rank for low SNR
+      6: 4  # Match rank for medium SNR
+      7: 4  # Match rank for medium SNR
+      8: 4  # Match rank for medium SNR
     task_lora_dropouts:
       0: 0.0
       1: 0.0
@@ -53,25 +53,25 @@ model:
     # These will be overridden by the backbone checkpoint anyway, but should match for clarity
     unet_args:
       in_channels: 2
-      base_features: 32
+      base_features: 16
       use_batch_norm: false
-      depth: 3
+      depth: 2
       activation: leakyrelu
       use_leaky_relu: false
-      leaky_slope: 0.19873055480755272
+      leaky_slope: 0.01
       verbose: false
     
     # SRCNN parameters (CORRECTED to match backbone model)
-    srcnn_channels: [128, 64]
-    srcnn_kernels: [7, 3, 5]
+    srcnn_channels: [64, 32]
+    srcnn_kernels: [9, 1, 5]
     num_tasks_for_model: 9
 
   strict_load: True
 
 data:
   dataset_type: standard
-  data_dir: ./data/raw/ray_tracing/
-  preprocessed_dir: ./data/preprocessed/
+  data_dir: ../../data/raw/ray_tracing/
+  preprocessed_dir: ../../data/preprocessed/
   tasks: 9
   sequence: [0, 1, 2, 3, 4, 5, 6, 7, 8]
   tasks_params:
@@ -105,23 +105,42 @@ data:
   interpolation: thin_plate_spline
   normalisation: zscore
   normalise_target: True
-  # Normalisation stats will be loaded from the backbone checkpoint
-  # norm_stats: 
-  #   mean_inputs: ...
-  #   std_inputs: ...
-  #   mean_targets: ...
-  #   std_targets: ...
   num_workers: 0
   validation_split: 0.15
   test_split: 0.15
 
 training:
-  epochs_per_task: 6
+  epochs_per_task: 14  # Default for high SNR tasks
   batch_size: 32
   loss_function: mse
   optimiser: adam
-  learning_rate: 0.005
+  learning_rate: 0.001   # Higher default - scheduler will reduce this
   weight_decay: 0.0001
+  
+  # Task-specific learning rates (higher initial rates - CosineAnnealingLR will reduce them)
+  task_learning_rates:
+    0: 0.001   # High SNR (20 dB) - start higher
+    1: 0.001   # High SNR (20 dB) - start higher  
+    2: 0.001   # High SNR (20 dB) - start higher
+    3: 0.0015  # Low SNR (3 dB) - even higher for difficult domains
+    4: 0.0015  # Low SNR (3 dB) - even higher for difficult domains
+    5: 0.0015  # Low SNR (3 dB) - even higher for difficult domains
+    6: 0.0012  # Medium SNR (10 dB) - moderate increase
+    7: 0.0012  # Medium SNR (10 dB) - moderate increase
+    8: 0.0012  # Medium SNR (10 dB) - moderate increase
+  
+  # Task-specific epoch counts (longer training for harder domains)
+  task_epochs:
+    0: 30      # High SNR
+    1: 30      # High SNR
+    2: 30      # High SNR
+    3: 50      # Low SNR (needs more epochs)
+    4: 50      # Low SNR (needs more epochs)
+    5: 50      # Low SNR (needs more epochs)
+    6: 30      # Medium SNR
+    7: 35      # Medium SNR
+    8: 35      # Medium SNR
+  
   task_weight_decays:
     0: 0.0001
     1: 0.0001
@@ -133,22 +152,41 @@ training:
     7: 0.0001
     8: 0.0001
   betas: [0.9, 0.999]
-  early_stopping_patience: 5
+  early_stopping_patience: 3  # Increased from 5
+  
+  # CosineAnnealingLR scheduler with task-specific T_max
   scheduler:
-    type: ReduceLROnPlateau
+    type: CosineAnnealingLR
     params:
-      mode: min
-      factor: 0.5
-      patience: 2
-      min_lr: 0.000001
-      verbose: True
+      T_max: 4  # Default for high SNR
+      eta_min: 0.00001  # Higher minimum to avoid too aggressive reduction
+      verbose: true
+  
+  # Task-specific scheduler parameters
+  task_scheduler_params:
+    0: {T_max: 4, eta_min: 0.00001}   # High SNR - quick cosine cycle
+    1: {T_max: 4, eta_min: 0.00001}   # High SNR - quick cosine cycle
+    2: {T_max: 4, eta_min: 0.00001}   # High SNR - quick cosine cycle
+    3: {T_max: 8, eta_min: 0.00001}   # Low SNR - longer cosine cycle
+    4: {T_max: 8, eta_min: 0.00001}   # Low SNR - longer cosine cycle
+    5: {T_max: 8, eta_min: 0.00001}   # Low SNR - longer cosine cycle
+    6: {T_max: 6, eta_min: 0.00001}   # Medium SNR - medium cosine cycle
+    7: {T_max: 6, eta_min: 0.00001}   # Medium SNR - medium cosine cycle
+    8: {T_max: 6, eta_min: 0.00001}   # Medium SNR - medium cosine cycle
+
+  # EWC (Elastic Weight Consolidation) parameters
+  ewc:
+    enabled: false
+    lambda_ewc: 1000.0               # EWC regularization strength (set to 0.0 to disable EWC loss but still compute Fisher)
+    fisher_samples: null             # Number of samples for Fisher computation (null = use all validation)
+    compute_fisher_after_task: true  # Compute Fisher matrices after each task training
 
 evaluation:
   metrics: [nmse, psnr, ssim, mse]
   plot_n_examples: 3
 
 logging:
-  checkpoint_dir: ./main_algorithm_v2/offline/checkpoints/lora/
+  checkpoint_dir: ./checkpoints/lora/
 
 hardware:
   device: auto

@@ -1,0 +1,98 @@
+# Experience Replay Configuration - Large Buffer (2000 samples)
+# Buffer Size Analysis: Large buffer to test performance with more memory
+
+experiment_name: experience_replay_large_buffer_2000
+
+# Method-specific parameters
+method:
+  name: "experience_replay"
+  buffer_size: 2000              # LARGE buffer for analysis
+  replay_batch_ratio: 0.5        
+  max_samples_per_task: 1000     
+  
+# Base model configuration (same as EWC for fair comparison)
+model:
+  name: unet_srcnn
+  use_pretrained: true
+  pretrained_path: C:/Users/Vincenzo_DES/OneDrive - Imperial College London/Year 4/ELEC70017 - Individual Project/Project/standard_training_2/models/trained/unet/unet_srcnn/best_model.pth
+  
+  params:
+    in_channels: 2
+    base_features: 16
+    use_batch_norm: false
+    depth: 2
+    activation: 'leakyrelu'
+    leaky_slope: 0.01
+    srcnn_channels: [64, 32]
+    srcnn_kernels: [9, 1, 5]
+
+# Data configuration (same as other methods)
+data:
+  dataset_type: standard
+  data_dir: ./data/raw/ray_tracing/
+  preprocessed_dir: ./data/preprocessed/
+  
+  sequence:
+    - domain_high_snr_med_linear
+    - domain_med_snr_med_linear  
+    - domain_low_snr_med_linear
+    - domain_high_snr_fast_linear
+    - domain_med_snr_fast_linear
+    - domain_low_snr_fast_linear
+    - domain_high_snr_slow_linear
+    - domain_med_snr_slow_linear
+    - domain_low_snr_slow_linear
+  
+  domain_snr_mapping:
+    high_snr: 20
+    med_snr: 10
+    low_snr: 3
+  
+  validation_split: 0.15
+  test_split: 0.15
+  num_workers: 0
+  pin_memory: true
+  persistent_workers: false
+
+# Training configuration
+training:
+  epochs_per_task: 30
+  batch_size: 32
+  loss_function: mse
+  optimizer: adam
+  learning_rate: 1e-4
+  weight_decay: 0.0
+  betas: [0.9, 0.999]
+  
+  # Early stopping
+  early_stopping_patience: 5
+  early_stopping_min_delta: 1e-6
+  
+  scheduler:
+    type: ReduceLROnPlateau
+    params:
+      mode: min
+      factor: 0.5
+      patience: 5
+      min_lr: 1e-6
+
+hardware:
+  device: cuda
+  use_amp: true
+
+logging:
+  checkpoint_dir: ./baseline_cl/checkpoints/experience_replay_2000/
+  save_best_model: true
+  log_frequency: 10
+  
+  wandb:
+    enabled: true
+    project: "continual_learning_baselines"
+    entity: null
+    tags: ["experience_replay", "buffer_2000", "large_buffer", "baseline"]
+
+evaluation:
+  eval_previous_tasks: true
+  metrics: [nmse, psnr, ssim, mse]
+  save_results: true
+  results_dir: ./baseline_cl/results/experience_replay_2000/ 

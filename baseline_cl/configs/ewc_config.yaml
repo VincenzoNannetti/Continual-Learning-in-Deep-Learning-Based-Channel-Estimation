@@ -1,0 +1,109 @@
+# EWC (Elastic Weight Consolidation) Configuration
+# Based on Kirkpatrick et al., 2017
+
+experiment_name: ewc_baseline_unet_srcnn
+
+# Method-specific parameters
+method:
+  name: "ewc"
+  ewc_lambda: 1000.0          # EWC regularisation strength (literature standard: 1000-10000)
+  fisher_samples: null        # Number of samples for Fisher computation (null = use all validation data)
+  
+# Base model configuration (inherits from UNet-SRCNN)
+model:
+  name: unet_srcnn
+  # Load pretrained backbone
+  use_pretrained: true
+  pretrained_path: C:/Users/Vincenzo_DES/OneDrive - Imperial College London/Year 4/ELEC70017 - Individual Project/Project/standard_training_2/models/trained/unet/unet_srcnn/best_model.pth  # Update this path
+  
+  # Model architecture (should match pretrained model)
+  params:
+    in_channels: 2
+    base_features: 16
+    use_batch_norm: false
+    depth: 2
+    activation: 'leakyrelu'
+    leaky_slope: 0.01
+    srcnn_channels: [64, 32]
+    srcnn_kernels: [9, 1, 5]
+
+# Data configuration (same domains as LoRA method)
+data:
+  dataset_type: standard
+  data_dir: ./data/raw/ray_tracing/
+  preprocessed_dir: ./data/preprocessed/
+  
+  # Domain sequence for continual learning with their corresponding SNR values
+  sequence:
+    - domain_high_snr_med_linear_cl
+    - domain_med_snr_med_linear_cl
+    - domain_low_snr_med_linear_cl
+    - domain_high_snr_fast_linear_cl
+    - domain_med_snr_fast_linear_cl
+    - domain_low_snr_fast_linear_cl
+    - domain_high_snr_slow_linear_cl
+    - domain_med_snr_slow_linear_cl
+    - domain_low_snr_slow_linear_cl
+  
+  # Domain-specific SNR mappings
+  domain_snr_mapping:
+    high_snr: 20  # High SNR domains
+    med_snr: 10   # Medium SNR domains
+    low_snr: 3    # Low SNR domains
+  
+  validation_split: 0.15
+  test_split: 0.15
+  
+  # Data loading
+  num_workers: 0
+  pin_memory: true
+  persistent_workers: false
+
+# Training configuration
+training:
+  epochs_per_task: 30         # Epochs per domain (conservative for EWC)
+  batch_size: 32
+  loss_function: mse
+  optimizer: adam
+  learning_rate: 1e-4
+  weight_decay: 0.0
+  betas: [0.9, 0.999]
+  
+  # Early stopping
+  early_stopping_patience: 5
+  early_stopping_min_delta: 1e-6
+  
+  # Scheduler (optional)
+  scheduler:
+    type: ReduceLROnPlateau
+    params:
+      mode: min
+      factor: 0.5
+      patience: 5
+      min_lr: 1e-6
+
+# Hardware configuration  
+hardware:
+  device: cuda
+  use_amp: true
+
+# Logging configuration
+logging:
+  checkpoint_dir: ./baseline_cl/checkpoints/ewc/
+  save_best_model: true
+  log_frequency: 10  # Log every N epochs
+  
+  # Weights & Biases (optional)
+  wandb:
+    enabled: true
+    project: "continual_learning_baselines"
+    entity: null  # Set your entity
+    tags: ["ewc", "baseline", "continual_learning"]
+
+# Evaluation configuration
+evaluation:
+  # Evaluate on all previous domains after each task
+  eval_previous_tasks: true
+  metrics: [nmse, psnr, ssim, mse]
+  save_results: true
+  results_dir: ./baseline_cl/results/ewc/ 

@@ -1,0 +1,137 @@
+# UNet+SRCNN Combined Model Hyperparameter Sweep Configuration for Standard Training 2.0
+# Optuna-based hyperparameter optimization with W&B logging
+program: standard_training_2/train.py # The script your agent will run
+method: bayes # Strategy: bayes (TPE) is efficient for hyperparameter optimization
+metric:
+  name: composite_score  # Composite score combining SSIM + NMSE with overfitting penalties
+  goal: maximize         # Maximize the composite score (higher is better)
+
+parameters:
+  # --- Fixed W&B Configuration ---
+  wandb.project:
+    value: "Model Optimisation"  # Project name for all runs
+  
+  # --- Base Configuration Path ---
+  train_config_path:
+    value: "../unet_srcnn.yaml" # Path to base training config, relative to this sweep file
+
+  # --- Training Hyperparameters to Optimize ---
+  training.learning_rate:
+    distribution: log_uniform_values # Good for learning rates
+    min: 1e-5
+    max: 1e-3
+
+  training.weight_decay:
+    distribution: log_uniform_values
+    min: 1e-7
+    max: 1e-2  # Expanded range for better regularization
+
+  training.batch_size:
+    distribution: categorical
+    values: [16, 32, 64, 128]  # Adjusted for combined UNet+SRCNN model
+
+  # --- Regularization Strategy ---
+  # The composite scoring function penalizes overfitting, and expanded weight_decay 
+  # provides L2 regularization. Dropout is not currently implemented in the UNet 
+  # architecture but could be added in future versions.
+
+  # --- UNet Architecture Parameters (via model.params) ---
+  model.params.base_features:
+    distribution: categorical
+    values: [16, 32, 48, 64]  # Range of UNet complexities
+
+  model.params.use_batch_norm:
+    distribution: categorical
+    values: [false, true]
+
+  model.params.depth:
+    distribution: categorical
+    values: [2, 3, 4, 5]  # Network depth - 2 is original, 3-5 are deeper
+
+  model.params.activation:
+    distribution: categorical
+    values: ['relu', 'leakyrelu', 'gelu', 'swish']  # Different activation functions
+
+  model.params.leaky_slope:
+    distribution: uniform
+    min: 0.01
+    max: 0.2  
+
+  # --- SRCNN Architecture Parameters ---
+  model.params.srcnn_channels:
+    distribution: categorical
+    values: ["64_32", "32_16", "128_64"]  # Using string representation of valid combinations
+
+  model.params.srcnn_kernels:
+    distribution: categorical
+    values: ["9_1_5", "5_1_3", "7_3_5"]  # Using string representation of valid combinations
+
+  # --- Combined Model Training Strategy ---
+  # model.params.freeze_unet:
+  #   distribution: categorical
+  #   values: [false, true]  # Whether to freeze UNet during training
+
+  # model.params.freeze_srcnn:
+  #   distribution: categorical
+  #   values: [false, true]  # Whether to freeze SRCNN during training
+
+  # --- Data Processing Parameters ---
+  data.snr:
+    distribution: categorical
+    values: [20]  # constant value for now
+
+  # --- Scheduler Parameters ---
+  training.scheduler.params.patience:
+    distribution: int_uniform
+    min: 5
+    max: 15
+
+  training.scheduler.params.factor:
+    distribution: uniform
+    min: 0.1
+    max: 0.5
+
+  # --- Early Stopping Parameters ---
+  training.early_stopping.patience:
+    distribution: int_uniform
+    min: 15
+    max: 35  # Longer patience for combined model
+
+  # --- Fixed Parameters for Stability and Windows Compatibility ---
+  data.num_workers:
+    value: 0  # Windows compatibility
+  
+  data.pin_memory:
+    value: true  # Faster CPU->GPU transfer
+  
+  hardware.use_amp:
+    value: true  # Mixed precision for efficiency
+  
+  # --- Fixed Training Parameters ---
+  training.epochs:
+    value: 100 # Longer training for combined model
+  
+  framework.seed:
+    value: 42  # Fixed seed for reproducible comparisons
+  
+  # --- Evaluation Configuration for Optuna ---
+  evaluation.optuna_wandb_num_plots:
+    value: 3  # Number of evaluation plots to log to W&B per trial
+  
+  # Disable plotting during individual training runs for efficiency
+  evaluation.plot_examples:
+    value: 3
+
+  # --- Optuna Runner W&B Configuration ---
+  optuna_runner_wandb.project:
+    value: "Model Optimisation"
+  
+  optuna_runner_wandb.entity:
+    value: null  # Use default entity
+
+  # --- W&B Configuration for Individual Training Runs ---
+  wandb.entity:
+    value: null  # Use default entity
+  
+  wandb.log_freq_train:
+    value: 1  # Log every 5 epochs during training for efficiency 

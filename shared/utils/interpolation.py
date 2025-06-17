@@ -13,7 +13,7 @@ Dependencies:
 import numpy as np
 from scipy import interpolate
 
-def interpolation(noisy, pilot_mask, method):
+def interpolation(noisy, pilot_mask, method="rbf"):
     """Interpolates channel estimates based on pilot locations derived from a mask.
 
     Args:
@@ -39,8 +39,8 @@ def interpolation(noisy, pilot_mask, method):
     interpolated_noisy = np.zeros((n_samples, n_sc, n_sym, n_channels), dtype=float)
 
     # Track interpolation success/failure stats
-    successful_samples = 0
-    failed_samples = 0
+    successful_samples  = 0
+    failed_samples      = 0
     min_pilots_required = {'rbf': 4, 'spline': 16}  # Minimum pilots needed for each method
     
     for i in range(n_samples):
@@ -105,7 +105,6 @@ def interpolation(noisy, pilot_mask, method):
         else:
             failed_samples += 1
 
-    print(f"Interpolation summary: {successful_samples} samples successful, {failed_samples} samples required fallback.")
     return interpolated_noisy
 
 def _nearest_neighbor_interpolation(sample, rows, cols, n_sc, n_sym, n_channels):
@@ -165,6 +164,92 @@ def _nearest_neighbor_fallback(channel, rows, cols, values):
             result[r, c] = values[nearest_idx]
     
     return result
+
+
+
+# import numpy as np
+# from scipy.interpolate import RBFInterpolator
+# def interpolation(noisy, pilot_mask, kernel="thin_plate_spline"):
+#     """Interpolates channel estimates based on pilot locations derived from a mask.
+
+#     Args:
+#         noisy (np.ndarray): The noisy channel estimate tensor with pilots.
+#                            Expected shape: (n_samples, n_subcarriers, n_symbols, 2) for real/imag.
+#         pilot_mask (np.ndarray): Boolean or integer mask indicating pilot locations.
+#                                 Expected shape: (n_samples, n_subcarriers, n_symbols).
+#                                 Value > 0 indicates a pilot.
+#         kernel (str): The RBF kernel to use. Default is "thin_plate_spline".
+#                      Other options: "cubic", "gaussian", "linear", "quintic".
+
+#     Returns:
+#         np.ndarray: Interpolated channel estimate tensor.
+#                    Shape: (n_samples, n_subcarriers, n_symbols, 2).
+#     """
+#     n_samples, n_sc, n_sym, n_channels = noisy.shape
+
+#     if pilot_mask.shape != (n_samples, n_sc, n_sym):
+#          raise ValueError(f"Shape mismatch: noisy data ({n_samples}, {n_sc}, {n_sym}) vs pilot_mask ({pilot_mask.shape})")
+
+#     if n_channels != 2:
+#         raise ValueError(f"Expected last dimension of noisy tensor to be 2 (real/imag), but got {n_channels}.")
+
+#     interpolated_noisy = np.zeros((n_samples, n_sc, n_sym, n_channels), dtype=float)
+
+#     successful_samples = 0
+#     failed_samples = 0
+
+#     for i in range(n_samples):
+#         # Get pilot positions
+#         rows, cols = np.where(pilot_mask[i] > 0)
+#         if rows.size == 0:
+#             print(f"Warning: No pilots found in sample {i}. Skipping.")
+#             interpolated_noisy[i] = noisy[i]
+#             failed_samples += 1
+#             continue
+
+#         # Prepare grid: (symbol, subcarrier) coordinates for interpolation
+#         eval_points = np.stack(np.meshgrid(np.arange(n_sym), np.arange(n_sc)), axis=-1).reshape(-1, 2)
+#         train_points = np.column_stack((cols, rows))  # (x, y) = (symbol, subcarrier)
+
+#         sample_success = True
+#         for j in range(n_channels):
+#             # Get pilot values for current channel (real/imag)
+#             pilot_values = noisy[i, rows, cols, j]
+
+#             try:
+#                 # Perform RBF interpolation
+#                 rbf = RBFInterpolator(
+#                     train_points,
+#                     pilot_values,
+#                     kernel=kernel,
+#                     neighbors=None,  # Use all pilots
+#                     degree=1  # Include linear term for better extrapolation
+#                 )
+                
+#                 # Interpolate the entire grid
+#                 interpolated_values = rbf(eval_points)
+                
+#                 # Reshape back to matrix form
+#                 interpolated_noisy[i, :, :, j] = interpolated_values.reshape(n_sc, n_sym)
+                
+#                 # Preserve original pilot values
+#                 interpolated_noisy[i, rows, cols, j] = pilot_values
+                
+#             except Exception as e:
+#                 print(f"Error during RBF interpolation for sample {i}, channel {j}: {e}")
+#                 sample_success = False
+#                 break
+
+#         if sample_success:
+#             successful_samples += 1
+#         else:
+#             failed_samples += 1
+#             # Preserve pilot positions in case of failure
+#             pilot_indices = pilot_mask[i] > 0
+#             interpolated_noisy[i, pilot_indices] = noisy[i, pilot_indices]
+
+#     print(f"Interpolation complete: {successful_samples} successful, {failed_samples} failed")
+#     return interpolated_noisy
 
 
 
