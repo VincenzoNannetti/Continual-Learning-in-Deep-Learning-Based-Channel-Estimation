@@ -37,6 +37,8 @@ data/
 data/raw/
 data/preprocessed/
 
+data_generation/utils/
+
 conventional_methods/
 
 continual_learning/
@@ -67,6 +69,8 @@ main_algorithm_v2/offline/ablation/
 main_algorithm_v2/online/tests/
 main_algorithm_v2/online/eval/
 main_algorithm_v2/online/config/
+main_algorithm_v2/online/realtime_visualizer.py
+main_algorithm_v2/online/simple_ocl.py
 
 combined_results/
 comparison_plots/
